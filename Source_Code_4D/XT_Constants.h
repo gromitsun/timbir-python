@@ -21,11 +21,11 @@
 #define ROW_BEGIN 512
 #define ROW_END 512
 #define COL_BEGIN 0
-#define COL_END 1023 
+#define COL_END 1023
 
 #define TIME_DIGITS 4
 #define ANGLE_DIGITS 4
-#define REPEAT_DIGITS "0000" 
+#define REPEAT_DIGITS "0000"
 
 /* i.e., the number of digits in projection angle part of filename and number of 0 in REPEAT_DIGITS should be greater than max(TIME_DIGITS,ANGLE_DIGITS) */
 
@@ -36,12 +36,12 @@
 #define PROJ_OFFSET_FILENAME "proj_offset"
 
 #ifndef PHANTOM_FILENAME
-	#define PHANTOM_FILENAME "phantom_23"
+  #define PHANTOM_FILENAME "phantom_shrinking_sphere"
 #endif
 
 #define PHANTOM_FOLDER "/Users/aditya/Academics/Graduate_Courses/ECE699/Time_Varying_XRay_Tomography/C_Code/Matlab_Launcher_Continuous_Views/Phantoms/"
 #ifndef SPARSE_ANGLES_LIST_FILE
-	#define SPARSE_ANGLES_LIST_FILE "view_info.txt"
+  #define SPARSE_ANGLES_LIST_FILE "view_info.txt"
 #endif
 
 #define OBJECT_INIT_VAL 0
@@ -52,15 +52,15 @@
 #define AIR_MASS_ATT_COEFF 0.496372335005353 /*in cm^2/g. computed using cubic interpolation*/
 #define WATER_MASS_ATT_COEFF 0.521225397034623
 
-#define WATER_DENSITY 1.0 /*in g/cm^3*/ 
+#define WATER_DENSITY 1.0 /*in g/cm^3*/
 #define AIR_DENSITY 0.001205
 #define HOUNSFIELD_WATER_MAP 1000
 #define HOUNSFIELD_AIR_MAP 0
 #ifndef HOUNSFIELD_MAX
-	#define HOUNSFIELD_MAX 60000
+  #define HOUNSFIELD_MAX 60000
 #endif
 #ifndef HOUNSFIELD_MIN
-	#define HOUNSFIELD_MIN 10000
+  #define HOUNSFIELD_MIN 10000
 #endif
 #define MRF_Q 2.0
 
@@ -95,14 +95,12 @@
 #define MV_SAMPLE_OUT_BEAM_TIME 20.0
 #define POST_FLAT_DARK_AQ_TIME 0.5
 #define WAIT_TIME_BTW_CYCLES 11.5
-#define PROJECTION_AQ_TIME 180.0 
+#define PROJECTION_AQ_TIME 180.0
+#define BH_QUAD_COEF 0.5
 
 #ifndef EXPECTED_COUNTS_FOR_PHANTOM_DATA
-	#define EXPECTED_COUNTS_FOR_PHANTOM_DATA 29473
+  #define EXPECTED_COUNTS_FOR_PHANTOM_DATA 29473
 #endif
 
-#ifndef PHANTOM_FILENAME
-	#define PHANTOM_FILENAME "phantom_shrinking_sphere"
-#endif
 
 #endif /*#ifndef XT_CONSTANTS_H*/
