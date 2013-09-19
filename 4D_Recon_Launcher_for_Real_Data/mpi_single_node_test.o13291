@@ -1,0 +1,613 @@
+clip_list_of_views: Number of views deleted are  63 . Deleted views are [   360.72580645    720.36290323   1081.08870968   1440.18145161
+   1800.90725806   2160.54435484   2521.27016129   2880.09072581
+   3240.81653226   3600.45362903   3961.17943548   4320.27217742
+   4680.99798387   5040.63508065   5401.3608871    5760.           6120.72580645
+   6480.36290323   6841.08870968   7200.18145161   7560.90725806
+   7920.54435484   8281.27016129   8640.09072581   9000.81653226
+   9360.45362903   9721.17943548  10080.27217742  10440.99798387
+  10800.63508065  11161.3608871   11520.          11880.72580645
+  12240.36290323  12601.08870968  12960.18145161  13320.90725806
+  13680.54435484  14041.27016129  14400.09072581  14760.81653226
+  15120.45362903  15481.17943548  15840.27217742  16200.99798387
+  16560.63508065  16921.3608871   17280.          17640.72580645
+  18000.36290323  18361.08870968  18720.18145161  19080.90725806
+  19440.54435484  19801.27016129  20160.09072581  20520.81653226
+  20880.45362903  21241.17943548  21600.27217742  21960.99798387
+  22320.63508065  22681.3608871 ]
+clip_list_of_views: Deleted views' times are [  124.25      248.125     372.375     496.0625    620.3125    744.1875
+   868.4375    992.03125  1116.28125  1240.15625  1364.40625  1488.09375
+  1612.34375  1736.21875  1860.46875  1984.       2108.25     2232.125
+  2356.375    2480.0625   2604.3125   2728.1875   2852.4375   2976.03125
+  3100.28125  3224.15625  3348.40625  3472.09375  3596.34375  3720.21875
+  3844.46875  3968.       4092.25     4216.125    4340.375    4464.0625
+  4588.3125   4712.1875   4836.4375   4960.03125  5084.28125  5208.15625
+  5332.40625  5456.09375  5580.34375  5704.21875  5828.46875  5952.
+  6076.25     6200.125    6324.375    6448.0625   6572.3125   6696.1875
+  6820.4375   6944.03125  7068.28125  7192.15625  7316.40625  7440.09375
+  7564.34375  7688.21875  7812.46875]
+proj_init: Total number of projections used for reconstruction is 1984
+write_tiff_from_object_bin_file: Average value of time slice 0 in HU is 24457.8366065
+Average value of image is 88.1771125793
+write_tiff_from_object_bin_file: Average value of time slice 0 in HU is 24455.5542187
+Average value of image is 88.0257759094
+write_tiff_from_object_bin_file: Average value of time slice 0 in HU is 24464.7656012
+Average value of image is 88.077960968
+write_tiff_from_object_bin_file: Average value of time slice 0 in HU is 24463.1278921
+Average value of image is 88.1585693359
+write_tiff_from_object_bin_file: Average value of time slice 0 in HU is 24475.4500935
+Average value of image is 88.229095459
+write_tiff_from_object_bin_file: Average value of time slice 0 in HU is 24486.3796488
+Average value of image is 88.3049125671
+write_tiff_from_object_bin_file: Average value of time slice 0 in HU is 24497.7608124
+Average value of image is 88.4050674438
+write_tiff_from_object_bin_file: Average value of time slice 0 in HU is 24490.8793099
+Average value of image is 88.5876846313
+write_tiff_from_object_bin_file: Average value of time slice 0 in um^-1 is 0.00127424138975
+write_tiff_from_object_bin_file: Average value of time slice 1 in HU is 24507.2847516
+Average value of image is 88.1673355103
+write_tiff_from_object_bin_file: Average value of time slice 1 in HU is 24497.208477
+Average value of image is 87.9912376404
+write_tiff_from_object_bin_file: Average value of time slice 1 in HU is 24501.8263103
+Average value of image is 88.0285949707
+write_tiff_from_object_bin_file: Average value of time slice 1 in HU is 24494.6605527
+Average value of image is 88.0926895142
+write_tiff_from_object_bin_file: Average value of time slice 1 in HU is 24504.5212166
+Average value of image is 88.1573257446
+write_tiff_from_object_bin_file: Average value of time slice 1 in HU is 24503.6912959
+Average value of image is 88.1941833496
+write_tiff_from_object_bin_file: Average value of time slice 1 in HU is 24515.4011172
+Average value of image is 88.2794456482
+write_tiff_from_object_bin_file: Average value of time slice 1 in HU is 24505.6503252
+Average value of image is 88.4528503418
+write_tiff_from_object_bin_file: Average value of time slice 1 in um^-1 is 0.00127579344382
+write_tiff_from_object_bin_file: Average value of time slice 2 in HU is 24520.41989
+Average value of image is 88.1736488342
+write_tiff_from_object_bin_file: Average value of time slice 2 in HU is 24513.4000647
+Average value of image is 88.0434265137
+write_tiff_from_object_bin_file: Average value of time slice 2 in HU is 24520.0741235
+Average value of image is 88.0729064941
+write_tiff_from_object_bin_file: Average value of time slice 2 in HU is 24511.6944188
+Average value of image is 88.1323280334
+write_tiff_from_object_bin_file: Average value of time slice 2 in HU is 24522.6431785
+Average value of image is 88.2197036743
+write_tiff_from_object_bin_file: Average value of time slice 2 in HU is 24527.1194741
+Average value of image is 88.26197052
+write_tiff_from_object_bin_file: Average value of time slice 2 in HU is 24543.1864329
+Average value of image is 88.360294342
+write_tiff_from_object_bin_file: Average value of time slice 2 in HU is 24537.4042255
+Average value of image is 88.5099525452
+write_tiff_from_object_bin_file: Average value of time slice 2 in um^-1 is 0.00127687177849
+write_tiff_from_object_bin_file: Average value of time slice 3 in HU is 24615.3625933
+Average value of image is 88.4762649536
+write_tiff_from_object_bin_file: Average value of time slice 3 in HU is 24608.398869
+Average value of image is 88.3523864746
+write_tiff_from_object_bin_file: Average value of time slice 3 in HU is 24605.8684903
+Average value of image is 88.3553276062
+write_tiff_from_object_bin_file: Average value of time slice 3 in HU is 24596.5243724
+Average value of image is 88.408039093
+write_tiff_from_object_bin_file: Average value of time slice 3 in HU is 24598.2455672
+Average value of image is 88.4712219238
+write_tiff_from_object_bin_file: Average value of time slice 3 in HU is 24592.1569927
+Average value of image is 88.4814414978
+write_tiff_from_object_bin_file: Average value of time slice 3 in HU is 24600.3936266
+Average value of image is 88.5418128967
+write_tiff_from_object_bin_file: Average value of time slice 3 in HU is 24589.4221953
+Average value of image is 88.6747360229
+write_tiff_from_object_bin_file: Average value of time slice 3 in um^-1 is 0.00128084436563
+write_tiff_from_object_bin_file: Average value of time slice 4 in HU is 24539.8016662
+Average value of image is 88.2791213989
+write_tiff_from_object_bin_file: Average value of time slice 4 in HU is 24536.5216272
+Average value of image is 88.171081543
+write_tiff_from_object_bin_file: Average value of time slice 4 in HU is 24537.986843
+Average value of image is 88.1989364624
+write_tiff_from_object_bin_file: Average value of time slice 4 in HU is 24533.725614
+Average value of image is 88.2654762268
+write_tiff_from_object_bin_file: Average value of time slice 4 in HU is 24547.331269
+Average value of image is 88.3553161621
+write_tiff_from_object_bin_file: Average value of time slice 4 in HU is 24547.3483471
+Average value of image is 88.3996200562
+write_tiff_from_object_bin_file: Average value of time slice 4 in HU is 24565.6466256
+Average value of image is 88.4962692261
+write_tiff_from_object_bin_file: Average value of time slice 4 in HU is 24563.6111152
+Average value of image is 88.6477890015
+write_tiff_from_object_bin_file: Average value of time slice 4 in um^-1 is 0.00127801736216
+write_tiff_from_object_bin_file: Average value of time slice 5 in HU is 24574.5613691
+Average value of image is 88.388874054
+write_tiff_from_object_bin_file: Average value of time slice 5 in HU is 24573.9933781
+Average value of image is 88.2648086548
+write_tiff_from_object_bin_file: Average value of time slice 5 in HU is 24576.8213973
+Average value of image is 88.3092002869
+write_tiff_from_object_bin_file: Average value of time slice 5 in HU is 24573.7860522
+Average value of image is 88.3682594299
+write_tiff_from_object_bin_file: Average value of time slice 5 in HU is 24588.0748616
+Average value of image is 88.4659767151
+write_tiff_from_object_bin_file: Average value of time slice 5 in HU is 24591.2175486
+Average value of image is 88.5282669067
+write_tiff_from_object_bin_file: Average value of time slice 5 in HU is 24604.6126735
+Average value of image is 88.6028938293
+write_tiff_from_object_bin_file: Average value of time slice 5 in HU is 24604.8038535
+Average value of image is 88.7854652405
+write_tiff_from_object_bin_file: Average value of time slice 5 in um^-1 is 0.00128007317625
+write_tiff_from_object_bin_file: Average value of time slice 6 in HU is 24634.0510382
+Average value of image is 88.6234359741
+write_tiff_from_object_bin_file: Average value of time slice 6 in HU is 24624.3885796
+Average value of image is 88.4894943237
+write_tiff_from_object_bin_file: Average value of time slice 6 in HU is 24629.004214
+Average value of image is 88.5290603638
+write_tiff_from_object_bin_file: Average value of time slice 6 in HU is 24620.579424
+Average value of image is 88.5596199036
+write_tiff_from_object_bin_file: Average value of time slice 6 in HU is 24627.9140423
+Average value of image is 88.6434669495
+write_tiff_from_object_bin_file: Average value of time slice 6 in HU is 24631.942195
+Average value of image is 88.7121620178
+write_tiff_from_object_bin_file: Average value of time slice 6 in HU is 24640.0283274
+Average value of image is 88.76512146
+write_tiff_from_object_bin_file: Average value of time slice 6 in HU is 24639.8503729
+Average value of image is 88.9542121887
+write_tiff_from_object_bin_file: Average value of time slice 6 in um^-1 is 0.00128241526396
+write_tiff_from_object_bin_file: Average value of time slice 7 in HU is 24648.829031
+Average value of image is 88.6647911072
+write_tiff_from_object_bin_file: Average value of time slice 7 in HU is 24647.6461075
+Average value of image is 88.5437965393
+write_tiff_from_object_bin_file: Average value of time slice 7 in HU is 24651.9332689
+Average value of image is 88.586605072
+write_tiff_from_object_bin_file: Average value of time slice 7 in HU is 24649.6313201
+Average value of image is 88.6499290466
+write_tiff_from_object_bin_file: Average value of time slice 7 in HU is 24661.5980724
+Average value of image is 88.7476577759
+write_tiff_from_object_bin_file: Average value of time slice 7 in HU is 24664.9112755
+Average value of image is 88.7966499329
+write_tiff_from_object_bin_file: Average value of time slice 7 in HU is 24675.9809525
+Average value of image is 88.8518867493
+write_tiff_from_object_bin_file: Average value of time slice 7 in HU is 24673.5010638
+Average value of image is 89.0380706787
+write_tiff_from_object_bin_file: Average value of time slice 7 in um^-1 is 0.00128388781197
+write_tiff_from_object_bin_file: Average value of time slice 8 in HU is 24677.0588811
+Average value of image is 88.826965332
+write_tiff_from_object_bin_file: Average value of time slice 8 in HU is 24675.6255724
+Average value of image is 88.7128372192
+write_tiff_from_object_bin_file: Average value of time slice 8 in HU is 24674.6809862
+Average value of image is 88.7390670776
+write_tiff_from_object_bin_file: Average value of time slice 8 in HU is 24673.2636442
+Average value of image is 88.810798645
+write_tiff_from_object_bin_file: Average value of time slice 8 in HU is 24678.6199271
+Average value of image is 88.8709259033
+write_tiff_from_object_bin_file: Average value of time slice 8 in HU is 24684.9962215
+Average value of image is 88.9373474121
+write_tiff_from_object_bin_file: Average value of time slice 8 in HU is 24694.5325199
+Average value of image is 88.998336792
+write_tiff_from_object_bin_file: Average value of time slice 8 in HU is 24697.6369571
+Average value of image is 89.1912193298
+write_tiff_from_object_bin_file: Average value of time slice 8 in um^-1 is 0.00128507473553
+write_tiff_from_object_bin_file: Average value of time slice 9 in HU is 24712.2849879
+Average value of image is 88.9468154907
+write_tiff_from_object_bin_file: Average value of time slice 9 in HU is 24703.8717283
+Average value of image is 88.8035926819
+write_tiff_from_object_bin_file: Average value of time slice 9 in HU is 24696.6512096
+Average value of image is 88.8181037903
+write_tiff_from_object_bin_file: Average value of time slice 9 in HU is 24694.1105456
+Average value of image is 88.8798713684
+write_tiff_from_object_bin_file: Average value of time slice 9 in HU is 24695.0830438
+Average value of image is 88.9358596802
+write_tiff_from_object_bin_file: Average value of time slice 9 in HU is 24697.612644
+Average value of image is 88.9890632629
+write_tiff_from_object_bin_file: Average value of time slice 9 in HU is 24703.3550209
+Average value of image is 89.0388526917
+write_tiff_from_object_bin_file: Average value of time slice 9 in HU is 24701.6952696
+Average value of image is 89.2066574097
+write_tiff_from_object_bin_file: Average value of time slice 9 in um^-1 is 0.00128603952125
+write_tiff_from_object_bin_file: Average value of time slice 10 in HU is 24747.5734258
+Average value of image is 89.1321907043
+write_tiff_from_object_bin_file: Average value of time slice 10 in HU is 24744.1887187
+Average value of image is 89.0029258728
+write_tiff_from_object_bin_file: Average value of time slice 10 in HU is 24738.7681656
+Average value of image is 89.0236244202
+write_tiff_from_object_bin_file: Average value of time slice 10 in HU is 24739.1862448
+Average value of image is 89.1013031006
+write_tiff_from_object_bin_file: Average value of time slice 10 in HU is 24742.0321797
+Average value of image is 89.1649360657
+write_tiff_from_object_bin_file: Average value of time slice 10 in HU is 24738.3239375
+Average value of image is 89.1792907715
+write_tiff_from_object_bin_file: Average value of time slice 10 in HU is 24744.3793112
+Average value of image is 89.2356109619
+write_tiff_from_object_bin_file: Average value of time slice 10 in HU is 24738.237643
+Average value of image is 89.3959159851
+write_tiff_from_object_bin_file: Average value of time slice 10 in um^-1 is 0.00128817425689
+write_tiff_from_object_bin_file: Average value of time slice 11 in HU is 24767.767608
+Average value of image is 89.1860198975
+write_tiff_from_object_bin_file: Average value of time slice 11 in HU is 24770.4608236
+Average value of image is 89.0749511719
+write_tiff_from_object_bin_file: Average value of time slice 11 in HU is 24767.0409082
+Average value of image is 89.1029472351
+write_tiff_from_object_bin_file: Average value of time slice 11 in HU is 24766.8231226
+Average value of image is 89.1764259338
+write_tiff_from_object_bin_file: Average value of time slice 11 in HU is 24769.7469405
+Average value of image is 89.2370452881
+write_tiff_from_object_bin_file: Average value of time slice 11 in HU is 24773.5398596
+Average value of image is 89.2689743042
+write_tiff_from_object_bin_file: Average value of time slice 11 in HU is 24777.4142618
+Average value of image is 89.3233757019
+write_tiff_from_object_bin_file: Average value of time slice 11 in HU is 24772.2795584
+Average value of image is 89.4935493469
+write_tiff_from_object_bin_file: Average value of time slice 11 in um^-1 is 0.00128968657144
+write_tiff_from_object_bin_file: Average value of time slice 12 in HU is 24750.9089066
+Average value of image is 89.1887550354
+write_tiff_from_object_bin_file: Average value of time slice 12 in HU is 24755.8286604
+Average value of image is 89.0939712524
+write_tiff_from_object_bin_file: Average value of time slice 12 in HU is 24748.9563867
+Average value of image is 89.1110229492
+write_tiff_from_object_bin_file: Average value of time slice 12 in HU is 24747.7769515
+Average value of image is 89.1845169067
+write_tiff_from_object_bin_file: Average value of time slice 12 in HU is 24753.44714
+Average value of image is 89.2508239746
+write_tiff_from_object_bin_file: Average value of time slice 12 in HU is 24759.8885264
+Average value of image is 89.2920150757
+write_tiff_from_object_bin_file: Average value of time slice 12 in HU is 24766.2427043
+Average value of image is 89.3529586792
+write_tiff_from_object_bin_file: Average value of time slice 12 in HU is 24764.0774246
+Average value of image is 89.530921936
+write_tiff_from_object_bin_file: Average value of time slice 12 in um^-1 is 0.00128891899516
+write_tiff_from_object_bin_file: Average value of time slice 13 in HU is 24778.8266733
+Average value of image is 89.2359657288
+write_tiff_from_object_bin_file: Average value of time slice 13 in HU is 24776.3810882
+Average value of image is 89.1031112671
+write_tiff_from_object_bin_file: Average value of time slice 13 in HU is 24769.1873064
+Average value of image is 89.1311721802
+write_tiff_from_object_bin_file: Average value of time slice 13 in HU is 24768.8543214
+Average value of image is 89.1993217468
+write_tiff_from_object_bin_file: Average value of time slice 13 in HU is 24771.8017611
+Average value of image is 89.2573051453
+write_tiff_from_object_bin_file: Average value of time slice 13 in HU is 24776.7524364
+Average value of image is 89.2994995117
+write_tiff_from_object_bin_file: Average value of time slice 13 in HU is 24783.5816247
+Average value of image is 89.3600387573
+write_tiff_from_object_bin_file: Average value of time slice 13 in HU is 24784.0606567
+Average value of image is 89.5542755127
+write_tiff_from_object_bin_file: Average value of time slice 13 in um^-1 is 0.00128997534247
+write_tiff_from_object_bin_file: Average value of time slice 14 in HU is 24812.5161043
+Average value of image is 89.4026412964
+write_tiff_from_object_bin_file: Average value of time slice 14 in HU is 24815.621735
+Average value of image is 89.2857208252
+write_tiff_from_object_bin_file: Average value of time slice 14 in HU is 24809.8835403
+Average value of image is 89.3129234314
+write_tiff_from_object_bin_file: Average value of time slice 14 in HU is 24817.3417752
+Average value of image is 89.4132194519
+write_tiff_from_object_bin_file: Average value of time slice 14 in HU is 24817.2971834
+Average value of image is 89.4759788513
+write_tiff_from_object_bin_file: Average value of time slice 14 in HU is 24822.8037488
+Average value of image is 89.5266952515
+write_tiff_from_object_bin_file: Average value of time slice 14 in HU is 24826.7129252
+Average value of image is 89.5622253418
+write_tiff_from_object_bin_file: Average value of time slice 14 in HU is 24828.3036625
+Average value of image is 89.7509880066
+write_tiff_from_object_bin_file: Average value of time slice 14 in um^-1 is 0.00129219474272
+write_tiff_from_object_bin_file: Average value of time slice 15 in HU is 24863.5640574
+Average value of image is 89.5371551514
+write_tiff_from_object_bin_file: Average value of time slice 15 in HU is 24864.5685099
+Average value of image is 89.4205665588
+write_tiff_from_object_bin_file: Average value of time slice 15 in HU is 24859.3665715
+Average value of image is 89.4193992615
+write_tiff_from_object_bin_file: Average value of time slice 15 in HU is 24858.5778958
+Average value of image is 89.5083847046
+write_tiff_from_object_bin_file: Average value of time slice 15 in HU is 24865.2500793
+Average value of image is 89.580657959
+write_tiff_from_object_bin_file: Average value of time slice 15 in HU is 24865.9429306
+Average value of image is 89.6133880615
+write_tiff_from_object_bin_file: Average value of time slice 15 in HU is 24869.4186995
+Average value of image is 89.6547431946
+write_tiff_from_object_bin_file: Average value of time slice 15 in HU is 24864.5960939
+Average value of image is 89.823677063
+write_tiff_from_object_bin_file: Average value of time slice 15 in um^-1 is 0.00129454279879
+write_tiff_from_object_bin_file: Average value of time slice 16 in HU is 24899.9789061
+Average value of image is 89.7940177917
+write_tiff_from_object_bin_file: Average value of time slice 16 in HU is 24903.8952486
+Average value of image is 89.6819458008
+write_tiff_from_object_bin_file: Average value of time slice 16 in HU is 24892.3090347
+Average value of image is 89.6718482971
+write_tiff_from_object_bin_file: Average value of time slice 16 in HU is 24892.5905637
+Average value of image is 89.7434272766
+write_tiff_from_object_bin_file: Average value of time slice 16 in HU is 24897.5640263
+Average value of image is 89.8313179016
+write_tiff_from_object_bin_file: Average value of time slice 16 in HU is 24897.0139406
+Average value of image is 89.8525466919
+write_tiff_from_object_bin_file: Average value of time slice 16 in HU is 24895.1199982
+Average value of image is 89.8791885376
+write_tiff_from_object_bin_file: Average value of time slice 16 in HU is 24889.3366821
+Average value of image is 90.0254936218
+write_tiff_from_object_bin_file: Average value of time slice 16 in um^-1 is 0.00129621221331
+write_tiff_from_object_bin_file: Average value of time slice 17 in HU is 24964.8695902
+Average value of image is 90.0451507568
+write_tiff_from_object_bin_file: Average value of time slice 17 in HU is 24958.6464836
+Average value of image is 89.8772087097
+write_tiff_from_object_bin_file: Average value of time slice 17 in HU is 24943.834274
+Average value of image is 89.8644981384
+write_tiff_from_object_bin_file: Average value of time slice 17 in HU is 24942.7048792
+Average value of image is 89.9353561401
+write_tiff_from_object_bin_file: Average value of time slice 17 in HU is 24937.7256805
+Average value of image is 89.9744911194
+write_tiff_from_object_bin_file: Average value of time slice 17 in HU is 24936.0405864
+Average value of image is 89.9849700928
+write_tiff_from_object_bin_file: Average value of time slice 17 in HU is 24929.377886
+Average value of image is 89.9918251038
+write_tiff_from_object_bin_file: Average value of time slice 17 in HU is 24920.7765356
+Average value of image is 90.1354446411
+write_tiff_from_object_bin_file: Average value of time slice 17 in um^-1 is 0.00129859517322
+write_tiff_from_object_bin_file: Average value of time slice 18 in HU is 24935.1872709
+Average value of image is 90.0033683777
+write_tiff_from_object_bin_file: Average value of time slice 18 in HU is 24935.0911656
+Average value of image is 89.8836746216
+write_tiff_from_object_bin_file: Average value of time slice 18 in HU is 24918.1743735
+Average value of image is 89.8611030579
+write_tiff_from_object_bin_file: Average value of time slice 18 in HU is 24915.8002247
+Average value of image is 89.9184303284
+write_tiff_from_object_bin_file: Average value of time slice 18 in HU is 24913.455997
+Average value of image is 89.9758338928
+write_tiff_from_object_bin_file: Average value of time slice 18 in HU is 24909.4747397
+Average value of image is 89.9659805298
+write_tiff_from_object_bin_file: Average value of time slice 18 in HU is 24906.6235383
+Average value of image is 89.9805488586
+write_tiff_from_object_bin_file: Average value of time slice 18 in HU is 24895.6248635
+Average value of image is 90.1019325256
+write_tiff_from_object_bin_file: Average value of time slice 18 in um^-1 is 0.0012972640351
+write_tiff_from_object_bin_file: Average value of time slice 19 in HU is 24926.2786221
+Average value of image is 89.91173172
+write_tiff_from_object_bin_file: Average value of time slice 19 in HU is 24924.7634873
+Average value of image is 89.7740898132
+write_tiff_from_object_bin_file: Average value of time slice 19 in HU is 24897.9904098
+Average value of image is 89.7122879028
+write_tiff_from_object_bin_file: Average value of time slice 19 in HU is 24896.995214
+Average value of image is 89.7644577026
+write_tiff_from_object_bin_file: Average value of time slice 19 in HU is 24888.6186758
+Average value of image is 89.7919540405
+write_tiff_from_object_bin_file: Average value of time slice 19 in HU is 24892.3112352
+Average value of image is 89.8091506958
+write_tiff_from_object_bin_file: Average value of time slice 19 in HU is 24894.6525174
+Average value of image is 89.8335494995
+write_tiff_from_object_bin_file: Average value of time slice 19 in HU is 24894.2158439
+Average value of image is 90.0131645203
+write_tiff_from_object_bin_file: Average value of time slice 19 in um^-1 is 0.00129652470424
+write_tiff_from_object_bin_file: Average value of time slice 20 in HU is 24772.0012556
+Average value of image is 89.4117012024
+write_tiff_from_object_bin_file: Average value of time slice 20 in HU is 24771.8675121
+Average value of image is 89.2814979553
+write_tiff_from_object_bin_file: Average value of time slice 20 in HU is 24747.4177815
+Average value of image is 89.2401580811
+write_tiff_from_object_bin_file: Average value of time slice 20 in HU is 24740.4911805
+Average value of image is 89.2807731628
+write_tiff_from_object_bin_file: Average value of time slice 20 in HU is 24736.7424598
+Average value of image is 89.3283576965
+write_tiff_from_object_bin_file: Average value of time slice 20 in HU is 24742.8498278
+Average value of image is 89.3761444092
+write_tiff_from_object_bin_file: Average value of time slice 20 in HU is 24752.7225695
+Average value of image is 89.439666748
+write_tiff_from_object_bin_file: Average value of time slice 20 in HU is 24754.6741335
+Average value of image is 89.6294403076
+write_tiff_from_object_bin_file: Average value of time slice 20 in um^-1 is 0.00128873443292
+write_tiff_from_object_bin_file: Average value of time slice 21 in HU is 24725.4923187
+Average value of image is 89.1886520386
+write_tiff_from_object_bin_file: Average value of time slice 21 in HU is 24734.3378792
+Average value of image is 89.0852508545
+write_tiff_from_object_bin_file: Average value of time slice 21 in HU is 24724.6324248
+Average value of image is 89.0825767517
+write_tiff_from_object_bin_file: Average value of time slice 21 in HU is 24725.0105627
+Average value of image is 89.1657333374
+write_tiff_from_object_bin_file: Average value of time slice 21 in HU is 24733.3279193
+Average value of image is 89.2486076355
+write_tiff_from_object_bin_file: Average value of time slice 21 in HU is 24745.2333458
+Average value of image is 89.343585968
+write_tiff_from_object_bin_file: Average value of time slice 21 in HU is 24752.5730907
+Average value of image is 89.3866996765
+write_tiff_from_object_bin_file: Average value of time slice 21 in HU is 24755.2014255
+Average value of image is 89.5839042664
+write_tiff_from_object_bin_file: Average value of time slice 21 in um^-1 is 0.00128793424343
+write_tiff_from_object_bin_file: Average value of time slice 22 in HU is 24693.8764417
+Average value of image is 89.1253089905
+write_tiff_from_object_bin_file: Average value of time slice 22 in HU is 24707.4996097
+Average value of image is 89.0703315735
+write_tiff_from_object_bin_file: Average value of time slice 22 in HU is 24700.9568757
+Average value of image is 89.0754165649
+write_tiff_from_object_bin_file: Average value of time slice 22 in HU is 24708.2993028
+Average value of image is 89.1863174438
+write_tiff_from_object_bin_file: Average value of time slice 22 in HU is 24718.5385181
+Average value of image is 89.2777366638
+write_tiff_from_object_bin_file: Average value of time slice 22 in HU is 24732.0190365
+Average value of image is 89.3561401367
+write_tiff_from_object_bin_file: Average value of time slice 22 in HU is 24742.6820909
+Average value of image is 89.4390258789
+write_tiff_from_object_bin_file: Average value of time slice 22 in HU is 24755.4929093
+Average value of image is 89.6679992676
+write_tiff_from_object_bin_file: Average value of time slice 22 in um^-1 is 0.0012870462864
+write_tiff_from_object_bin_file: Average value of time slice 23 in HU is 24695.6464489
+Average value of image is 89.042804718
+write_tiff_from_object_bin_file: Average value of time slice 23 in HU is 24704.8582063
+Average value of image is 88.9568099976
+write_tiff_from_object_bin_file: Average value of time slice 23 in HU is 24701.8055406
+Average value of image is 88.9660224915
+write_tiff_from_object_bin_file: Average value of time slice 23 in HU is 24705.4265843
+Average value of image is 89.0647392273
+write_tiff_from_object_bin_file: Average value of time slice 23 in HU is 24706.2710642
+Average value of image is 89.1131629944
+write_tiff_from_object_bin_file: Average value of time slice 23 in HU is 24720.2364248
+Average value of image is 89.1841812134
+write_tiff_from_object_bin_file: Average value of time slice 23 in HU is 24730.4704942
+Average value of image is 89.2616729736
+write_tiff_from_object_bin_file: Average value of time slice 23 in HU is 24741.1477131
+Average value of image is 89.4878921509
+write_tiff_from_object_bin_file: Average value of time slice 23 in um^-1 is 0.0012866981019
+write_tiff_from_object_bin_file: Average value of time slice 24 in HU is 24769.2945683
+Average value of image is 89.4866828918
+write_tiff_from_object_bin_file: Average value of time slice 24 in HU is 24777.944522
+Average value of image is 89.4017219543
+write_tiff_from_object_bin_file: Average value of time slice 24 in HU is 24767.3750962
+Average value of image is 89.4095802307
+write_tiff_from_object_bin_file: Average value of time slice 24 in HU is 24759.3662558
+Average value of image is 89.4505310059
+write_tiff_from_object_bin_file: Average value of time slice 24 in HU is 24755.1483886
+Average value of image is 89.462928772
+write_tiff_from_object_bin_file: Average value of time slice 24 in HU is 24761.8195429
+Average value of image is 89.5181236267
+write_tiff_from_object_bin_file: Average value of time slice 24 in HU is 24774.9566207
+Average value of image is 89.6009559631
+write_tiff_from_object_bin_file: Average value of time slice 24 in HU is 24793.3166052
+Average value of image is 89.8518447876
+write_tiff_from_object_bin_file: Average value of time slice 24 in um^-1 is 0.00128964849092
+write_tiff_from_object_bin_file: Average value of time slice 25 in HU is 24787.7123676
+Average value of image is 89.523059845
+write_tiff_from_object_bin_file: Average value of time slice 25 in HU is 24799.5352893
+Average value of image is 89.4177703857
+write_tiff_from_object_bin_file: Average value of time slice 25 in HU is 24783.2775535
+Average value of image is 89.4047737122
+write_tiff_from_object_bin_file: Average value of time slice 25 in HU is 24769.1190966
+Average value of image is 89.4096260071
+write_tiff_from_object_bin_file: Average value of time slice 25 in HU is 24766.4644341
+Average value of image is 89.4272384644
+write_tiff_from_object_bin_file: Average value of time slice 25 in HU is 24767.2093386
+Average value of image is 89.4464378357
+write_tiff_from_object_bin_file: Average value of time slice 25 in HU is 24773.7161855
+Average value of image is 89.4954528809
+write_tiff_from_object_bin_file: Average value of time slice 25 in HU is 24796.9403617
+Average value of image is 89.7819900513
+write_tiff_from_object_bin_file: Average value of time slice 25 in um^-1 is 0.00129020005013
+write_tiff_from_object_bin_file: Average value of time slice 26 in HU is 24771.1720952
+Average value of image is 89.5337677002
+write_tiff_from_object_bin_file: Average value of time slice 26 in HU is 24788.5832531
+Average value of image is 89.4693069458
+write_tiff_from_object_bin_file: Average value of time slice 26 in HU is 24764.7678337
+Average value of image is 89.4247932434
+write_tiff_from_object_bin_file: Average value of time slice 26 in HU is 24750.425434
+Average value of image is 89.4012031555
+write_tiff_from_object_bin_file: Average value of time slice 26 in HU is 24744.6084587
+Average value of image is 89.4197044373
+write_tiff_from_object_bin_file: Average value of time slice 26 in HU is 24736.2115011
+Average value of image is 89.3895530701
+write_tiff_from_object_bin_file: Average value of time slice 26 in HU is 24734.5336068
+Average value of image is 89.3995742798
+write_tiff_from_object_bin_file: Average value of time slice 26 in HU is 24744.9243564
+Average value of image is 89.6087303162
+write_tiff_from_object_bin_file: Average value of time slice 26 in um^-1 is 0.0012888415508
+write_tiff_from_object_bin_file: Average value of time slice 27 in HU is 24655.42718
+Average value of image is 88.8315315247
+write_tiff_from_object_bin_file: Average value of time slice 27 in HU is 24667.3544776
+Average value of image is 88.7356376648
+write_tiff_from_object_bin_file: Average value of time slice 27 in HU is 24637.4471486
+Average value of image is 88.669090271
+write_tiff_from_object_bin_file: Average value of time slice 27 in HU is 24624.0175867
+Average value of image is 88.657119751
+write_tiff_from_object_bin_file: Average value of time slice 27 in HU is 24618.1358131
+Average value of image is 88.6938362122
+write_tiff_from_object_bin_file: Average value of time slice 27 in HU is 24605.2995838
+Average value of image is 88.6422920227
+write_tiff_from_object_bin_file: Average value of time slice 27 in HU is 24578.6532573
+Average value of image is 88.5401268005
+write_tiff_from_object_bin_file: Average value of time slice 27 in HU is 24590.3331839
+Average value of image is 88.7576675415
+write_tiff_from_object_bin_file: Average value of time slice 27 in um^-1 is 0.00128195262179
+write_tiff_from_object_bin_file: Average value of time slice 28 in HU is 24551.7429223
+Average value of image is 88.4182662964
+write_tiff_from_object_bin_file: Average value of time slice 28 in HU is 24580.1116113
+Average value of image is 88.406452179
+write_tiff_from_object_bin_file: Average value of time slice 28 in HU is 24567.7748856
+Average value of image is 88.4378509521
+write_tiff_from_object_bin_file: Average value of time slice 28 in HU is 24564.0065791
+Average value of image is 88.4865341187
+write_tiff_from_object_bin_file: Average value of time slice 28 in HU is 24583.8660773
+Average value of image is 88.6443443298
+write_tiff_from_object_bin_file: Average value of time slice 28 in HU is 24594.8795881
+Average value of image is 88.7089233398
+write_tiff_from_object_bin_file: Average value of time slice 28 in HU is 24591.7462769
+Average value of image is 88.7364311218
+write_tiff_from_object_bin_file: Average value of time slice 28 in HU is 24595.8603371
+Average value of image is 88.9083099365
+write_tiff_from_object_bin_file: Average value of time slice 28 in um^-1 is 0.00127969648383
+write_tiff_from_object_bin_file: Average value of time slice 29 in HU is 24524.5046245
+Average value of image is 88.2198753357
+write_tiff_from_object_bin_file: Average value of time slice 29 in HU is 24559.4111046
+Average value of image is 88.2053260803
+write_tiff_from_object_bin_file: Average value of time slice 29 in HU is 24572.2823369
+Average value of image is 88.3626327515
+write_tiff_from_object_bin_file: Average value of time slice 29 in HU is 24591.5660386
+Average value of image is 88.5254478455
+write_tiff_from_object_bin_file: Average value of time slice 29 in HU is 24623.8513086
+Average value of image is 88.7482528687
+write_tiff_from_object_bin_file: Average value of time slice 29 in HU is 24647.8626465
+Average value of image is 88.8682975769
+write_tiff_from_object_bin_file: Average value of time slice 29 in HU is 24645.2717384
+Average value of image is 88.8913002014
+write_tiff_from_object_bin_file: Average value of time slice 29 in HU is 24649.7044845
+Average value of image is 89.0742149353
+write_tiff_from_object_bin_file: Average value of time slice 29 in um^-1 is 0.00128089695923
+write_tiff_from_object_bin_file: Average value of time slice 30 in HU is 24435.8971643
+Average value of image is 87.9075126648
+write_tiff_from_object_bin_file: Average value of time slice 30 in HU is 24489.5353946
+Average value of image is 87.976776123
+write_tiff_from_object_bin_file: Average value of time slice 30 in HU is 24501.2179143
+Average value of image is 88.1185379028
+write_tiff_from_object_bin_file: Average value of time slice 30 in HU is 24531.4694022
+Average value of image is 88.3532943726
+write_tiff_from_object_bin_file: Average value of time slice 30 in HU is 24555.2315064
+Average value of image is 88.5188026428
+write_tiff_from_object_bin_file: Average value of time slice 30 in HU is 24577.3428638
+Average value of image is 88.6427764893
+write_tiff_from_object_bin_file: Average value of time slice 30 in HU is 24565.1932636
+Average value of image is 88.6191902161
+write_tiff_from_object_bin_file: Average value of time slice 30 in HU is 24555.1806776
+Average value of image is 88.7307853699
+write_tiff_from_object_bin_file: Average value of time slice 30 in um^-1 is 0.00127697021855
+write_tiff_from_object_bin_file: Average value of time slice 31 in HU is 24451.0234784
+Average value of image is 88.052444458
+write_tiff_from_object_bin_file: Average value of time slice 31 in HU is 24488.3824999
+Average value of image is 88.0448265076
+write_tiff_from_object_bin_file: Average value of time slice 31 in HU is 24494.1629529
+Average value of image is 88.1310997009
+write_tiff_from_object_bin_file: Average value of time slice 31 in HU is 24511.0089187
+Average value of image is 88.3222236633
+write_tiff_from_object_bin_file: Average value of time slice 31 in HU is 24529.8122562
+Average value of image is 88.4542694092
+write_tiff_from_object_bin_file: Average value of time slice 31 in HU is 24552.8097801
+Average value of image is 88.5679473877
+write_tiff_from_object_bin_file: Average value of time slice 31 in HU is 24537.4434438
+Average value of image is 88.5052185059
+write_tiff_from_object_bin_file: Average value of time slice 31 in HU is 24518.4957298
+Average value of image is 88.6438827515
+write_tiff_from_object_bin_file: Average value of time slice 31 in um^-1 is 0.00127613767615
+job 13291 (RM job '13291.conte-adm.rcac.purdue.edu')
+
+AName: mpi_single_node_test
+State: Running 
+Creds:  user:mohank  group:student  class:standby  qos:standby
+WallTime:   00:00:00 of 4:00:00
+SubmitTime: Sun Sep 15 21:45:31
+  (Time Queued  Total: 00:00:48  Eligible: 00:00:48)
+
+StartTime: Sun Sep 15 21:46:19
+TemplateSets:  DEFAULT
+NodeMatchPolicy: EXACTNODE
+Total Requested Tasks: 32
+Total Requested Nodes: 2
+
+Req[0]  TaskCount: 32  Partition: conte-adm
+NodeAccess: SINGLEJOB
+TasksPerNode: 16  NodeCount:  2
+
+Allocated Nodes:
+[conte-a333:16][conte-a141:16]
+
+
+SystemID:   Moab
+SystemJID:  13291
+Notification Events: JobFail
+Task Distribution: conte-a333,conte-a333,conte-a333,conte-a333,conte-a333,conte-a333,conte-a333,conte-a333,conte-a333,conte-a333,conte-a333,...
+
+UMask:          0000 
+OutputFile:     conte-fe01.rcac.purdue.edu:/home/mohank/Academics/ECE699/Workspace/Recon_MPI/4D_Recon_Launcher_for_Real_Data/mpi_single_node_test.o13291
+ErrorFile:      conte-fe01.rcac.purdue.edu:/home/mohank/Academics/ECE699/Workspace/Recon_MPI/4D_Recon_Launcher_for_Real_Data/mpi_single_node_test.e13291
+StartCount:     1
+Partition List: [ALL]
+SrcRM:          conte-adm  DstRM: conte-adm  DstRMJID: 13291.conte-adm.rcac.purdue.edu
+Submit Args:    Standby_Sub_File.sub
+Flags:          BACKFILL,RESTARTABLE
+Attr:           BACKFILL,checkpoint
+StartPriority:  105
+PE:             32.00
+Reservation '13291' (-00:00:18 -> 3:59:42  Duration: 4:00:00)
+

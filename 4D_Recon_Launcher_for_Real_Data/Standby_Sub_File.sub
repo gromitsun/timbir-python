@@ -1,0 +1,27 @@
+#!/bin/sh -l
+# FILENAME:  Main_Sub_File.sub
+
+#PBS -V
+#PBS -q standby
+#PBS -l nodes=2:ppn=16
+#PBS -l walltime=4:00:00
+#PBS -N mpi_single_node_test
+
+# start top in batch mode, 30 sec interval between reports, in background
+
+top -b -d 30 -u mohank >& $HOME/top.out &
+tpid=$!          # Save top's process ID
+
+module load devel
+module load python
+module load openmpi
+
+cd $PBS_O_WORKDIR
+export PARALLEL=1
+export OMP_NUM_THREADS=32
+uniq < $PBS_NODEFILE > nodefile
+
+python XT_Main.py
+checkjob -v $PBS_JOBID
+
+kill $tpid

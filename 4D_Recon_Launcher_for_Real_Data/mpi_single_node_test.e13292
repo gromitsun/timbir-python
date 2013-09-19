@@ -1,0 +1,2 @@
+mkdir: cannot create directory `../XT_run/run_sigs_500000_sigt_1000_r_32_K_32_N_theta_1984_N_p_1984/': File exists
+mkdir: cannot create directory `../XT_Result_Repository/MBIR_sigs_500000_sigt_1000_r_32_K_32_N_theta_1984_N_p_1984_zinger_50_0.5/': File exists
