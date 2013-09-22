@@ -90,7 +90,7 @@ void DetectorResponseProfile (Real_t** H_r, Real_t* H_t, Sinogram* SinogramPtr, 
   int32_t i,k,p,ProfileIndex;
   Real_t** VoxProfile;
   Real_t* BeamProfile;
-  char filename[]="VoxelProfile";
+  char filename[100]="VoxelProfile";
   int dimTiff[4];  
 
   VoxProfile = (Real_t**)multialloc(sizeof(Real_t),2,SinogramPtr->N_p,PROFILE_RESOLUTION);
@@ -100,6 +100,7 @@ void DetectorResponseProfile (Real_t** H_r, Real_t* H_t, Sinogram* SinogramPtr, 
   dimTiff[1] = 1;
   dimTiff[2] = SinogramPtr->N_p;
   dimTiff[3] = PROFILE_RESOLUTION;
+  sprintf(filename, "%s_n%d", filename, TomoInputsPtr->node_rank);
   if (TomoInputsPtr->Write2Tiff == 1)
   WriteMultiDimArray2Tiff (filename, dimTiff, 0, 1, 2, 3, &(VoxProfile[0][0]), 0, TomoInputsPtr->debug_file_ptr);
 

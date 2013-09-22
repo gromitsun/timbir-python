@@ -28,27 +28,27 @@ import os
 def proj_init ():
 	proj = {}
 
-	proj['Path2Dataset'] = os.environ['RCAC_SCRATCH'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
-	proj['Path2WhiteDark'] = os.environ['RCAC_SCRATCH'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
+	proj['Path2Dataset'] = os.environ['RCAC_SCRATCH'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
+	proj['Path2WhiteDark'] = os.environ['RCAC_SCRATCH'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
 	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
-	proj['recon_N_r'] = 512
-	proj['slice_t_start'] = 0
-	proj['N_t'] = 4*8
+	proj['recon_N_r'] = 2048
+	proj['slice_t_start'] = 500
+	proj['N_t'] = 8
 	proj['recon_N_t'] = 8
-	proj['rotation_center_r'] = 265.0 + 1.0/4
-	proj['proj_start'] = 1969
-	proj['proj_num'] = 1984
-	proj['N_p'] = 1984*4
-	proj['K'] = 32
-	proj['N_theta'] = 1984
+	proj['rotation_center_r'] = 264.75*4
+	proj['proj_start'] = 2000
+	proj['proj_num'] = 2000
+	proj['N_p'] = 2000*4
+	proj['K'] = 16
+	proj['N_theta'] = 2000
 
 	proj['N_r'] = 2080
 	proj['length_r'] = 0.65*proj['N_r']	
 	proj['length_t'] = 0.65*proj['N_t']	
 	proj['L'] = proj['N_theta']/proj['K']
 	
-	min_time_btw_views = 0.028391
+	min_time_btw_views = 0.014039
 	rotation_speed = 100
 
 	fps_of_camera = proj['L']/(180.0/rotation_speed)
@@ -101,15 +101,18 @@ def recon_init (proj):
 	recon = {}
 	recon['recon_type'] = 'MBIR'
 	
-	recon['r'] = [32]
+	recon['r'] = [16]
 	recon['c_s'] = [10**-6]
-	recon['c_t'] = [10**-3]
+	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [5*(10**5)]
-	recon['sigma_t'] = [(10**3)]
+	recon['sigma_s'] = [3*(10**5)]
+	recon['sigma_t'] = [4*(10**2)]
 	
-	recon['ZingerT'] = [50]
-	recon['ZingerDel'] = [0.5]
+	recon['ZingerT'] = [30]
+	recon['ZingerDel'] = [0.1]
+
+	recon['node_num'] = 2
+	recon['init_object4mHDF'] = 0
 	
 	recon['maxHU'] = 60000
 	recon['minHU'] = 10000
@@ -126,17 +129,18 @@ def recon_init (proj):
         #recon['WritePerIter'] = [0, 1, 1, 1]
         #recon['updateProjOffset'] = [0, 2, 3, 3]
         #recon['iterations'] = [100, 50, 20, 10]
-	recon['voxel_thresh'] = [5, 5, 5, 5]
-        recon['cost_thresh'] = [10, 10, 10, 10]
-        recon['delta_xy'] = [8, 4, 2, 1]
-        recon['delta_z'] = [1, 1, 1, 1]
-        recon['initICD'] = [0, 2, 2, 2]
-        recon['sinobin'] = 3 
-        recon['writeTiff'] = [1, 1, 1, 1]
-        recon['WritePerIter'] = [0, 0, 0, 1]
-        recon['updateProjOffset'] = [0, 2, 3, 3]
-        recon['iterations'] = [100, 60, 30, 20]
-        recon['only_Edge_Updates'] = [0, 0, 0, 0]
+	recon['voxel_thresh'] = [5, 5, 5, 5, 10, 10]
+        recon['cost_thresh'] = [10, 10, 10, 10, 10, 10]
+        recon['delta_xy'] = [32, 16, 8, 4, 2, 1]
+        recon['delta_z'] = [1, 1, 1, 1, 1, 1]
+        recon['initICD'] = [0, 2, 2, 2, 2, 2]
+        recon['sinobin'] = 1 
+        recon['writeTiff'] = [1, 1, 1, 1, 1, 1]
+        recon['WritePerIter'] = [0, 0, 0, 0, 1, 1]
+        recon['updateProjOffset'] = [0, 2, 3, 3, 3, 3]
+        recon['iterations'] = [200, 100, 50, 30, 10, 5]
+        recon['only_Edge_Updates'] = [0, 0, 0, 0, 0, 0]
+        recon['initMagUpMap'] = [0, 1, 1, 1, 1, 1]
 	
 	recon['init_with_FBP'] = 0
 	recon['num_threads'] = 32
@@ -159,10 +163,9 @@ def recon_init (proj):
 	
 	recon['reconstruct'] = 1
 	recon['calculate_cost'] = 1
-	recon['use_same_folder_environ'] = 0
+	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1
 
-	recon['node_num'] = 2;
 
 	recon['FBP_N_xy'] = proj['recon_N_r']
 	if (recon['init_with_FBP'] == 1):
@@ -191,10 +194,11 @@ def files_init ():
 	files = {}
 	
 	files['C_Source_Folder'] = "../Source_Code_4D/"
-	files['Result_Folder'] = "../XT_Result_Repository/"
+	#files['Result_Folder'] = "../XT_Result_Repository/"
+	files['Result_Folder'] = os.environ['RCAC_SCRATCH'] + "/Recon_Runs/Recon_MPI/XT_Result_Repository/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
-	#files['Launch_Folder'] = os.environ['RCAC_SCRATCH'] + "/Recon_Runs/XT_run_K_32_Ramp_5/"
-	files['Launch_Folder'] = "../XT_run/"
+	files['Launch_Folder'] = os.environ['RCAC_SCRATCH'] + "/Recon_Runs/Recon_MPI/XT_run/"
+	#files['Launch_Folder'] = "../XT_run/"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 

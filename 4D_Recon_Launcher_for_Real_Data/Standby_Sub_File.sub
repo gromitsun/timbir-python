@@ -5,12 +5,12 @@
 #PBS -q standby
 #PBS -l nodes=2:ppn=16
 #PBS -l walltime=4:00:00
-#PBS -N mpi_single_node_test
+#PBS -N mpi_test
 
 # start top in batch mode, 30 sec interval between reports, in background
 
-top -b -d 30 -u mohank >& $HOME/top.out &
-tpid=$!          # Save top's process ID
+#top -b -d 30 -u mohank >& $HOME/top.out &
+#tpid=$!          # Save top's process ID
 
 module load devel
 module load python
@@ -21,7 +21,9 @@ export PARALLEL=1
 export OMP_NUM_THREADS=32
 uniq < $PBS_NODEFILE > nodefile
 
-python XT_Main.py
+mpiexec -n 2 -machinefile nodefile python XT_Main.py --setup_launch_folder --node_num 2
+python XT_Main.py --run_reconstruction --node_num 2
+
 checkjob -v $PBS_JOBID
 
-kill $tpid
+#kill $tpid

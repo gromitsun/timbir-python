@@ -143,6 +143,7 @@ typedef struct
     int32_t node_num;
     int32_t node_rank;
 
+    uint8_t initMagUpMap;
     FILE *debug_file_ptr;
   } TomoInputs;
 

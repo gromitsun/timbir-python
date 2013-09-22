@@ -6,6 +6,7 @@ import h5py
 
 def error_by_flag (flag, message):
 	if (flag != 0):
+		print 'ERROR_FLAG: ' + str(flag) 
 		print message
 		exit()
 
@@ -70,7 +71,7 @@ def write_tiff_from_object_bin_file (proj, recon, files):
 				Object[k*zpernode:(k+1)*zpernode,:,:] = np.fromfile(path2results + 'object_n' + str(k) + '_time_' + str(j) + '.bin', dtype = np.float64, count = -1).reshape((zpernode, recon['N_xy'], recon['N_xy']), order = 'C')
 			for k in range(recon['N_z']):
 				slice_object = convert_um2HU(Object[k,:,:])
-				print 'write_tiff_from_object_bin_file: Average value of time slice ' + str(j) + ' in HU is ' + str(np.mean(slice_object))
+		#		print 'write_tiff_from_object_bin_file: Average value of time slice ' + str(j) + ' in HU is ' + str(np.mean(slice_object))
 				write_array2tif(path2results + 'object_z_' + str(k) + '_time_' + str(j) + '.tif', convert_HU2uint8(slice_object, recon['maxHU'], recon['minHU']))
 			print 'write_tiff_from_object_bin_file: Average value of time slice ' + str(j) + ' in um^-1 is ' + str(np.mean(Object))
 
@@ -81,13 +82,16 @@ def write_object2HDF (proj, recon, files):
                 file = h5py.File(path2results + 'object.hdf5', 'w');
 #               dset = file.create_dataset('object', (recon['Rtime_num'][i], recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True, compression='lzf');
                 dset = file.create_dataset('object', (recon['Rtime_num'][i], recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True);
+                dset_off = file.create_dataset('proj_offset', (proj['recon_N_r'], proj['recon_N_t']), dtype=np.float32, chunks=True)
+		for k in range(recon['node_num']):
+                	proj_offset = np.fromfile(path2results + 'proj_offset_n' + str(k) + '.bin', dtype = np.float64, count = -1).reshape((proj['recon_N_r'], proj['recon_N_t']/recon['node_num']), order = 'C')
+                	dset_off[:,k*proj['recon_N_t']/recon['node_num']:(k+1)*proj['recon_N_t']/recon['node_num']] = proj_offset.astype(np.float32)
                 for j in range(int(recon['Rtime_num'][i])):
 			zpernode = recon['N_z']/recon['node_num']	
 			for k in range(recon['node_num']):
                         	Object[k*zpernode:(k+1)*zpernode,:,:] = np.fromfile(path2results + 'object_n' + str(k) + '_time_' + str(j) + '.bin', dtype = np.float64, count = -1).reshape((zpernode, recon['N_xy'], recon['N_xy']), order = 'C')
 
                         Object[Object < 0] = 0
-                        for k in range(recon['N_z']):
-                                dset[j,k,:,:] = Object[k,:,:].astype(np.float32)
+                        dset[j,:,:,:] = Object.astype(np.float32)
                 file.close
 

@@ -115,19 +115,6 @@ void Write2Tiff(char* filename, int height, int width, Real_t** img, int hounsfi
   fclose ( fp );
 }
 
-void WriteUint82Tiff(char* filename, int height, int width, bool** imgin, int hounsfield_flag, FILE *debug_file_ptr)
-{
-	Real_t** img;
-	int32_t i, j;
-
-	img = (Real_t**)multialloc(sizeof(Real_t), 2, height, width);
-	for (i = 0; i < height; i++)
-	for (j = 0; j < height; j++)
-		img[i][j] = (Real_t)imgin[i][j];
-	Write2Tiff(filename, height, width, img, hounsfield_flag, debug_file_ptr);
-	multifree(img,2);
-}
-
 void WriteInt32Tiff(char* filename, int height, int width, int32_t** imgin, int hounsfield_flag, FILE *debug_file_ptr)
 {
 	Real_t** img;
@@ -135,7 +122,7 @@ void WriteInt32Tiff(char* filename, int height, int width, int32_t** imgin, int 
 
 	img = (Real_t**)multialloc(sizeof(Real_t), 2, height, width);
 	for (i = 0; i < height; i++)
-	for (j = 0; j < height; j++)
+	for (j = 0; j < width; j++)
 		img[i][j] = (Real_t)imgin[i][j];
 	Write2Tiff(filename, height, width, img, hounsfield_flag, debug_file_ptr);
 	multifree(img,2);
@@ -204,5 +191,23 @@ void write_ObjectProjOff2TiffBinPerIter (Sinogram* SinogramPtr, ScannedObject* S
 	if (TomoInputsPtr->Write2Tiff == 1)
 		WriteMultiDimArray2Tiff (projOffset_file, dim, 0, 1, 2, 3, &(SinogramPtr->ProjOffset[0][0]), 0, TomoInputsPtr->debug_file_ptr);
 
+}
+
+void WriteBoolArray2Tiff (char *filename, int dim[4], int dim2loop_1, int dim2loop_2, int dim2write_1, int dim2write_2, bool* imgin, int hounsfield_flag, FILE* debug_file_ptr)
+{
+	Real_t* img;
+	int32_t i;
+
+	img = (Real_t*)get_spc(dim[0]*dim[1]*dim[2]*dim[3], sizeof(Real_t));
+	for (i = 0; i < dim[0]*dim[1]*dim[2]*dim[3]; i++)
+	{
+		if (imgin[i] == true)
+			img[i] = 1;
+		else
+			img[i] = 0;
+	}
+
+	WriteMultiDimArray2Tiff (filename, dim, dim2loop_1, dim2loop_2, dim2write_1, dim2write_2, img, hounsfield_flag, debug_file_ptr);
+	free(img);
 }
 

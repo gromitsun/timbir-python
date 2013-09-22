@@ -28,28 +28,28 @@ import os
 def proj_init ():
 	proj = {}
 
-#	proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Large_Datasets/K_8_N_theta_2000_RotSpeed_50_Exp_4_ROI_1000x2080_Ramp_1/k-08-4ms-last_3.hdf"
-#	proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Large_Datasets/K_8_N_theta_2000_RotSpeed_50_Exp_4_ROI_1000x2080_Ramp_1/k-08-4ms-last_16.hdf"
-	proj['Path2Dataset'] = os.environ['RCAC_SCRATCH'] + "/Argonne_Datasets/K_8_N_theta_2000_RotSpeed_50_Exp_4_ROI_1000x2080_Ramp_1/k-08-4ms-last_3.hdf"
-	proj['Path2WhiteDark'] = os.environ['RCAC_SCRATCH'] + "/Argonne_Datasets/K_8_N_theta_2000_RotSpeed_50_Exp_4_ROI_1000x2080_Ramp_1/k-08-4ms-last_16.hdf"
-	proj['recon_N_r'] = 512
+	proj['Path2Dataset'] = os.environ['RCAC_SCRATCH'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
+	proj['Path2WhiteDark'] = os.environ['RCAC_SCRATCH'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
+	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
+	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
+	proj['recon_N_r'] = 2048
 	proj['slice_t_start'] = 500
-	proj['recon_N_t'] = 4
-	proj['rotation_center_r'] = 265.0
-	proj['proj_start'] = 0
+	proj['N_t'] = 8
+	proj['recon_N_t'] = 8
+	proj['rotation_center_r'] = 264.75*4
+	proj['proj_start'] = 2000
 	proj['proj_num'] = 2000
 	proj['N_p'] = 2000*4
-	proj['K'] = 8
+	proj['K'] = 16
 	proj['N_theta'] = 2000
 
 	proj['N_r'] = 2080
-	proj['N_t'] = 1000
 	proj['length_r'] = 0.65*proj['N_r']	
 	proj['length_t'] = 0.65*proj['N_t']	
 	proj['L'] = proj['N_theta']/proj['K']
 	
 	min_time_btw_views = 0.014039
-	rotation_speed = 50
+	rotation_speed = 100
 
 	fps_of_camera = proj['L']/(180.0/rotation_speed)
 	angles, times = gen_interlaced_views_0_to_Inf(proj['K'], proj['N_theta'], proj['N_p'])
@@ -101,12 +101,18 @@ def recon_init (proj):
 	recon = {}
 	recon['recon_type'] = 'MBIR'
 	
-	recon['r'] = [8]
+	recon['r'] = [16]
 	recon['c_s'] = [10**-6]
-	recon['c_t'] = [10**-3]
+	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [5*(10**5)]
-	recon['sigma_t'] = [5*(10**3)]
+	recon['sigma_s'] = [2*(10**5)]
+	recon['sigma_t'] = [5*(10**2)]
+	
+	recon['ZingerT'] = [25]
+	recon['ZingerDel'] = [0]
+
+	recon['node_num'] = 2
+	recon['init_object4mHDF'] = 0
 	
 	recon['maxHU'] = 60000
 	recon['minHU'] = 10000
@@ -123,34 +129,32 @@ def recon_init (proj):
         #recon['WritePerIter'] = [0, 1, 1, 1]
         #recon['updateProjOffset'] = [0, 2, 3, 3]
         #recon['iterations'] = [100, 50, 20, 10]
-	
-	recon['voxel_thresh'] = [5, 5, 5, 5]
-        recon['cost_thresh'] = [10, 10, 10, 10]
-        recon['delta_xy'] = [8, 4, 2, 1]
-        recon['delta_z'] = [1, 1, 1, 1]
-        recon['initICD'] = [0, 2, 2, 2]
+	recon['voxel_thresh'] = [50, 50, 50, 50, 50]
+        recon['cost_thresh'] = [10, 10, 10, 10, 10]
+        recon['delta_xy'] = [16, 8, 4, 2, 1]
+        recon['delta_z'] = [1, 1, 1, 1, 1]
+        recon['initICD'] = [0, 2, 2, 2, 2]
         recon['sinobin'] = 1 
-        recon['writeTiff'] = [1, 1, 1, 1]
-        recon['WritePerIter'] = [0, 0, 0, 1]
-        recon['updateProjOffset'] = [1, 1, 1, 1]
-        recon['iterations'] = [100, 60, 30, 20]
-        recon['only_Edge_Updates'] = [0, 0, 0, 1]
-
-	recon['ZingerT'] = 200
-	recon['ZingerDel'] = 0.5
+        recon['writeTiff'] = [1, 1, 1, 1, 1]
+        recon['WritePerIter'] = [0, 0, 0, 1, 1]
+        recon['updateProjOffset'] = [0, 2, 3, 3, 3]
+        recon['iterations'] = [100, 50, 30, 10, 5]
+        recon['only_Edge_Updates'] = [0, 0, 0, 0, 0]
+        recon['initMagUpMap'] = [0, 1, 1, 1, 1]
+	
 	recon['init_with_FBP'] = 0
 	recon['num_threads'] = 32
 	#recon['num_threads'] = 1
-	recon['positivity_constraint'] = 1;
+	recon['positivity_constraint'] = 0;
 	
-	recon['p'] = 1.2
+	recon['p'] = 1.1
 	recon['alpha'] = 1.5
 	recon['time_reg'] = 1
 	recon['Rtime0'] = proj['times'][0]
 
 	recon['Rtime_num'] = [ceil(recon['r'][i]*float(proj['recon_N_p'])/proj['N_theta']) for i in range(len(recon['r']))]
 #	recon['Rtime_num'] = proj['r']*proj['N_p']/proj['N_theta']
-	recon['Rtime_delta'] = [(proj['times'][-1]-proj['times'][0])/recon['r'][i] for i in range(len(recon['r']))]
+	recon['Rtime_delta'] = [(proj['times'][-1]-proj['times'][0])/recon['Rtime_num'][i] for i in range(len(recon['r']))]
 #	recon['Rtime_delta'] = proj['N_p']*proj['delta_time']/recon['Rtime_num']
 
 	recon['multi_res_stages'] = len(recon['delta_xy'])
@@ -158,13 +162,17 @@ def recon_init (proj):
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	
 	recon['reconstruct'] = 1
-	recon['calculate_cost'] = 0
-	recon['use_same_folder_environ'] = 0
+	recon['calculate_cost'] = 1
+	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1
+
 
 	recon['FBP_N_xy'] = proj['recon_N_r']
 	if (recon['init_with_FBP'] == 1):
 		recon['FBP_N_xy'] = recon['FBP_N_xy']/recon['delta_xy'][0]
+
+	if (proj['N_t'] % proj['recon_N_t'] != 0):
+		error_by_flag(1, 'ERROR: recon_init: recon_N_t must divide N_t')
 
 	recon['updateProjOffset'] = np.asarray(recon['updateProjOffset'])	
 	if (len(recon['r']) != len(recon['c_s']) or len(recon['r']) != len(recon['c_t']) or len(recon['r']) != len(recon['sigma_s']) or len(recon['r']) != len(recon['sigma_t'])):
@@ -186,10 +194,11 @@ def files_init ():
 	files = {}
 	
 	files['C_Source_Folder'] = "../Source_Code_4D/"
-	files['Result_Folder'] = "../XT_Result_Repository/"
+	#files['Result_Folder'] = "../XT_Result_Repository/"
+	files['Result_Folder'] = os.environ['RCAC_SCRATCH'] + "/Recon_Runs/Recon_MPI/XT_Result_Repository/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
-	#files['Launch_Folder'] = os.environ['RCAC_SCRATCH'] + "/Recon_Runs/XT_run_Edge/"
-	files['Launch_Folder'] = "../XT_run/"
+	files['Launch_Folder'] = os.environ['RCAC_SCRATCH'] + "/Recon_Runs/Recon_MPI/XT_run/"
+	#files['Launch_Folder'] = "../XT_run/"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 

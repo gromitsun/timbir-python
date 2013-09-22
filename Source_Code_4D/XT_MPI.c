@@ -5,7 +5,7 @@
 
 void MPI_Send_Recv_Z_Slices (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, MPI_Request* send_reqs, MPI_Request* recv_reqs, uint8_t select)
 {
-	int32_t i, idx = 0, num, N_z, off1, off2;
+	int32_t i, num, N_z, off1, off2;
 	N_z = ScannedObjectPtr->N_z;
 	num = ScannedObjectPtr->N_y*ScannedObjectPtr->N_x;
 
@@ -42,7 +42,7 @@ void MPI_Send_Recv_Z_Slices (ScannedObject* ScannedObjectPtr, TomoInputs* TomoIn
 
 void MPI_Wait_Z_Slices (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, MPI_Request* send_reqs, MPI_Request* recv_reqs, uint8_t select)
 {
-	int32_t i, idx = 0, num, N_z, off1, off2;
+	int32_t i, num, N_z, off1, off2;
 	N_z = ScannedObjectPtr->N_z;
 	num = ScannedObjectPtr->N_y*ScannedObjectPtr->N_x;
 

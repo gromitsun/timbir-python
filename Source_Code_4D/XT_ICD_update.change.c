@@ -11,9 +11,7 @@
 #include "XT_IOMisc.h"
 #include "XT_Structures.h"
 #include "XT_NHICD.h"
-#fdef XTEngine_OpenMP_SUPPORT
 #include "omp.h"
-#endif
 
 int32_t array_loc_1D (int32_t i, int32_t j, int32_t k, int32_t N_j, int32_t N_k)
 {

@@ -396,6 +396,7 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
                {"only_Edge_Updates",  no_argument, 0, '-'}, 
                {"zingerT",  required_argument, 0, '*'}, 
                {"zingerDel",  required_argument, 0, '^'}, 
+               {"initMagUpMap",  no_argument, 0, '&'}, 
                {0, 0, 0, 0}
          };
 
@@ -416,9 +417,10 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
 	TomoInputsPtr->no_NHICD = 0;
 	TomoInputsPtr->WritePerIter = 0;
 	TomoInputsPtr->only_Edge_Updates = 0;
+	TomoInputsPtr->initMagUpMap = 0;
 	while(1)
 	{		
-	   c = getopt_long (argc, argv, "a:b:c:d:e:f:z:g:h:3:j:k:l:m:no:p:q:rs:t:u:v:w:xy:i:1:2:4:5:6:7:8+-*:^:", long_options, &option_index);
+	   c = getopt_long (argc, argv, "a:b:c:d:e:f:z:g:h:3:j:k:l:m:no:p:q:rs:t:u:v:w:xy:i:1:2:4:5:6:7:8+-*:^:&", long_options, &option_index);
      
            /* Detect the end of the options. */
            if (c == -1) break;
@@ -465,6 +467,7 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
 		case '-': TomoInputsPtr->only_Edge_Updates = 1;	break;
 		case '*': TomoInputsPtr->ErrorSinoThresh = (Real_t)atof(optarg);	break;
 		case '^': TomoInputsPtr->ErrorSinoDelta = (Real_t)atof(optarg);	break;
+		case '&': TomoInputsPtr->initMagUpMap = 1;	break;
 		case '?': printf("ERROR: argsParser: Cannot recognize argument %s\n",optarg); break;
 		}
 	}
@@ -484,10 +487,10 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
 		ScannedObjectPtr->delta_z = ScannedObjectPtr->mult_z;
 	}
   	
-	sprintf(debug_filename ,"DEBUG_delta_xy_%d_delta_z_%d_n%d.log", (int)ScannedObjectPtr->delta_xy, (int)ScannedObjectPtr->delta_z, TomoInputsPtr->node_rank);
+	sprintf(debug_filename ,"DEBUG_n%d_delta_xy_%d_delta_z_%d.log", TomoInputsPtr->node_rank, (int)ScannedObjectPtr->mult_xy, (int)ScannedObjectPtr->mult_z);
 	TomoInputsPtr->debug_file_ptr = fopen(debug_filename, "w" );
 	printf ("Refer to %s for more information\n", debug_filename);
-	TomoInputsPtr->debug_file_ptr = stdout;
+/*	TomoInputsPtr->debug_file_ptr = stdout;*/
 
 	if(argc-optind>0){
 		fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: argsParser: Argument list has an error\n");

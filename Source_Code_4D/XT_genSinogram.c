@@ -219,7 +219,7 @@ int genSinogram_subsampleCounts(Sinogram* SinogramPtr, ScannedObject* ScannedObj
 	int result;
 	char brightfile[100]=BRIGHT_FIELD_FILENAME;
 	char weightfile[100]=WEIGHT_MATRIX_FILENAME;
-	Real_t temp, ***weight, ***bright, weight_temp, bright_temp;
+	Real_t temp, ***weight, **bright, weight_temp, bright_temp;
 	int32_t p, q, N_t, N_r, mult_xy, mult_z, i,k,size,slice;
 	Real_t sino_avg=0, weight_avg=0;
 	
@@ -234,9 +234,9 @@ int genSinogram_subsampleCounts(Sinogram* SinogramPtr, ScannedObject* ScannedObj
 	sprintf(brightfile, "%s.bin", brightfile);
 	fp = fopen (brightfile, "r" );
  	if (fp==NULL) {fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: genSinogram_subsampleCounts: error in reading file %s\n",brightfile); exit (1);}		
-	size=SinogramPtr->N_p*N_r*N_t*mult_xy*mult_z;
-	bright = (Real_t***)multialloc(sizeof(Real_t), 3, SinogramPtr->N_p, SinogramPtr->N_r*mult_xy, SinogramPtr->N_t*mult_z);
-	result = fread (&(bright[0][0][0]), sizeof(Real_t), size, fp);
+	size=N_r*N_t*mult_xy*mult_z;
+	bright = (Real_t**)multialloc(sizeof(Real_t), 2, SinogramPtr->N_r*mult_xy, SinogramPtr->N_t*mult_z);
+	result = fread (&(bright[0][0]), sizeof(Real_t), size, fp);
   	if (result != (int)size) 
 	{fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: Reading file %s, Number of elements read does not match required, number of elements read=%d\n",brightfile,result);}
 	fclose(fp);	
@@ -244,6 +244,7 @@ int genSinogram_subsampleCounts(Sinogram* SinogramPtr, ScannedObject* ScannedObj
 	sprintf(weightfile, "%s.bin", weightfile);
 	fp = fopen (weightfile, "r" );
  	if (fp==NULL) {fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: error in reading file %s\n",weightfile); exit (1);}		
+	size=SinogramPtr->N_p*N_r*N_t*mult_xy*mult_z;
 	weight = (Real_t***)multialloc(sizeof(Real_t), 3, SinogramPtr->N_p, SinogramPtr->N_r*mult_xy, SinogramPtr->N_t*mult_z);
 	result = fread (&(weight[0][0][0]), sizeof(Real_t), size, fp);
   	if (result != (int)size) 
@@ -262,7 +263,7 @@ int genSinogram_subsampleCounts(Sinogram* SinogramPtr, ScannedObject* ScannedObj
 					for (q = 0; q < mult_z; q++)
 					{
 						weight_temp += weight[i][k*mult_xy+p][slice*mult_z+q];
-						bright_temp += bright[i][k*mult_xy+p][slice*mult_z+q];
+						bright_temp += bright[k*mult_xy+p][slice*mult_z+q];
 					}
 				}
 				temp = log(bright_temp/weight_temp);
@@ -280,7 +281,7 @@ int genSinogram_subsampleCounts(Sinogram* SinogramPtr, ScannedObject* ScannedObj
 
 	fprintf(TomoInputsPtr->debug_file_ptr, "DebugMsg: genSinogram_fromCounts: sinogram average = %f, Weight average = %f\n", sino_avg, weight_avg);
 
-	multifree(bright,3);
+	multifree(bright,2);
 	multifree(weight,3);
 	return(0);	
 }
