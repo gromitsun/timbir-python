@@ -39,6 +39,7 @@ void freeMemory(Sinogram* SinogramPtr, ScannedObject *ScannedObjectPtr, TomoInpu
 	free(TomoInputsPtr);
 }
 
+/*computes sinogram*/
 int computeWriteSinogram(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	char proj_file[100]=PROJECTION_FILENAME;
