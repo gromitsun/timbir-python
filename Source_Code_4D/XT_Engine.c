@@ -13,7 +13,6 @@
 #include <ctype.h>
 #include <mpi.h>
 
-/*frees memory*/
 void freeMemory(Sinogram* SinogramPtr, ScannedObject *ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	int32_t i;
