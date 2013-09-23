@@ -105,7 +105,7 @@ def recon_init (proj):
 	recon['c_s'] = [10**-6]
 	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [3*(10**5)]
+	recon['sigma_s'] = [4*(10**4)]
 	recon['sigma_t'] = [4*(10**2)]
 	
 	recon['ZingerT'] = [30]
@@ -117,7 +117,7 @@ def recon_init (proj):
 	recon['maxHU'] = 60000
 	recon['minHU'] = 10000
 	
-	recon['radius_obj'] = 0.65*proj['N_r']/2
+	recon['radius_obj'] = 0.65*2*proj['N_r']/2
 	recon['BH_Quad_Coef'] = 0.5;
         #recon['voxel_thresh'] = [10, 20, 40, 40]
         #recon['cost_thresh'] = [10, 10, 10, 10]
@@ -139,7 +139,7 @@ def recon_init (proj):
         recon['WritePerIter'] = [0, 0, 0, 0, 1, 1]
         recon['updateProjOffset'] = [0, 2, 3, 3, 3, 3]
         recon['iterations'] = [200, 100, 50, 30, 10, 5]
-        recon['only_Edge_Updates'] = [0, 0, 0, 0, 0, 0]
+        recon['only_Edge_Updates'] = [0, 0, 0, 0, 0, 1]
         recon['initMagUpMap'] = [0, 1, 1, 1, 1, 1]
 	
 	recon['init_with_FBP'] = 0
@@ -147,7 +147,7 @@ def recon_init (proj):
 	#recon['num_threads'] = 1
 	recon['positivity_constraint'] = 0;
 	
-	recon['p'] = 1.1
+	recon['p'] = 1.2
 	recon['alpha'] = 1.5
 	recon['time_reg'] = 1
 	recon['Rtime0'] = proj['times'][0]

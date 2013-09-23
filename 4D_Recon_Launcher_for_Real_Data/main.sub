@@ -1,8 +1,0 @@
-#!/bin/sh -l
-# FILENAME:  mpi_hello.sub
-
-module load devel
-cd $PBS_O_WORKDIR
-uniq <$PBS_NODEFILE >nodefile
-
-mpiexec -n 4 -machinefile nodefile ./test

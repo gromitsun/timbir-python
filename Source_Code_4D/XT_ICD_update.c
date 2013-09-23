@@ -901,7 +901,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
 			} 
 		}
 			
-		if (denominator != 0)	
+		/*if (denominator != 0)	
 			SinogramPtr->ProjOffset[i][j] = numerator/denominator;
 		else
 		{
@@ -912,7 +912,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
 			WriteBoolArray2Tiff (projselect_file, dimTiff, 0, 3, 1, 2, &(SinogramPtr->ProjSelect[0][0][0]), 0, TomoInputsPtr->debug_file_ptr);
 			printf("ERROR: denominator is zero!!!!\n");
 			exit(1);
-		}
+		}*/
 			
 		for (k = 0; k < SinogramPtr->N_p; k++)
 		{
