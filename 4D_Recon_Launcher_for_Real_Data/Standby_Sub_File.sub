@@ -12,7 +12,7 @@
 #top -b -d 30 -u mohank >& $HOME/top.out &
 #tpid=$!          # Save top's process ID
 
-module load devel
+module load intel
 module load python
 module load openmpi
 

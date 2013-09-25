@@ -901,9 +901,9 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
 			} 
 		}
 			
-		/*if (denominator != 0)	
-			SinogramPtr->ProjOffset[i][j] = numerator/denominator;
-		else
+		/*if (denominator != 0)	*/
+		SinogramPtr->ProjOffset[i][j] = numerator/denominator;
+		/*else
 		{
 			int32_t dimTiff[4];
 			char projselect_file[100] = "ProjSelectErred";

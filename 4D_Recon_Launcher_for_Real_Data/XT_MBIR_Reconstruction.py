@@ -48,7 +48,7 @@ def do_MBIR_reconstruction(proj, recon, files):
 			else:
 				generate_projections (proj, recon, files, path2launch)
 
-			macros = ' -fopenmp -DBH_QUAD_COEF="' + str(recon['BH_Quad_Coef']) + '" -DHOUNSFIELD_MAX="' + str(recon['maxHU']) + '" -DHOUNSFIELD_MIN="' + str(recon['minHU']) + '"' 
+			macros = ' -openmp -DBH_QUAD_COEF="' + str(recon['BH_Quad_Coef']) + '" -DHOUNSFIELD_MAX="' + str(recon['maxHU']) + '" -DHOUNSFIELD_MIN="' + str(recon['minHU']) + '"' 
 			if (recon['calculate_cost'] == 0):
 				macros = macros + ' -DNO_COST_CALCULATE'
 

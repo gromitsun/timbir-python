@@ -105,7 +105,7 @@ def recon_init (proj):
 	recon['c_s'] = [10**-6]
 	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [4*(10**4)]
+	recon['sigma_s'] = [4*(10**5)]
 	recon['sigma_t'] = [4*(10**2)]
 	
 	recon['ZingerT'] = [30]
@@ -117,29 +117,33 @@ def recon_init (proj):
 	recon['maxHU'] = 60000
 	recon['minHU'] = 10000
 	
-	recon['radius_obj'] = 0.65*2*proj['N_r']/2
+	recon['radius_obj'] = 0.65*proj['N_r']/2
 	recon['BH_Quad_Coef'] = 0.5;
-        #recon['voxel_thresh'] = [10, 20, 40, 40]
-        #recon['cost_thresh'] = [10, 10, 10, 10]
-        #recon['delta_xy'] = [8, 4, 2, 1]
-        #recon['delta_z'] = [2, 2, 1, 1]
-        #recon['initICD'] = [0, 2, 3, 2]
-        #recon['sinobin'] = 1
-        #recon['writeTiff'] = [1, 1, 1, 1]
-        #recon['WritePerIter'] = [0, 1, 1, 1]
-        #recon['updateProjOffset'] = [0, 2, 3, 3]
-        #recon['iterations'] = [100, 50, 20, 10]
-	recon['voxel_thresh'] = [5, 5, 5, 5, 10, 10]
+	
+	#recon['voxel_thresh'] = [10]
+        #recon['cost_thresh'] = [10]
+        #recon['delta_xy'] = [1]
+        #recon['delta_z'] = [1]
+        #recon['initICD'] = [2]
+        #recon['sinobin'] = 1 
+        #recon['writeTiff'] = [1]
+        #recon['WritePerIter'] = [1]
+        #recon['updateProjOffset'] = [3]
+        #recon['iterations'] = [5]
+        #recon['only_Edge_Updates'] = [0]
+        #recon['initMagUpMap'] = [1]
+	
+	recon['voxel_thresh'] = [5, 5, 5, 10, 10, 10]
         recon['cost_thresh'] = [10, 10, 10, 10, 10, 10]
         recon['delta_xy'] = [32, 16, 8, 4, 2, 1]
         recon['delta_z'] = [1, 1, 1, 1, 1, 1]
         recon['initICD'] = [0, 2, 2, 2, 2, 2]
         recon['sinobin'] = 1 
         recon['writeTiff'] = [1, 1, 1, 1, 1, 1]
-        recon['WritePerIter'] = [0, 0, 0, 0, 1, 1]
+        recon['WritePerIter'] = [0, 0, 0, 0, 0, 1]
         recon['updateProjOffset'] = [0, 2, 3, 3, 3, 3]
         recon['iterations'] = [200, 100, 50, 30, 10, 5]
-        recon['only_Edge_Updates'] = [0, 0, 0, 0, 0, 1]
+        recon['only_Edge_Updates'] = [0, 0, 0, 0, 0, 0]
         recon['initMagUpMap'] = [0, 1, 1, 1, 1, 1]
 	
 	recon['init_with_FBP'] = 0
