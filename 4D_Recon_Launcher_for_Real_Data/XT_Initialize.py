@@ -25,11 +25,11 @@ import os
 	angles - Angles of projections used for reconstruction
 	times - Times at which these projections were acquired """
 
-def proj_init ():
+def proj_init (files):
 	proj = {}
 
-	proj['Path2Dataset'] = os.environ['RCAC_SCRATCH'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
-	proj['Path2WhiteDark'] = os.environ['RCAC_SCRATCH'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
+	proj['Path2Dataset'] = files['scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
+	proj['Path2WhiteDark'] = files['scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
 	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	proj['recon_N_r'] = 2048
@@ -111,7 +111,6 @@ def recon_init (proj):
 	recon['ZingerT'] = [30]
 	recon['ZingerDel'] = [0.1]
 
-	recon['node_num'] = 2
 	recon['init_object4mHDF'] = 0
 	
 	recon['maxHU'] = 60000
@@ -147,7 +146,6 @@ def recon_init (proj):
         recon['initMagUpMap'] = [0, 1, 1, 1, 1, 1]
 	
 	recon['init_with_FBP'] = 0
-	recon['num_threads'] = 32
 	#recon['num_threads'] = 1
 	recon['positivity_constraint'] = 0;
 	
@@ -165,7 +163,6 @@ def recon_init (proj):
 	recon['N_xy'] = proj['recon_N_r']/recon['delta_xy'][-1]
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	
-	recon['reconstruct'] = 1
 	recon['calculate_cost'] = 1
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1
@@ -194,14 +191,14 @@ def recon_init (proj):
 	copy_executables - If '1', copies the executables from the source code folder and hence is not compiled again (Keep it at 0)
 	copy_projections - If '1', copies projection.bin and weight.bin from source code folder. If '0' reads the projection data from HDF files, as is described in XT_Projections.py"""
 
-def files_init ():
+def files_init (files):
 	files = {}
 	
 	files['C_Source_Folder'] = "../Source_Code_4D/"
 	#files['Result_Folder'] = "../XT_Result_Repository/"
-	files['Result_Folder'] = os.environ['RCAC_SCRATCH'] + "/Recon_Runs/Recon_MPI/XT_Result_Repository/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI/XT_Result_Repository/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
-	files['Launch_Folder'] = os.environ['RCAC_SCRATCH'] + "/Recon_Runs/Recon_MPI/XT_run/"
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI/XT_run/"
 	#files['Launch_Folder'] = "../XT_run/"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
