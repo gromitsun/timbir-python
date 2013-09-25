@@ -4,11 +4,13 @@ from XT_Initialize import proj_init, recon_init, files_init
 #from XT_Projections import generate_projections
 from XT_MBIR_Reconstruction import do_MBIR_reconstruction
 #from XT_FBP_Reconstruction import do_FBP_reconstruction
+from XT_IOMisc import error_by_flag
 from XT_IOMisc import write_object2HDF
 from XT_ObjectHDFIO import writepar_object2HDF
 from XT_IOMisc import write_tiff_from_object_bin_file
 import argparse
 import time
+import os
 from mpi4py import MPI
 
 def main():
@@ -22,6 +24,8 @@ def main():
 	parser.add_argument("-n", "--node_num", type=int, help="Specifies number of nodes")
 	args = parser.parse_args()
 
+	recon = {}
+	files = {}
 	recon['node_num'] = args.node_num
 	if (args.Purdue):
 		recon['num_threads'] = 32
