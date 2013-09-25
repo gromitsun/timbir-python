@@ -31,11 +31,11 @@ def proj_init (files):
 	proj['Path2WhiteDark'] = files['scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
 	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
-	proj['recon_N_r'] = 512
+	proj['recon_N_r'] = 2048
 	proj['slice_t_start'] = 500
 	proj['N_t'] = 8
 	proj['recon_N_t'] = 8
-	proj['rotation_center_r'] = 264.75
+	proj['rotation_center_r'] = 264.75*4
 	proj['proj_start'] = 2000
 	proj['proj_num'] = 2000
 	proj['N_p'] = 2000*4
@@ -99,12 +99,12 @@ def proj_init (files):
 def recon_init (proj, recon):
 	recon['recon_type'] = 'MBIR'
 	
-	recon['r'] = [16]
+	recon['r'] = [32]
 	recon['c_s'] = [10**-6]
 	recon['c_t'] = [10**-4]
 
 	recon['sigma_s'] = [2*(10**5)]
-	recon['sigma_t'] = [2*(10**2)]
+	recon['sigma_t'] = [4*(10**2)]
 	
 	recon['ZingerT'] = [30]
 	recon['ZingerDel'] = [0.1]
@@ -130,18 +130,18 @@ def recon_init (proj, recon):
         #recon['only_Edge_Updates'] = [0]
         #recon['initMagUpMap'] = [1]
 	
-	recon['voxel_thresh'] = [10, 10, 10, 10]
-        recon['cost_thresh'] = [10, 10, 10, 10]
-        recon['delta_xy'] = [8, 4, 2, 1]
-        recon['delta_z'] = [1, 1, 1, 1]
-        recon['initICD'] = [0, 2, 2, 2]
+	recon['voxel_thresh'] = [5, 5, 5, 5, 10, 10]
+        recon['cost_thresh'] = [10, 10, 10, 10, 10, 10]
+        recon['delta_xy'] = [32, 16, 8, 4, 2, 1]
+        recon['delta_z'] = [1, 1, 1, 1, 1, 1]
+        recon['initICD'] = [0, 2, 2, 2, 2, 2]
         recon['sinobin'] = 1 
-        recon['writeTiff'] = [1, 1, 1, 1]
-        recon['WritePerIter'] = [0, 0, 0, 1]
-        recon['updateProjOffset'] = [0, 2, 3, 3]
-        recon['iterations'] = [200, 100, 50, 30]
-        recon['only_Edge_Updates'] = [0, 0, 0, 0]
-        recon['initMagUpMap'] = [0, 1, 1, 1]
+        recon['writeTiff'] = [1, 1, 1, 1, 1, 1]
+        recon['WritePerIter'] = [0, 0, 0, 0, 0, 1]
+        recon['updateProjOffset'] = [0, 2, 3, 3, 3, 3]
+        recon['iterations'] = [200, 100, 50, 30, 20, 10]
+        recon['only_Edge_Updates'] = [0, 0, 0, 0, 0, 0]
+        recon['initMagUpMap'] = [0, 1, 1, 1, 1, 1]
 	
 	recon['init_with_FBP'] = 0
 	#recon['num_threads'] = 1
