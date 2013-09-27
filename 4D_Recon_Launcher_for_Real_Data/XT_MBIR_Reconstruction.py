@@ -3,7 +3,7 @@ from os import system
 from XT_IOMisc import create_folder, error_by_flag
 from XT_Projections import generate_projections
 from XT_ObjectHDFIO import initpar_object4mHDF
-from mpi4py import MPI
+import mpi4py
 
 def write_views2file (path2save, views, times):
 	fid = open(path2save + 'view_info.txt', 'w')
@@ -46,7 +46,14 @@ def do_MBIR_reconstruction(proj, recon, files):
 				flag = system('cp ' + path2source + 'bright*.bin ' + path2source + 'projection*.bin ' + path2source + 'weight*.bin ' + path2launch + '.')
 				error_by_flag(flag, 'ERROR: cannot copy projection.bin/weight.bin')
 			else:
-				generate_projections (proj, recon, files, path2launch)
+				if (recon['HPC'] == 'NERSC'):
+					for i in range(recon['node_num']):
+						recon['rank'] = i
+						generate_projections (proj, recon, files, path2launch)
+					recon['rank'] = 0
+				else:
+					generate_projections (proj, recon, files, path2launch)
+					
 
 			macros = ' -openmp -DBH_QUAD_COEF="' + str(recon['BH_Quad_Coef']) + '" -DHOUNSFIELD_MAX="' + str(recon['maxHU']) + '" -DHOUNSFIELD_MIN="' + str(recon['minHU']) + '"' 
 			if (recon['calculate_cost'] == 0):
@@ -73,6 +80,9 @@ def do_MBIR_reconstruction(proj, recon, files):
 
 		if (recon['reconstruct'] == 1):	
 			path2launch = launch_folder + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '/'
+			if (recon['HPC'] == 'Purdue'):
+				flag = system('cp nodefile ' + path2launch + '.')
+				error_by_flag(flag, 'ERROR: Cannot copy nodefile to launch folder')
 			for multidx in range(len(recon['delta_xy'])):
 				ZingerT = recon['ZingerT'][i]
 				if (recon['ZingerDel'][i] == 0 and multidx == 0):

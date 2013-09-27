@@ -32,9 +32,9 @@ def proj_init (files):
 	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	proj['recon_N_r'] = 2048
-	proj['slice_t_start'] = 500
-	proj['N_t'] = 8
-	proj['recon_N_t'] = 8
+	proj['slice_t_start'] = 415
+	proj['N_t'] = 384
+	proj['recon_N_t'] = 384
 	proj['rotation_center_r'] = 264.75*4
 	proj['proj_start'] = 2000
 	proj['proj_num'] = 2000
@@ -99,7 +99,7 @@ def proj_init (files):
 def recon_init (proj, recon):
 	recon['recon_type'] = 'MBIR'
 	
-	recon['r'] = [32]
+	recon['r'] = [16]
 	recon['c_s'] = [10**-6]
 	recon['c_t'] = [10**-4]
 
@@ -133,8 +133,8 @@ def recon_init (proj, recon):
 	recon['voxel_thresh'] = [5, 5, 5, 5, 10, 10]
         recon['cost_thresh'] = [10, 10, 10, 10, 10, 10]
         recon['delta_xy'] = [32, 16, 8, 4, 2, 1]
-        recon['delta_z'] = [1, 1, 1, 1, 1, 1]
-        recon['initICD'] = [0, 2, 2, 2, 2, 2]
+        recon['delta_z'] = [4, 4, 2, 2, 2, 1]
+        recon['initICD'] = [0, 2, 3, 2, 2, 3]
         recon['sinobin'] = 1 
         recon['writeTiff'] = [1, 1, 1, 1, 1, 1]
         recon['WritePerIter'] = [0, 0, 0, 0, 0, 1]
@@ -161,7 +161,7 @@ def recon_init (proj, recon):
 	recon['N_xy'] = proj['recon_N_r']/recon['delta_xy'][-1]
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	
-	recon['calculate_cost'] = 1
+	recon['calculate_cost'] = 0
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1
 
@@ -192,9 +192,9 @@ def recon_init (proj, recon):
 def files_init (files):
 	files['C_Source_Folder'] = "../Source_Code_4D/"
 	#files['Result_Folder'] = "../XT_Result_Repository/"
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI/XT_Result_Repository/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_Source_MPI/XT_Result_Repository/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI/XT_run/"
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_Source_MPI/XT_run/"
 	#files['Launch_Folder'] = "../XT_run/"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0

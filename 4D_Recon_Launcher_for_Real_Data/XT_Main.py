@@ -11,7 +11,7 @@ from XT_IOMisc import write_tiff_from_object_bin_file
 import argparse
 import time
 import os
-from mpi4py import MPI
+import mpi4py
 
 def main():
 	start_time = time.time()
@@ -30,40 +30,44 @@ def main():
 	if (args.Purdue):
 		recon['num_threads'] = 32
 		files['scratch'] = os.environ['RCAC_SCRATCH']
-		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) + ' -machinefile ' + os.getcwd() + '/nodefile '
+		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) + ' -machinefile nodefile '
 		recon['compile_command'] = 'mpicc '
+		recon['HPC'] = 'Purdue' 
+		recon['rank'] = mpi4py.MPI.COMM_WORLD.rank
 	elif (args.NERSC):
 		recon['num_threads'] = 16
 		files['scratch'] = os.environ['SCRATCH']
 		recon['run_command'] = 'aprun -j 2 -n ' + str(recon['node_num']) + ' -N 2 -S 1 -d ' + str(recon['num_threads'])
 		recon['compile_command'] = 'cc '
+		recon['HPC'] = 'NERSC'
+		recon['rank'] = 0		
 	else:
-		error_by_flag(1, 'HPC system not recognized')	
+		error_by_flag(1, 'HPC system not recognized')
 	
 	proj = proj_init(files)
 	recon = recon_init(proj, recon)
 	files = files_init(files)
-
-	recon['rank'] = MPI.COMM_WORLD.rank	
+	
 	recon['set_up_launch_folder'] = 0	
 	if args.setup_launch_folder:
-		recon['set_up_launch_folder'] = 1	
-	
+		recon['set_up_launch_folder'] = 1
+
 	recon['reconstruct'] = 0
 	if (args.run_reconstruction):
-		recon['reconstruct'] = 1	
+		recon['rank'] = 0
+		recon['reconstruct'] = 1
 
 	if (recon['recon_type'] == 'MBIR'):
 		print 'main: Will do MBIR reconstruction'
 		do_MBIR_reconstruction(proj, recon, files)
-		if (args.run_reconstruction):	
+		if (args.run_reconstruction):
 			write_tiff_from_object_bin_file (proj, recon, files)
 			write_object2HDF (proj, recon, files)
 	elif (recon['recon_type'] == 'FBP'):
 		print 'main: Will do FBP reconstruction'
-		do_FBP_reconstruction(proj, recon, files)	
+		do_FBP_reconstruction(proj, recon, files)
 	else:
-		print 'ERROR: main: Reconstruction type not recognized'		
+		print 'ERROR: main: Reconstruction type not recognized'
 
 	print 'main: Done!'
 	print 'main: Total time taken by program - ' + str((time.time() - start_time)/60.0) + 'mins'

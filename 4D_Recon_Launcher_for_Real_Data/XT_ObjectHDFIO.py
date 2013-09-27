@@ -1,13 +1,13 @@
 import numpy as np
 import h5py
-from mpi4py import MPI
+import mpi4py
 
 
 def initpar_object4mHDF (proj, recon, files, i):
 	rank = recon['rank']
 	path2results = files['Result_Folder'] + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '_zinger_' + str(recon['ZingerT'][i]) + '_' + str(recon['ZingerDel'][i]) + '/'
 	path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '/'
-	file = h5py.File(path2results + 'object.hdf5', 'r', comm=MPI.COMM_WORLD);
+	file = h5py.File(path2results + 'object.hdf5', 'r', comm=mpi4py.MPI.COMM_WORLD);
 	zpernode = proj['recon_N_t']/(recon['delta_z'][0]*recon['node_num'])
 	
 	proj_offset = file['/proj_offset'][:,rank*zpernode:(rank+1)*zpernode].astype(np.float64)
@@ -29,7 +29,7 @@ def writepar_object2HDF (proj, recon, files):
 	Object = np.zeros((zpernode, recon['N_xy'], recon['N_xy']), dtype = np.float64, order = 'C')
         for i in range(len(recon['r'])):
                 path2results = files['Result_Folder'] + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '_zinger_' + str(recon['ZingerT'][i]) + '_' + str(recon['ZingerDel'][i]) + '/'
-                file = h5py.File(path2results + 'object.hdf5', 'w', comm=MPI.COMM_WORLD)
+                file = h5py.File(path2results + 'object.hdf5', 'w', comm=mpi4py.MPI.COMM_WORLD)
 #               dset = file.create_dataset('object', (recon['Rtime_num'][i], recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True, compression='lzf');
                 dset_obj = file.create_dataset('object', (recon['Rtime_num'][i], recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True)
                 dset_off = file.create_dataset('proj_offset', (proj['recon_N_r'], proj['recon_N_t']), dtype=np.float32, chunks=True)

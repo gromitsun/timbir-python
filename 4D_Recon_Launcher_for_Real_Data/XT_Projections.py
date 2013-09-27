@@ -2,7 +2,7 @@
 from XT_IOMisc import error_by_flag
 import numpy as np
 import h5py
-from mpi4py import MPI
+import mpi4py
 
 def decimate_count_data_in_r (data, true_length, reduced_length):
 	ratio = true_length/reduced_length
@@ -41,8 +41,8 @@ def generate_projections (proj, recon, files, path2launch):
 	weight = np.zeros((proj['recon_N_p'], proj['recon_N_r'], proj['recon_N_t']/recon['node_num']), dtype = np.float64, order = 'C')
 #	proj['expected'] = np.zeros((proj['recon_N_p'], proj['recon_N_r']), dtype = np.float64, order = 'C')
 	
-	FILE = h5py.File(proj['Path2Dataset'], 'r', comm=MPI.COMM_WORLD)
-	FILE_wd = h5py.File(proj['Path2WhiteDark'], 'r', comm=MPI.COMM_WORLD)
+	FILE = h5py.File(proj['Path2Dataset'], 'r')
+	FILE_wd = h5py.File(proj['Path2WhiteDark'], 'r')
 	dark_ptr = FILE_wd['/exchange/data_dark']
 	white_ptr = FILE_wd['/exchange/data_white']
 	data_ptr = FILE['/exchange/data']
