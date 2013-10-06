@@ -2,10 +2,10 @@
 # FILENAME:  Main_Sub_File.sub
 
 #PBS -V
-#PBS -q standby
-#PBS -l nodes=64:ppn=16
-#PBS -l walltime=4:00:00
-#PBS -N fullvolres
+#PBS -q bouman
+#PBS -l nodes=2:ppn=16
+#PBS -l walltime=48:00:00
+#PBS -N with_rings
 
 # start top in batch mode, 30 sec interval between reports, in background
 
@@ -21,8 +21,9 @@ export PARALLEL=1
 export OMP_NUM_THREADS=32
 uniq < $PBS_NODEFILE > nodefile
 
-#mpiexec -n 64 -machinefile nodefile python XT_Main.py --setup_launch_folder --node_num 64 --Purdue
-python XT_Main.py --run_reconstruction --node_num 64 --Purdue
+mpiexec -n 2 -machinefile nodefile python XT_Main.py --setup_launch_folder --node_num 2 --Purdue
+python XT_Main.py --run_reconstruction --node_num 2 --Purdue
+python XT_Main.py --node_num 2 --create_objectHDFtiffonly --Purdue
 
 checkjob -v $PBS_JOBID
 

@@ -3,7 +3,6 @@ from os import system
 from XT_IOMisc import create_folder, error_by_flag
 from XT_Projections import generate_projections
 from XT_ObjectHDFIO import initpar_object4mHDF
-import mpi4py
 
 def write_views2file (path2save, views, times):
 	fid = open(path2save + 'view_info.txt', 'w')
@@ -22,8 +21,8 @@ def do_MBIR_reconstruction(proj, recon, files):
 ###############################################################################
 
 	for i in range(len(recon['sigma_s'])):
+		path2launch = launch_folder + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + '/'
 		if (recon['set_up_launch_folder'] == 1):
-			path2launch = launch_folder + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + '/'
 			if (recon['rank'] == 0):
 				print 'Setting up run folder by node with rank ', recon['rank']
 				create_folder(path2launch)
@@ -79,7 +78,6 @@ def do_MBIR_reconstruction(proj, recon, files):
 				initpar_object4mHDF (proj, recon, files, i)
 
 		if (recon['reconstruct'] == 1):	
-			path2launch = launch_folder + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '/'
 			if (recon['HPC'] == 'Purdue'):
 				flag = system('cp nodefile ' + path2launch + '.')
 				error_by_flag(flag, 'ERROR: Cannot copy nodefile to launch folder')
@@ -114,25 +112,25 @@ def do_MBIR_reconstruction(proj, recon, files):
 				if (recon['reconstruct'] == 0):
 					break
 				
-			path2results = result_folder + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '_zinger_' + str(recon['ZingerT'][i]) + '_' + str(recon['ZingerDel'][i]) + '/'
-			create_folder(path2results)	
+		#path2results = result_folder + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '_zinger_' + str(recon['ZingerT'][i]) + '_' + str(recon['ZingerDel'][i]) + '/'
+		#create_folder(path2results)	
 	
 			#flag = system('cp ' + path2launch + 'object_*tif ' + path2results + '.')
 			#error_by_flag(flag, 'ERROR: Could not move object_*.tif files')
 					
-			flag = system('cp ' + path2launch + 'object*.bin ' + path2results + '.')
-			error_by_flag(flag, 'ERROR: Could not move object.bin files')
+#		flag = system('cp ' + path2launch + 'object*.bin ' + path2results + '.')
+#		error_by_flag(flag, 'ERROR: Could not move object.bin files')
 					
-			flag = system('cp ' + path2launch + 'view_info.txt ' + path2results + '.')
-			error_by_flag(flag, 'ERROR: Could not move view_info.txt')
+		#flag = system('cp ' + path2launch + 'view_info.txt ' + path2results + '.')
+		#error_by_flag(flag, 'ERROR: Could not move view_info.txt')
 				
-			flag = system('cp ' + path2launch + 'DEBUG*.log ' + path2results + '.')
-			error_by_flag(flag, 'ERROR: Could not move debug.log')
+		#flag = system('cp ' + path2launch + 'DEBUG*.log ' + path2results + '.')
+		#error_by_flag(flag, 'ERROR: Could not move debug.log')
 			
-			if (any(recon['updateProjOffset'] > 1)): 
-				flag = system('cp ' + path2launch + 'proj_offset* ' + path2results + '.')
-				error_by_flag(flag, 'ERROR: Could not move proj_offset*')
+#		if (any(recon['updateProjOffset'] > 1)): 
+#			flag = system('cp ' + path2launch + 'proj_offset* ' + path2results + '.')
+#			error_by_flag(flag, 'ERROR: Could not move proj_offset*')
 
-			if (recon['calculate_cost'] == 1):
-				flag = system('cp ' + path2launch + 'cost* ' + path2results + '.')
-				error_by_flag(flag, 'ERROR: Could not move cost.bin')
+#		if (recon['calculate_cost'] == 1):
+#			flag = system('cp ' + path2launch + 'cost* ' + path2results + '.')
+#			error_by_flag(flag, 'ERROR: Could not move cost.bin')

@@ -49,7 +49,7 @@ def convert_HU2uint8 (Object, maxval, minval):
 	return Object.astype(np.uint8)
 
 def write_array2tif (filename, array):
-	print 'Average value of image is ' + str(np.mean(array));
+#	print 'Average value of image is ' + str(np.mean(array));
 	img = Image.fromarray(array)
 	img.save(filename)
 
@@ -64,7 +64,7 @@ def read_slice_of_tiff_file (filename, slice_num):
 def write_tiff_from_object_bin_file (proj, recon, files):
 	Object = np.zeros((recon['N_z'], recon['N_xy'], recon['N_xy']), dtype = np.float64, order = 'C')
 	for i in range(len(recon['r'])):
-                path2results = files['Result_Folder'] + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '_zinger_' + str(recon['ZingerT'][i]) + '_' + str(recon['ZingerDel'][i]) + '/'
+                path2results = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '/'
 		for j in range(int(recon['Rtime_num'][i])):
 			for k in range(recon['node_num']):
 				zpernode = recon['N_z']/recon['node_num']	
@@ -78,7 +78,7 @@ def write_tiff_from_object_bin_file (proj, recon, files):
 def write_object2HDF (proj, recon, files):
 	Object = np.zeros((recon['N_z'], recon['N_xy'], recon['N_xy']), dtype = np.float64, order = 'C')
         for i in range(len(recon['r'])):
-                path2results = files['Result_Folder'] + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '_zinger_' + str(recon['ZingerT'][i]) + '_' + str(recon['ZingerDel'][i]) + '/'
+                path2results = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '/'
                 file = h5py.File(path2results + 'object.hdf5', 'w');
 #               dset = file.create_dataset('object', (recon['Rtime_num'][i], recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True, compression='lzf');
                 dset = file.create_dataset('object', (recon['Rtime_num'][i], recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True);
