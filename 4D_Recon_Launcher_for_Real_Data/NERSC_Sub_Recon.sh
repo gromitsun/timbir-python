@@ -1,14 +1,14 @@
 #!/bin/tcsh
 
-#PBS -q debug
-#PBS -l mppwidth=768
+#PBS -q regular
+#PBS -l mppwidth=24
 #PBS -l walltime=24:00:00
 #PBS -N mpi_test
 #PBS -e my_job.$PBS_JOBID.err
 #PBS -o my_job.$PBS_JOBID.out
 #PBS -V
 
-set mpi_tasks=32
+set mpi_tasks=2
 cd $PBS_O_WORKDIR
 setenv OMP_NUM_THREADS 16
 setenv CRAY_ROOTFS DSL

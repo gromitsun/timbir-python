@@ -12,7 +12,7 @@ from XT_IOMisc import write_tiff_from_object_bin_file
 import argparse
 import time
 import os
-from mpi4py import MPI
+#from mpi4py import MPI
 
 def main():
 	start_time = time.time()
@@ -61,11 +61,6 @@ def main():
 	if (recon['recon_type'] == 'MBIR'):
 		print 'main: Will do MBIR reconstruction'
 		do_MBIR_reconstruction(proj, recon, files)
-	#	if (args.run_reconstruction):
-	#		write_tiff_from_object_bin_file (proj, recon, files)
-	#		recon['size'] = MPI.COMM_WORLD.size
-	#		writepar_object2HDF (proj, recon, files)
-	#		writepar_tiff_from_object_bin_file (proj, recon, files)
 	elif (recon['recon_type'] == 'FBP'):
 		print 'main: Will do FBP reconstruction'
 		do_FBP_reconstruction(proj, recon, files)
@@ -73,11 +68,13 @@ def main():
 		print 'ERROR: main: Reconstruction type not recognized'
 
 	if (args.create_objectHDFtiffonly):
-		write_tiff_from_object_bin_file (proj, recon, files)
-		recon['size'] = MPI.COMM_WORLD.size
-		writepar_object2HDF (proj, recon, files)
-		writepar_tiff_from_object_bin_file (proj, recon, files)
-		
+		if (recon['HPC'] == 'Purdue'):
+			recon['size'] = MPI.COMM_WORLD.size
+			writepar_object2HDF (proj, recon, files)
+			writepar_tiff_from_object_bin_file (proj, recon, files)
+		else:
+			write_tiff_from_object_bin_file (proj, recon, files)
+			write_object2HDF (proj, recon, files)
 	
 	print 'main: Done!'
 	print 'main: Total time taken by program - ' + str((time.time() - start_time)/60.0) + 'mins'
