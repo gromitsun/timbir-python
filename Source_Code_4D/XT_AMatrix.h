@@ -1,3 +1,6 @@
+/*Function to compute the system matrix on the fly for 
+  MBIR Recon*/
+
 #ifndef XT_MATRIX_H
 #define XT_MATRIX_H
 
