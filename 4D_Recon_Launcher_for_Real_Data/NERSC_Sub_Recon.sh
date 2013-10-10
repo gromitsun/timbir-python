@@ -1,7 +1,7 @@
 #!/bin/tcsh
 
 #PBS -q regular
-#PBS -l mppwidth=24
+#PBS -l mppwidth=48
 #PBS -l walltime=24:00:00
 #PBS -N mpi_test
 #PBS -e my_job.$PBS_JOBID.err
@@ -10,7 +10,7 @@
 
 set mpi_tasks=2
 cd $PBS_O_WORKDIR
-setenv OMP_NUM_THREADS 16
+setenv OMP_NUM_THREADS 32
 setenv CRAY_ROOTFS DSL
 
 module load PrgEnv-intel
