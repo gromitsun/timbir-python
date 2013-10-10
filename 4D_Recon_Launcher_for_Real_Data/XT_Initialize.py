@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-import numpy as np
+import numpy as np 
 from XT_Interlaced_Angles import gen_interlaced_views_0_to_Inf,clip_list_of_views
 from math import ceil
 from XT_IOMisc import error_by_flag
@@ -31,35 +31,35 @@ def proj_init (files):
 	proj['Path2WhiteDark'] = files['scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
 	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
-	proj['recon_N_r'] = 512
-	proj['slice_t_start'] = 500
-	proj['N_t'] = 8
-	proj['recon_N_t'] = 8
-	proj['rotation_center_r'] = 264.75
-	proj['proj_start'] = 0
-	proj['proj_num'] = 2000
-	proj['N_p'] = 2000*4
-	proj['K'] = 16
-	proj['N_theta'] = 2000
+	proj['recon_N_r'] = 512 #Total number of detector elements to be used (crops to nearest power of 2 and then down samples to specified number 
+	proj['slice_t_start'] = 500 #parallel to z
+	proj['N_t'] = 8 #Number of slices 
+	proj['recon_N_t'] = 8 #Downsampled to N_t
+	proj['rotation_center_r'] = 264.75 #detector pixels from left; To Do  
+	proj['proj_start'] = 0 #view index start
+	proj['proj_num'] = 2000 #num of views to use 
+	proj['N_p'] = 2000*4 #total number of supposed to be taken. For 3D take equal to proj_num
+	proj['K'] = 16 #Set to 1
+	proj['N_theta'] = 2000 #Equal to proj num
 
-	proj['N_r'] = 2080
-	proj['length_r'] = 0.65*proj['N_r']	
+	proj['N_r'] = 2080 #Total number of detector pixels
+	proj['length_r'] = 0.65*proj['N_r'] #0.65 is pixel size in micro meter	
 	proj['length_t'] = 0.65*proj['N_t']	
-	proj['L'] = proj['N_theta']/proj['K']
+	proj['L'] = proj['N_theta']/proj['K'] 
 	
-	min_time_btw_views = 0.014039
-	rotation_speed = 100
+	min_time_btw_views = 0.014039 #default to 0; in units of sec
+	rotation_speed = 100 #rotation set to any number for 3d; degrees per sec
 
-	fps_of_camera = proj['L']/(180.0/rotation_speed)
-	angles, times = gen_interlaced_views_0_to_Inf(proj['K'], proj['N_theta'], proj['N_p'])
+	fps_of_camera = proj['L']/(180.0/rotation_speed) 
+	angles, times = gen_interlaced_views_0_to_Inf(proj['K'], proj['N_theta'], proj['N_p']) #Generate the list
 	angles_clip, times_clip, angles_del, times_del = clip_list_of_views (angles, times, min_time_btw_views, rotation_speed)
-	print 'clip_list_of_views: Number of views deleted are ', angles_del.size, '. Deleted views are ' + str(angles_del)
+	print 'clip_list_of_views: Number of views deleted are ', angles_del.size, '. Deleted views are ' + str(angles_del) 
 	print 'clip_list_of_views: Deleted views\' times are ' + str(times_del)
 
 	proj['angles'] = angles_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
 	proj['times'] = times_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
 	
-	proj['recon_N_p'] = len(proj['angles']) 	
+	proj['recon_N_p'] = len(proj['angles']) #total number of angles to be used	
 	print 'proj_init: Total number of projections used for reconstruction is ' + str(proj['recon_N_p'])
 
 	return proj
@@ -99,23 +99,23 @@ def proj_init (files):
 def recon_init (proj, recon):
 	recon['recon_type'] = 'MBIR'
 	
-	recon['r'] = [1]
-	recon['c_s'] = [10**-6]
+	recon['r'] = [1] #recon per frame 
+	recon['c_s'] = [10**-6] #10^-6
 	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [2*(10**5)]
-	recon['sigma_t'] = [4*(10**2)]
+	recon['sigma_s'] = [2*(10**5)] #need to automatically set. To Do
+	recon['sigma_t'] = [4*(10**2)] #Ignored for 3d recon
 	
-	recon['ZingerT'] = [30]
+	recon['ZingerT'] = [30] #Need to set automatically
 	recon['ZingerDel'] = [0.1]
 
 	recon['init_object4mHDF'] = 0
 	
-	recon['maxHU'] = 60000
+	recon['maxHU'] = 60000 
 	recon['minHU'] = 10000
 	
-	recon['radius_obj'] = 0.65*proj['N_r']/2
-	recon['BH_Quad_Coef'] = 0.5;
+	recon['radius_obj'] = 0.65*proj['N_r']/2 #Used or not used?
+	recon['BH_Quad_Coef'] = 0.5;#need to make zero
 	
 	#recon['voxel_thresh'] = [10]
         #recon['cost_thresh'] = [10]
@@ -130,41 +130,40 @@ def recon_init (proj, recon):
         #recon['only_Edge_Updates'] = [0]
         #recon['initMagUpMap'] = [1]
 	
-	recon['voxel_thresh'] = [5, 10, 10, 10]
-        recon['cost_thresh'] = [10, 10, 10, 10]
-        recon['delta_xy'] = [8, 4, 2, 1]
-        recon['delta_z'] = [1, 1, 1, 1]
-        recon['initICD'] = [0, 2, 2, 2]
-        recon['sinobin'] = 1 
-        recon['writeTiff'] = [1, 1, 1, 1]
-        recon['WritePerIter'] = [0, 0, 0, 1]
-        recon['updateProjOffset'] = [0, 0, 0, 0]
-        recon['iterations'] = [200, 100, 50, 20]
-        recon['only_Edge_Updates'] = [0, 0, 0, 0]
-        recon['initMagUpMap'] = [0, 1, 1, 1]
+	recon['voxel_thresh'] = [5, 10, 10, 10] #4 stage multi-resolution, with stopping in HU
+        recon['cost_thresh'] = [10, 10, 10, 10] #percentage change presnt-prev / present - initial
+        recon['delta_xy'] = [8, 4, 2, 1] #Multi-res multiple of det pixel size
+        recon['delta_z'] = [1, 1, 1, 1] #Mutli-res multi-resolution 
+        recon['initICD'] = [0, 2, 2, 2] #upsampling factor; 0 - no umpsample , 2 - xy upsampling, 3 - xy,z upsampling
+        recon['sinobin'] = 1 #1-multi-res or 3-mult-grid  
+        recon['writeTiff'] = [1, 1, 1, 1] #1 writes upon termination
+        recon['WritePerIter'] = [0, 0, 0, 1] #Writes after each iteration
+        recon['updateProjOffset'] = [0, 0, 0, 0] #update gain fluction 0 - no estimation, 1 - initialize and not estimated, 2 - not read but estimated , 3 initialized and estimated
+        recon['iterations'] = [200, 100, 50, 20] #max iter
+        recon['only_Edge_Updates'] = [0, 0, 0, 0] #DO NOT USE
+        recon['initMagUpMap'] = [0, 1, 1, 1] #Update Mag Map 
 	
-	recon['init_with_FBP'] = 0
+	recon['init_with_FBP'] = 0 #DO NOT USE
 	#recon['num_threads'] = 1
-	recon['positivity_constraint'] = 0;
+	recon['positivity_constraint'] = 0;#0 means no positivity ; 1 positivty used
 	
 	recon['p'] = 1.2
 	recon['alpha'] = 1.5
-	recon['time_reg'] = 1
-	recon['Rtime0'] = proj['times'][0]
+	recon['time_reg'] = 1 #0 disable, 1 enable
 
+	recon['Rtime0'] = proj['times'][0] #always 1 for 3-D recon;
 	recon['Rtime_num'] = [ceil(recon['r'][i]*float(proj['recon_N_p'])/proj['N_theta']) for i in range(len(recon['r']))]
 #	recon['Rtime_num'] = proj['r']*proj['N_p']/proj['N_theta']
 	recon['Rtime_delta'] = [(proj['times'][-1]-proj['times'][0])/recon['Rtime_num'][i] for i in range(len(recon['r']))]
 #	recon['Rtime_delta'] = proj['N_p']*proj['delta_time']/recon['Rtime_num']
 
 	recon['multi_res_stages'] = len(recon['delta_xy'])
-	recon['N_xy'] = proj['recon_N_r']/recon['delta_xy'][-1]
+	recon['N_xy'] = proj['recon_N_r']/recon['delta_xy'][-1] #-1 means last elemen in the list
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	
-	recon['calculate_cost'] = 1
+	recon['calculate_cost'] = 1 #0 for no 1 for yes
 	recon['set_up_launch_folder'] = 0
-	recon['NHICD'] = 1
-
+	recon['NHICD'] = 1 #Enable or disable NHICD algorithm
 
 	recon['FBP_N_xy'] = proj['recon_N_r']
 	if (recon['init_with_FBP'] == 1):
@@ -192,11 +191,11 @@ def recon_init (proj, recon):
 def files_init (files):
 	files['C_Source_Folder'] = "../Source_Code_4D/"
 	#files['Result_Folder'] = "../XT_Result_Repository/"
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_16/XT_Result_Repository/"
-	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_16/XT_run/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_16/XT_Result_Repository/" #Unncessary?
+	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin" #Not used if 0 is mult-res gain parameter estimation
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_16/XT_run/" #input by programmers
 	#files['Launch_Folder'] = "../XT_run/"
-	files['copy_executables'] = 0
-	files['copy_projections'] = 0
+	files['copy_executables'] = 0 #0 - dont exec, copy code + compile; TO DO : Test if we can only copy this 
+	files['copy_projections'] = 0 #0 always for 3D
 
 	return files

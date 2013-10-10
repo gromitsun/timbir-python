@@ -1,4 +1,6 @@
-#!/bin/tcsh
+#!/bin/tcsh 
+
+#Sets up Launch folder : Creates data; binaries; splits into mpi tasks, copies into launch folder
 
 #PBS -q regular
 #PBS -l mppwidth=1
@@ -8,7 +10,7 @@
 #PBS -o my_job.$PBS_JOBID.out
 #PBS -V
 
-set mpi_tasks=2
+set mpi_tasks=2 #Total tasks for C-Code 
 cd $PBS_O_WORKDIR
 setenv CRAY_ROOTFS DSL
 
