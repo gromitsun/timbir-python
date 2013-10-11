@@ -27,12 +27,12 @@ from XT_IOMisc import error_by_flag
 def proj_init (files):
 	proj = {}
 
-	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
-	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
+#	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
+#	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
 	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
-#	proj['Path2Dataset'] = files['data_scratch'] + "/Data/k-32-08ms_1.hdf"
-#	proj['Path2WhiteDark'] = files['data_scratch'] + "/Data/k-32-08ms_1.hdf"
+	proj['Path2Dataset'] = files['data_scratch'] + "/Data/k-32-08ms_1.hdf"
+	proj['Path2WhiteDark'] = files['data_scratch'] + "/Data/k-32-08ms_1.hdf"
 
 
 	proj['recon_N_r'] = 512 #Total number of detector elements to be used (crops to nearest power of 2 and then down samples to specified number 
@@ -195,13 +195,13 @@ def recon_init (proj, recon):
 def files_init (files):
 	files['C_Source_Folder'] = "../Source_Code_4D/"
 	#files['Result_Folder'] = "../XT_Result_Repository/"
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/LBNL_Recons/XT_Result_Repository/" #Unncessary?
-#	files['Result_Folder'] = files['scratch'] + "/Results/"
+#	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/LBNL_Recons/XT_Result_Repository/" #Unncessary?
+	files['Result_Folder'] = files['scratch'] + "/Results/"
 
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin" #Not used if 0 is mult-res gain parameter estimation
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/LBNL_Recons/XT_run/" #input by programmers
+#	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/LBNL_Recons/XT_run/" #input by programmers
 	#files['Launch_Folder'] = "../XT_run/"
-#        files['Launch_Folder'] = files['scratch'] + "/LaunchFolder/"
+        files['Launch_Folder'] = files['scratch'] + "/LaunchFolder/"
 	files['copy_executables'] = 0 #0 - dont exec, copy code + compile; TO DO : Test if we can only copy this 
 	files['copy_projections'] = 0 #0 always for 3D
 
