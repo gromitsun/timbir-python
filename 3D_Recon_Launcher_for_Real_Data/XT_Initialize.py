@@ -31,9 +31,10 @@ def proj_init (files):
 #	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
 	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
-	proj['Path2Dataset'] = files['data_scratch'] + "/Data/k-32-08ms_1.hdf"
-	proj['Path2WhiteDark'] = files['data_scratch'] + "/Data/k-32-08ms_1.hdf"
+	proj['Path2Dataset'] = files['data_scratch'] + "/Data/k-16-4ms-last_31.hdf"
+	proj['Path2WhiteDark'] = files['data_scratch'] + "/Data/k-16-4ms-last_31.hdf"
 
+        print proj['Path2Dataset']
 
 	proj['recon_N_r'] = 512 #Total number of detector elements to be used (crops to nearest power of 2 and then down samples to specified number 
 	proj['slice_t_start'] = 500 #parallel to z
