@@ -33,9 +33,9 @@ def proj_init (files):
 #	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
 
 	proj['recon_N_r'] = 2048
-	proj['slice_t_start'] = 9
-	proj['N_t'] = 992 
-	proj['recon_N_t'] = 992
+	proj['slice_t_start'] = 0
+	proj['N_t'] = 1000
+	proj['recon_N_t'] = 1000
 	proj['rotation_center_r'] = 264.75*4
 	proj['proj_start'] = 998
 	proj['proj_num'] = 7969 - 998
@@ -139,8 +139,8 @@ def recon_init (proj, recon):
 	recon['voxel_thresh'] = [5, 5, 5, 10, 10, 10]
         recon['cost_thresh'] = [10, 10, 10, 10, 10, 10]
         recon['delta_xy'] = [32, 16, 8, 4, 2, 1]
-        recon['delta_z'] = [1, 1, 1, 1, 1, 1]
-        recon['initICD'] = [0, 2, 2, 2, 2, 2]
+        recon['delta_z'] = [2, 2, 2, 2, 2, 1]
+        recon['initICD'] = [0, 2, 2, 2, 2, 3]
         recon['sinobin'] = 1 
         recon['writeTiff'] = [1, 1, 1, 1, 1, 1]
         recon['WritePerIter'] = [0, 0, 0, 0, 1, 1]
