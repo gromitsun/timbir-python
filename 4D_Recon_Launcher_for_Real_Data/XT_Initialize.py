@@ -27,16 +27,13 @@ from XT_IOMisc import error_by_flag
 def proj_init (files):
 	proj = {}
 
-#	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
-#	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
-	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
-	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
-
-	proj['Path2Dataset'] = files['data_scratch'] + "/Data/k-32-08ms_1.hdf"
-	proj['Path2WhiteDark'] = files['data_scratch'] + "/Data/k-32-08ms_1.hdf"
-
-	proj['recon_N_r'] = 512
-	proj['slice_t_start'] = 500
+	#proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
+	#proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
+	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
+	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
+	
+	proj['recon_N_r'] = 2048
+	proj['slice_t_start'] = 0
 	proj['N_t'] = 8*4
 	proj['recon_N_t'] = 8
 	proj['rotation_center_r'] = 265.0 + 1.0/4
@@ -110,7 +107,7 @@ def recon_init (proj, recon):
 	recon['sigma_s'] = [3*(10**5)]
 	recon['sigma_t'] = [4*(10**2)]
 	
-	recon['ZingerT'] = [50]
+	recon['ZingerT'] = [40]
 	recon['ZingerDel'] = [0.1]
 
 	recon['init_object4mHDF'] = 0
@@ -196,12 +193,10 @@ def recon_init (proj, recon):
 def files_init (files):
 	files['C_Source_Folder'] = "../Source_Code_4D/"
 	#files['Result_Folder'] = "../XT_Result_Repository/"
-	#files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_32/XT_Result_Repository/"
-	files['Result_Folder'] = files['scratch'] + "/Results/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_32/XT_Result_Repository/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
-	#files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_32/XT_run/"
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_32/XT_run/"
 	#files['Launch_Folder'] = "../XT_run/"
-        files['Launch_Folder'] = files['scratch'] + "/LaunchFolder/"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 
