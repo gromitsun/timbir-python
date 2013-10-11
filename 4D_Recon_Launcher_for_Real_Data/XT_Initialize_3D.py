@@ -33,9 +33,9 @@ def proj_init (files):
 	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	proj['recon_N_r'] = 512 #Total number of detector elements to be used (crops to nearest power of 2 and then down samples to specified number 
 	proj['slice_t_start'] = 500 #parallel to z
-	proj['N_t'] = 8 #Number of slices 
+	proj['N_t'] = 8*4 #Number of slices 
 	proj['recon_N_t'] = 8 #Downsampled to N_t
-	proj['rotation_center_r'] = 264.75 #detector pixels from left; To Do  
+	proj['rotation_center_r'] = 265.0 + 1.0/4 #detector pixels from left; To Do  
 	proj['proj_start'] = 0 #view index start
 	proj['proj_num'] = 2000 #num of views to use 
 	proj['N_p'] = 2000*4 #total number of supposed to be taken. For 3D take equal to proj_num
@@ -138,7 +138,7 @@ def recon_init (proj, recon):
         recon['sinobin'] = 1 #1-multi-res or 3-mult-grid  
         recon['writeTiff'] = [1, 1, 1, 1] #1 writes upon termination
         recon['WritePerIter'] = [0, 0, 0, 1] #Writes after each iteration
-        recon['updateProjOffset'] = [0, 0, 0, 0] #update gain fluction 0 - no estimation, 1 - initialize and not estimated, 2 - not read but estimated , 3 initialized and estimated
+        recon['updateProjOffset'] = [0, 2, 3, 3] #update gain fluction 0 - no estimation, 1 - initialize and not estimated, 2 - not read but estimated , 3 initialized and estimated
         recon['iterations'] = [200, 100, 50, 20] #max iter
         recon['only_Edge_Updates'] = [0, 0, 0, 0] #DO NOT USE
         recon['initMagUpMap'] = [0, 1, 1, 1] #Update Mag Map 
