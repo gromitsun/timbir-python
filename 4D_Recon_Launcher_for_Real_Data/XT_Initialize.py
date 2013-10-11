@@ -27,10 +27,14 @@ from XT_IOMisc import error_by_flag
 def proj_init (files):
 	proj = {}
 
-	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
-	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
+#	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
+#	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
 	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
+
+	proj['Path2Dataset'] = files['data_scratch'] + "/Data/k-32-08ms_1.hdf"
+	proj['Path2WhiteDark'] = files['data_scratch'] + "/Data/k-32-08ms_1.hdf"
+
 	proj['recon_N_r'] = 512
 	proj['slice_t_start'] = 500
 	proj['N_t'] = 8*4
@@ -192,10 +196,12 @@ def recon_init (proj, recon):
 def files_init (files):
 	files['C_Source_Folder'] = "../Source_Code_4D/"
 	#files['Result_Folder'] = "../XT_Result_Repository/"
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_32/XT_Result_Repository/"
+	#files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_32/XT_Result_Repository/"
+	files['Result_Folder'] = files['scratch'] + "/Results/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_32/XT_run/"
+	#files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_32/XT_run/"
 	#files['Launch_Folder'] = "../XT_run/"
+        files['Launch_Folder'] = files['scratch'] + "/LaunchFolder/"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 
