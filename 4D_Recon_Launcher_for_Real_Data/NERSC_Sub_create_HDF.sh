@@ -10,7 +10,7 @@
 
 set mpi_tasks=2
 cd $PBS_O_WORKDIR
-setenv OMP_NUM_THREADS 16
+setenv OMP_NUM_THREADS 32
 setenv CRAY_ROOTFS DSL
 
 module load PrgEnv-intel
