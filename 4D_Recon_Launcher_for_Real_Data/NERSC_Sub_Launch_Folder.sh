@@ -4,7 +4,7 @@
 
 #PBS -q regular
 #PBS -l mppwidth=1
-#PBS -l walltime=24:00:00
+#PBS -l walltime=00:15:00
 #PBS -N fullvolres
 #PBS -e my_job.$PBS_JOBID.err
 #PBS -o my_job.$PBS_JOBID.out
