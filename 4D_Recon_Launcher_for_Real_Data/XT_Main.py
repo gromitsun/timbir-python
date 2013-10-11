@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-from XT_Initialize_3D import proj_init, recon_init, files_init 
+from XT_Initialize import proj_init, recon_init, files_init 
 #from XT_Projections import generate_projections
 from XT_MBIR_Reconstruction import do_MBIR_reconstruction
 #from XT_FBP_Reconstruction import do_FBP_reconstruction
