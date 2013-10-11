@@ -139,8 +139,8 @@ def recon_init (proj, recon):
 	recon['voxel_thresh'] = [5, 5, 5, 10, 10, 10]
         recon['cost_thresh'] = [10, 10, 10, 10, 10, 10]
         recon['delta_xy'] = [32, 16, 8, 4, 2, 1]
-        recon['delta_z'] = [2, 2, 2, 2, 2, 1]
-        recon['initICD'] = [0, 2, 2, 2, 2, 3]
+        recon['delta_z'] = [1, 1, 1, 1, 1, 1]
+        recon['initICD'] = [0, 2, 2, 2, 2, 2]
         recon['sinobin'] = 1 
         recon['writeTiff'] = [1, 1, 1, 1, 1, 1]
         recon['WritePerIter'] = [0, 0, 0, 0, 1, 1]
