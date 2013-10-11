@@ -307,7 +307,7 @@ uint8_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin,
   z_max = ScannedObjectPtr->N_z + 1;
   if (TomoInputsPtr->node_rank == 0)
 	z_min = 1;
-  else if (TomoInputsPtr->node_rank == TomoInputsPtr->node_num - 1)
+  if (TomoInputsPtr->node_rank == TomoInputsPtr->node_num - 1)
 	z_max = ScannedObjectPtr->N_z;
 
     Real_t THETASelTemp, Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM]; 
