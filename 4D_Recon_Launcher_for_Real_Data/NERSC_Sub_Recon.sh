@@ -24,4 +24,4 @@ module load mpi4py
 # (note: use "-cc none" instead for other number of threads)
 # aprun -j 2 -n 128 -N 2 -S 1 -d 24 -cc numa_node ./my_executable      
 # for Cray or GNU compiled programs
-python XT_Main.py --run_reconstruction --node_num $mpi_tasks --NERSC
+python XT_Main_3D.py --run_reconstruction --node_num $mpi_tasks --NERSC
