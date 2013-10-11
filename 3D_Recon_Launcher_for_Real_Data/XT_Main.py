@@ -72,11 +72,11 @@ def main():
 	if (args.create_objectHDFtiffonly):
 		if (recon['HPC'] == 'Purdue'):
 			recon['size'] = MPI.COMM_WORLD.size
-			writepar_object2HDF (proj, recon, files)
+#			writepar_object2HDF (proj, recon, files)
 			writepar_tiff_from_object_bin_file (proj, recon, files)
 		else:
-		#	write_tiff_from_object_bin_file (proj, recon, files)
-			write_object2HDF (proj, recon, files)
+			write_tiff_from_object_bin_file (proj, recon, files)
+#			write_object2HDF (proj, recon, files)
 	
 	print 'main: Done!'
 	print 'main: Total time taken by program - ' + str((time.time() - start_time)/60.0) + 'mins'

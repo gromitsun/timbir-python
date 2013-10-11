@@ -34,11 +34,6 @@ def proj_init (files):
 	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 
-	proj['Path2Dataset'] = files['data_scratch'] + "/Data/k-16-4ms-last_31.hdf"
-	proj['Path2WhiteDark'] = files['data_scratch'] + "/Data/k-16-4ms-last_31.hdf"
-
-        print proj['Path2Dataset']
-
 	proj['recon_N_r'] = 512 #Total number of detector elements to be used (crops to nearest power of 2 and then down samples to specified number 
 	proj['slice_t_start'] = 1000 #parallel to z
 	proj['N_t'] = 8*4 #Number of slices 
@@ -107,20 +102,20 @@ def proj_init (files):
 def recon_init (proj, recon):
 	recon['recon_type'] = 'MBIR'
 	
-	recon['r'] = [1, 1, 1] #recon per frame 
-	recon['c_s'] = [10**-6, 10**-6, 10**-6] #10^-6
-	recon['c_t'] = [10**-4, 10**-4, 10**-4]
+	recon['r'] = [1] #recon per frame 
+	recon['c_s'] = [10**-6] #10^-6
+	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [(10**7), 10**6, 10**4] #need to automatically set. To Do
-	recon['sigma_t'] = [4*(10**2), 10**2, 10**2] #Ignored for 3d recon
+	recon['sigma_s'] = [(10**5)] #need to automatically set. To Do
+	recon['sigma_t'] = [(10**2)] #Ignored for 3d recon
 	
-	recon['ZingerT'] = [100000, 100000, 100000] #Need to set automatically
-	recon['ZingerDel'] = [0.1, 0.1, 0.1]
+	recon['ZingerT'] = [100000] #Need to set automatically
+	recon['ZingerDel'] = [0.1]
 
 	recon['init_object4mHDF'] = 0
 	
-	recon['maxHU'] = 60000 
-	recon['minHU'] = 10000
+	recon['maxHU'] = 20000 
+	recon['minHU'] = 0
 	
 	recon['radius_obj'] = 0.65*proj['N_r']/2 #Used or not used?
 	recon['BH_Quad_Coef'] = 0;#need to make zero
@@ -138,18 +133,18 @@ def recon_init (proj, recon):
         #recon['only_Edge_Updates'] = [0]
         #recon['initMagUpMap'] = [1]
 	
-	recon['voxel_thresh'] = [5, 10, 10, 10] #4 stage multi-resolution, with stopping in HU
-        recon['cost_thresh'] = [10, 10, 10, 10] #percentage change presnt-prev / present - initial
-        recon['delta_xy'] = [8, 4, 2, 1] #Multi-res multiple of det pixel size
-        recon['delta_z'] = [1, 1, 1, 1] #Mutli-res multi-resolution 
-        recon['initICD'] = [0, 2, 2, 2] #upsampling factor; 0 - no umpsample , 2 - xy upsampling, 3 - xy,z upsampling
+	recon['voxel_thresh'] = [5, 5, 10, 10, 10, 10] #4 stage multi-resolution, with stopping in HU
+        recon['cost_thresh'] = [10, 10, 10, 10, 10, 10] #percentage change presnt-prev / present - initial
+        recon['delta_xy'] = [32, 16, 8, 4, 2, 1] #Multi-res multiple of det pixel size
+        recon['delta_z'] = [1, 1, 1, 1, 1, 1] #Mutli-res multi-resolution 
+        recon['initICD'] = [0, 2, 2, 2, 2, 2] #upsampling factor; 0 - no umpsample , 2 - xy upsampling, 3 - xy,z upsampling
         recon['sinobin'] = 1 #1-multi-res or 3-mult-grid  
-        recon['writeTiff'] = [1, 1, 1, 1] #1 writes upon termination
-        recon['WritePerIter'] = [0, 0, 0, 1] #Writes after each iteration
-        recon['updateProjOffset'] = [0, 2, 3, 3] #update gain fluction 0 - no estimation, 1 - initialize and not estimated, 2 - not read but estimated , 3 initialized and estimated
-        recon['iterations'] = [200, 100, 50, 20] #max iter
-        recon['only_Edge_Updates'] = [0, 0, 0, 0] #DO NOT USE
-        recon['initMagUpMap'] = [0, 1, 1, 1] #Update Mag Map 
+        recon['writeTiff'] = [1, 1, 1, 1, 1, 1] #1 writes upon termination
+        recon['WritePerIter'] = [0, 0, 0, 0, 0, 1] #Writes after each iteration
+        recon['updateProjOffset'] = [0, 2, 3, 3, 3, 3] #update gain fluction 0 - no estimation, 1 - initialize and not estimated, 2 - not read but estimated , 3 initialized and estimated
+        recon['iterations'] = [200, 100, 50, 30, 20, 10] #max iter
+        recon['only_Edge_Updates'] = [0, 0, 0, 0, 0, 0] #DO NOT USE
+        recon['initMagUpMap'] = [0, 1, 1, 1, 1, 1] #Update Mag Map 
 	
 	recon['init_with_FBP'] = 0 #DO NOT USE
 	#recon['num_threads'] = 1
@@ -197,12 +192,12 @@ def recon_init (proj, recon):
 	copy_projections - If '1', copies projection.bin and weight.bin from source code folder. If '0' reads the projection data from HDF files, as is described in XT_Projections.py"""
 
 def files_init (files):
-	files['C_Source_Folder'] = "../Source_Code_4D/"
+	files['C_Source_Folder'] = "../Source_Code_3D/"
 	#files['Result_Folder'] = "../XT_Result_Repository/"
 	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/LBNL_Recons/XT_Result_Repository/" #Unncessary?
 #	files['Result_Folder'] = files['scratch'] + "/Results/"
 
-	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin" #Not used if 0 is mult-res gain parameter estimation
+	files['Proj_Offset_File'] = "../Source_Code_3D/proj_offset.bin" #Not used if 0 is mult-res gain parameter estimation
 	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/LBNL_Recons/XT_run/" #input by programmers
 	#files['Launch_Folder'] = "../XT_run/"
 #        files['Launch_Folder'] = files['scratch'] + "/LaunchFolder/"

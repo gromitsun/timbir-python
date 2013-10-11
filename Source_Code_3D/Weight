@@ -1,0 +1,189 @@
+XT_Engine.c:	multifree(TomoInputsPtr->Weight,3);	
+XT_Engine.c:	if(TomoInputsPtr->sinobin == 1)
+XT_Engine.c:	else if(TomoInputsPtr->sinobin == 2)
+XT_Engine.c:	if (TomoInputsPtr->Write2Tiff == 1)	
+XT_Engine.c:		WriteMultiDimArray2Tiff (proj_file, dim, 0, 2, 1, 3, &(SinogramPtr->Projection[0][0][0]), 0, TomoInputsPtr->debug_file_ptr);
+XT_Engine.c:/*	fprintf(TomoInputsPtr->debug_file_ptr, "newline=%d, space=%d, '-'=%d, ','=%d, number=%d, alpha=%d\n", isalnum('\n'), isalnum(' '), isalnum('-'), isalnum(','), isalnum('1'), isalnum('a'));*/
+XT_Engine.c:	// TomoInputsPtr->debug_file_ptr = fopen( "debug.log", "w" );
+XT_Engine.c:	TomoInputsPtr->debug_file_ptr = stdout;
+XT_Engine.c:	fprintf(TomoInputsPtr->debug_file_ptr, "main: Time elapsed is %f minutes\n", difftime(time(NULL), start)/60.0);
+XT_Engine.c:	fprintf(TomoInputsPtr->debug_file_ptr, "main: Time elapsed is %f minutes\n", difftime(time(NULL), start)/60.0);
+XT_Engine.c:	if (TomoInputsPtr->reconstruct == 1) {
+XT_Engine.c:	fprintf(TomoInputsPtr->debug_file_ptr, "main: Time elapsed is %f minutes\n", difftime(time(NULL), start)/60.0);
+XT_Engine.c:	Write2Bin (object_file, ScannedObjectPtr->N_time, ScannedObjectPtr->N_z, ScannedObjectPtr->N_y, ScannedObjectPtr->N_x, &(ScannedObjectPtr->Object[0][0][0][0]), TomoInputsPtr->debug_file_ptr);
+XT_Engine.c:	if (TomoInputsPtr->Write2Tiff == 1)
+XT_Engine.c:		WriteMultiDimArray2Tiff (object_file, dim, 0, 1, 2, 3, &(ScannedObjectPtr->Object[0][0][0][0]), 1, TomoInputsPtr->debug_file_ptr);
+XT_Engine.c:	fclose(TomoInputsPtr->debug_file_ptr);
+XT_ICD_update.c:  return ((pow(fabs(delta),MRF_Q)/TomoInputsPtr->Sigma_S_Q)/(ScannedObjectPtr->C_S + pow(fabs(delta),MRF_Q - ScannedObjectPtr->MRF_P)/TomoInputsPtr->Sigma_S_Q_P));
+XT_ICD_update.c:  return ((pow(fabs(delta),MRF_Q)/TomoInputsPtr->Sigma_T_Q)/(ScannedObjectPtr->C_T + pow(fabs(delta),MRF_Q - ScannedObjectPtr->MRF_P)/TomoInputsPtr->Sigma_T_Q_P));
+XT_ICD_update.c:  temp1=pow(fabs(delta),MRF_Q - ScannedObjectPtr->MRF_P)/(TomoInputsPtr->Sigma_S_Q_P);
+XT_ICD_update.c:    return ((-1*temp2/(temp3*TomoInputsPtr->Sigma_S_Q))*(MRF_Q - ((MRF_Q-ScannedObjectPtr->MRF_P)*temp1)/(temp3)));
+XT_ICD_update.c:    return ((temp2/(temp3*TomoInputsPtr->Sigma_S_Q))*(MRF_Q - ((MRF_Q-ScannedObjectPtr->MRF_P)*temp1)/(temp3)));
+XT_ICD_update.c:  temp1 = pow(fabs(delta),MRF_Q - ScannedObjectPtr->MRF_P)/(TomoInputsPtr->Sigma_T_Q_P);
+XT_ICD_update.c:    return ((-1*temp2/(temp3*TomoInputsPtr->Sigma_T_Q))*(MRF_Q - ((MRF_Q-ScannedObjectPtr->MRF_P)*temp1)/(temp3)));
+XT_ICD_update.c:    return ((temp2/(temp3*TomoInputsPtr->Sigma_T_Q))*(MRF_Q - ((MRF_Q-ScannedObjectPtr->MRF_P)*temp1)/(temp3)));
+XT_ICD_update.c:  return MRF_Q/(TomoInputsPtr->Sigma_S_Q*ScannedObjectPtr->C_S);
+XT_ICD_update.c:  return MRF_Q/(TomoInputsPtr->Sigma_T_Q*ScannedObjectPtr->C_T);
+XT_ICD_update.c:        if(TomoInputsPtr->Spatial_BDFlag[i][j][k] == true && (i != (NHOOD_Z_MAXDIM-1)/2 || j != (NHOOD_Y_MAXDIM-1)/2 || k != (NHOOD_X_MAXDIM-1)/2))
+XT_ICD_update.c:	  Delta0  = (RefValue - TomoInputsPtr->Spatial_Nhood[i][j][k]);
+XT_ICD_update.c:          temp_const = TomoInputsPtr->Spatial_Filter[i][j][k]*QGGMRF_Params;
+XT_ICD_update.c:          temp1 += temp_const*TomoInputsPtr->Spatial_Nhood[i][j][k];
+XT_ICD_update.c:		if(TomoInputsPtr->Time_BDFlag[i] == true)
+XT_ICD_update.c:           		Delta0  = (RefValue - TomoInputsPtr->Time_Nhood[i]);
+XT_ICD_update.c:           	temp_const = TomoInputsPtr->Time_Filter[0]*QGGMRF_Params;
+XT_ICD_update.c:           	temp1 += temp_const*TomoInputsPtr->Time_Nhood[i];
+XT_ICD_update.c:      RefValue = RefValue + TomoInputsPtr->alpha*(u-RefValue);
+XT_ICD_update.c:        cost += (ErrorSino[i][j][k] * ErrorSino[i][j][k] * TomoInputsPtr->Weight[i][j][k]);
+XT_ICD_update.c:fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: forward cost=%f\n",cost);
+XT_ICD_update.c:          temp += TomoInputsPtr->Spatial_Filter[1][1][2] * CE_QGGMRF_Spatial_Value(delta,ScannedObjectPtr,TomoInputsPtr);
+XT_ICD_update.c:            temp += TomoInputsPtr->Spatial_Filter[1][2][0] * CE_QGGMRF_Spatial_Value(delta,ScannedObjectPtr,TomoInputsPtr);
+XT_ICD_update.c:          temp += TomoInputsPtr->Spatial_Filter[1][2][1] * CE_QGGMRF_Spatial_Value(delta,ScannedObjectPtr,TomoInputsPtr);
+XT_ICD_update.c:            temp += TomoInputsPtr->Spatial_Filter[1][2][2] * CE_QGGMRF_Spatial_Value(delta,ScannedObjectPtr,TomoInputsPtr);
+XT_ICD_update.c:            temp += TomoInputsPtr->Spatial_Filter[2][0][1] * CE_QGGMRF_Spatial_Value(delta, ScannedObjectPtr, TomoInputsPtr);
+XT_ICD_update.c:          temp += TomoInputsPtr->Spatial_Filter[2][1][1] * CE_QGGMRF_Spatial_Value(delta, ScannedObjectPtr, TomoInputsPtr);
+XT_ICD_update.c:            temp += TomoInputsPtr->Spatial_Filter[2][2][1] * CE_QGGMRF_Spatial_Value(delta, ScannedObjectPtr, TomoInputsPtr);
+XT_ICD_update.c:              temp += TomoInputsPtr->Spatial_Filter[2][0][0] * CE_QGGMRF_Spatial_Value(delta, ScannedObjectPtr, TomoInputsPtr);
+XT_ICD_update.c:              temp += TomoInputsPtr->Spatial_Filter[2][0][2] * CE_QGGMRF_Spatial_Value(delta, ScannedObjectPtr, TomoInputsPtr);
+XT_ICD_update.c:            temp += TomoInputsPtr->Spatial_Filter[2][1][0] * CE_QGGMRF_Spatial_Value(delta, ScannedObjectPtr, TomoInputsPtr);
+XT_ICD_update.c:              temp += TomoInputsPtr->Spatial_Filter[2][2][0] * CE_QGGMRF_Spatial_Value(delta, ScannedObjectPtr, TomoInputsPtr);
+XT_ICD_update.c:              temp += TomoInputsPtr->Spatial_Filter[2][2][2] * CE_QGGMRF_Spatial_Value(delta, ScannedObjectPtr, TomoInputsPtr);
+XT_ICD_update.c:            temp += TomoInputsPtr->Spatial_Filter[2][1][2] * CE_QGGMRF_Spatial_Value(delta, ScannedObjectPtr, TomoInputsPtr);
+XT_ICD_update.c:            temp += TomoInputsPtr->Time_Filter[0] * CE_QGGMRF_Temporal_Value(delta,ScannedObjectPtr,TomoInputsPtr);
+XT_ICD_update.c: fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: prior cost =%f\n",temp);
+XT_ICD_update.c:			TomoInputsPtr->Time_Nhood[0] = ScannedObjectPtr->Object[i_new-1][slice][j_new][k_new];
+XT_ICD_update.c:			TomoInputsPtr->Time_BDFlag[0] = true;
+XT_ICD_update.c:			TomoInputsPtr->Time_Nhood[0] = 0.0;
+XT_ICD_update.c:			TomoInputsPtr->Time_BDFlag[0] = false;
+XT_ICD_update.c:			TomoInputsPtr->Time_Nhood[1] = ScannedObjectPtr->Object[i_new+1][slice][j_new][k_new];
+XT_ICD_update.c:			TomoInputsPtr->Time_BDFlag[1] = true;
+XT_ICD_update.c:			TomoInputsPtr->Time_Nhood[1] = 0.0;
+XT_ICD_update.c:			TomoInputsPtr->Time_BDFlag[1] = false;
+XT_ICD_update.c:	                				TomoInputsPtr->Spatial_Nhood[p][q][r] = ScannedObjectPtr->Object[i_new][idxp][idxq][idxr];
+XT_ICD_update.c:        	        				TomoInputsPtr->Spatial_BDFlag[p][q][r] = true;
+XT_ICD_update.c:	                				TomoInputsPtr->Spatial_Nhood[p][q][r] = 0.0;
+XT_ICD_update.c:                    					TomoInputsPtr->Spatial_BDFlag[p][q][r] = false;
+XT_ICD_update.c:	                			TomoInputsPtr->Spatial_Nhood[p][q][r] = 0.0;
+XT_ICD_update.c:                    				TomoInputsPtr->Spatial_BDFlag[p][q][r] = false;
+XT_ICD_update.c:	              			TomoInputsPtr->Spatial_Nhood[p][q][r] = 0.0;
+XT_ICD_update.c:                   			TomoInputsPtr->Spatial_BDFlag[p][q][r] = false;
+XT_ICD_update.c:        TomoInputsPtr->Spatial_Nhood[(NHOOD_Z_MAXDIM-1)/2][(NHOOD_Y_MAXDIM-1)/2][(NHOOD_X_MAXDIM-1)/2] = 0.0;
+XT_ICD_update.c:					if (TomoInputsPtr->Time_Nhood[0] > 0.0 || TomoInputsPtr->Time_Nhood[1] > 0.0)
+XT_ICD_update.c:							  	if(TomoInputsPtr->Spatial_Nhood[p][q][r] > 0.0)
+XT_ICD_update.c:	            		THETA2 += (VoxelLineResponse[slice].values[r]*VoxelLineResponse[slice].values[r]*ProjectionEntry*ProjectionEntry*TomoInputsPtr->Weight[sino_view][i_t][i_r]);
+XT_ICD_update.c:               	    		THETA1 += -(ErrorSino[sino_view][i_t][i_r]*VoxelLineResponse[slice].values[r]*ProjectionEntry*TomoInputsPtr->Weight[sino_view][i_t][i_r]);
+XT_ICD_update.c:          fprintf(TomoInputsPtr->debug_file_ptr, "WARNING: Pixel (%d %d) not visited\n", j, k);
+XT_ICD_update.c:if (TomoInputsPtr->initICD > 2){
+XT_ICD_update.c:	fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: initObject: initICD value not recognized\n");
+XT_ICD_update.c:if(TomoInputsPtr->initICD > 0){
+XT_ICD_update.c: 	if (fp==NULL) {fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: error in reading file %s\n", object_file); exit (1);}	
+XT_ICD_update.c:	{fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: Number of elements read does not match required, number of elements read=%d\n",result);}
+XT_ICD_update.c:	if (TomoInputsPtr->initICD == 1){	
+XT_ICD_update.c:	else if (TomoInputsPtr->initICD == 2)
+XT_ICD_update.c:	if (TomoInputsPtr->Write2Tiff == 1)	
+XT_ICD_update.c:		WriteMultiDimArray2Tiff (initfile, dimTiff, 0, 1, 2, 3, &(ScannedObjectPtr->Object[0][0][0][0]), 1, TomoInputsPtr->debug_file_ptr);
+XT_ICD_update.c:	fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Average of Error Sinogram is %f\n", avg);
+XT_ICD_update.c:	if (TomoInputsPtr->Write2Tiff == 1)
+XT_ICD_update.c:		WriteMultiDimArray2Tiff (detect_file, dimTiff, 0, 1, 2, 3, &(H_r[0][0]), 0, TomoInputsPtr->debug_file_ptr);
+XT_ICD_update.c:	fprintf(TomoInputsPtr->debug_file_ptr, "-------------ICD_BackProject: ICD Iter=Before ICD, cost=%f------------\n",cost);
+XT_ICD_update.c:	Write2Bin (costfile, 1, 1, 1, 1, &cost, TomoInputsPtr->debug_file_ptr);
+XT_ICD_update.c:	Write2Bin (avgupdatefile, 1, 1, 1, 1, &(IO_VoxUpdate.AverageUpdate), TomoInputsPtr->debug_file_ptr);
+XT_ICD_update.c:	for (IO_VoxUpdate.Iter = 1; IO_VoxUpdate.Iter <= TomoInputsPtr->NumIter; IO_VoxUpdate.Iter++)
+XT_ICD_update.c:		fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Zero count is %d\n", IO_VoxUpdate.zero_count);
+XT_ICD_update.c:		fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Percentage change in cost is %f\n", percentage_change_in_cost);
+XT_ICD_update.c:		fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Average magnitude of update is %f\n", (IO_VoxUpdate.AverageUpdate));
+XT_ICD_update.c:		fprintf(TomoInputsPtr->debug_file_ptr, "-------------ICD_BackProject: ICD Iter=%d, cost=%f, time since start of ICD = %fmins------------\n",IO_VoxUpdate.Iter,cost,difftime(time(NULL),start)/60.0);
+XT_ICD_update.c:		Append2Bin (costfile, 1, 1, 1, 1, &cost, TomoInputsPtr->debug_file_ptr);
+XT_ICD_update.c:		Append2Bin (avgupdatefile, 1, 1, 1, 1, &(IO_VoxUpdate.AverageUpdate), TomoInputsPtr->debug_file_ptr);
+XT_ICD_update.c://			fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: ICD_BackProject: Cost value increased\n"); exit(1);
+XT_ICD_update.c:		if ((percentage_change_in_cost < TomoInputsPtr->cost_thresh && IO_VoxUpdate.AverageUpdate < TomoInputsPtr->StopThreshold) && IO_VoxUpdate.Iter > 1){
+XT_ICD_update.c:			 fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Convergence criteria is met\n");
+XT_Init.c:	fprintf(TomoInputsPtr->debug_file_ptr, "DebugMsg: copyViewIndexMap: Total number of views at time %d relative to object is %d\n", time, ViewNum);
+XT_Init.c:        if (fp==NULL) {fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: Error in reading file %s\n", filename); exit(1);}
+XT_Init.c:                        fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: initSparseAnglesfrmFile: File %s is not correctly formatted to be read\n", filename);
+XT_Init.c:		fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: Number of projections read is %d and expected is %d\n", index, SinogramPtr->N_p);
+XT_Init.c:        fprintf(TomoInputsPtr->debug_file_ptr, "initRandomAngles: The initialized angle indices of sinogram are ...\n");
+XT_Init.c:                    fprintf(TomoInputsPtr->debug_file_ptr, "time %f - ", SinogramPtr->TimePtr[i]);
+XT_Init.c:                    fprintf(TomoInputsPtr->debug_file_ptr, "%f, ", SinogramPtr->ViewPtr[i]);
+XT_Init.c:                fprintf(TomoInputsPtr->debug_file_ptr, "\n");
+XT_Init.c:	fprintf(TomoInputsPtr->debug_file_ptr, "initRandomAngles: The initialized angle indices of sinogram as corresponding to the scanned object are ...\n");
+XT_Init.c:		fprintf(TomoInputsPtr->debug_file_ptr, "Object %d : ", i);
+XT_Init.c:			fprintf(TomoInputsPtr->debug_file_ptr, "%.1f, ", SinogramPtr->ViewPtr[sino_view]*180/M_PI);
+XT_Init.c:		fprintf(TomoInputsPtr->debug_file_ptr, "\n");
+XT_Init.c:	TomoInputsPtr->Time_Filter[0] = 1.0/distance2node(0,1,1,1);
+XT_Init.c:	sum += 2.0*TomoInputsPtr->Time_Filter[0];
+XT_Init.c:		TomoInputsPtr->Spatial_Filter[i][j][k] = temp1;
+XT_Init.c:		TomoInputsPtr->Spatial_Filter[i][j][k]=0;
+XT_Init.c:		TomoInputsPtr->Spatial_Filter[i][j][k] = prior_const*TomoInputsPtr->Spatial_Filter[i][j][k]/sum;
+XT_Init.c:	TomoInputsPtr->Time_Filter[0] = prior_const*TomoInputsPtr->Time_Filter[0]/sum;
+XT_Init.c:				sum+=TomoInputsPtr->Spatial_Filter[i][j][k];
+XT_Init.c:				fprintf(TomoInputsPtr->debug_file_ptr, "initFilter: Filter i=%d, j=%d, k=%d, coeff = %f\n", i,j,k,TomoInputsPtr->Spatial_Filter[i][j][k]/prior_const);
+XT_Init.c:			fprintf(TomoInputsPtr->debug_file_ptr, "initFilter: Filter i=0 is %f\n", TomoInputsPtr->Time_Filter[0]/prior_const);
+XT_Init.c:			fprintf(TomoInputsPtr->debug_file_ptr, "initFilter: Sum of filter coefficients is %f\n",(sum+2.0*TomoInputsPtr->Time_Filter[0])/prior_const);	
+XT_Init.c:			fprintf(TomoInputsPtr->debug_file_ptr, "initFilter: delta_xy*delta_xy*delta_xy*delta_tau = %f\n",prior_const);	
+XT_Init.c:  fprintf(TomoInputsPtr->debug_file_ptr, "calculateSinCos: Calculated sines and cosines of angles of rotation\n");
+XT_Init.c:	SinogramPtr->R0 = -TomoInputsPtr->RotCenter*SinogramPtr->delta_r;
+XT_Init.c:	SinogramPtr->RMax = (SinogramPtr->N_r-TomoInputsPtr->RotCenter)*SinogramPtr->delta_r;
+XT_Init.c:	TomoInputsPtr->Sigma_S_Q = pow((ScannedObjectPtr->Sigma_S*ScannedObjectPtr->delta_xy),MRF_Q);
+XT_Init.c:	TomoInputsPtr->Sigma_S_Q_P = pow(ScannedObjectPtr->Sigma_S*ScannedObjectPtr->delta_xy,MRF_Q-ScannedObjectPtr->MRF_P);	
+XT_Init.c:	TomoInputsPtr->Sigma_T_Q = pow((ScannedObjectPtr->Sigma_T*ScannedObjectPtr->delta_Rtime),MRF_Q);
+XT_Init.c:	TomoInputsPtr->Sigma_T_Q_P = pow(ScannedObjectPtr->Sigma_T*ScannedObjectPtr->delta_Rtime,MRF_Q-ScannedObjectPtr->MRF_P);	
+XT_Init.c:/*	TomoInputsPtr->BoundaryFlag = (uint8_t***)multialloc(sizeof(uint8_t), 3, 3, 3, 3);*/
+XT_Init.c:	TomoInputsPtr->Weight = (Real_t***)multialloc(sizeof(Real_t), 3, SinogramPtr->N_p, SinogramPtr->N_t, SinogramPtr->N_r);
+XT_Init.c:	fprintf(TomoInputsPtr->debug_file_ptr, "initStructures: Initilialized the structures, Sinogram and ScannedObject\n");
+XT_Init.c:	fprintf(TomoInputsPtr->debug_file_ptr, "DebugMsg: Reading command line arguments ....\n");
+XT_Init.c:	TomoInputsPtr->sinobin = 0;
+XT_Init.c:	TomoInputsPtr->initICD = 0;
+XT_Init.c:	TomoInputsPtr->Write2Tiff = 0;
+XT_Init.c:	TomoInputsPtr->time_reg = 0;
+XT_Init.c:	TomoInputsPtr->reconstruct = 1;
+XT_Init.c:	TomoInputsPtr->No_Projection_Noise = 0;
+XT_Init.c:	fprintf(TomoInputsPtr->debug_file_ptr, "DebugMsg: argsParser: Allocated memory for sigma_s and MRF_C parameters\n");
+XT_Init.c:		case  0 : fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: Argument not recognized\n");		break;
+XT_Init.c:		case 'j': TomoInputsPtr->StopThreshold=(Real_t)atof(optarg);	break;
+XT_Init.c:		case 'k': TomoInputsPtr->NumIter=(uint16_t)atoi(optarg);	break;
+XT_Init.c:		case 'l': TomoInputsPtr->RotCenter=(Real_t)atof(optarg);	break;
+XT_Init.c:		case 'm': TomoInputsPtr->alpha=(Real_t)atof(optarg);		break;
+XT_Init.c:		case 'n': TomoInputsPtr->time_reg = 1;				break;
+XT_Init.c:		case 'o': TomoInputsPtr->sinobin = (uint8_t)atoi(optarg);	break;
+XT_Init.c:		case 'p': TomoInputsPtr->initICD = (uint8_t)atoi(optarg);	break;
+XT_Init.c:		case 'q': TomoInputsPtr->Write2Tiff = 1;			break;
+XT_Init.c:		case 'r': TomoInputsPtr->No_Projection_Noise = 1;		break;
+XT_Init.c:		case 'x': TomoInputsPtr->reconstruct = 0; 		break;	
+XT_Init.c:		case 'y': TomoInputsPtr->cost_thresh = (Real_t)atof(optarg); 		break;	
+XT_Init.c:		case '?': fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: argsParser: Cannot recognize argument %s\n",optarg); break;
+XT_Init.c:		fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: argsParser: Argument list has an error\n");
+XT_Init.c:		fprintf(TomoInputsPtr->debug_file_ptr, "argsParser: p = %.2f, sigma_s = %f, sigma_t = %f, c_s = %.3f, c_t = %.3f, delta_xy = %f, delta_z = %f, Length_R = %.2f, Length_T = %.2f, stop threshold = %.2f, number of iterations = %d, center of rotation = %.2f, alpha = %.2f, time regularization = %d, read sinogram from bin = %d, init ICD = %d, Write Tiff file = %d, Don't add noise = %d, Reconstruction start time = %f, Reconstruction time gap = %f, number of reconstructions = %d, N_p = %d, N_r = %d, reconstruct = %d, cost_thresh = %f, PHANTOM_FILENAME = %s, Slice Begin = %d, Slice End = %d \n",ScannedObjectPtr->MRF_P, ScannedObjectPtr->Sigma_S, ScannedObjectPtr->Sigma_T, ScannedObjectPtr->C_S, ScannedObjectPtr->C_T, ScannedObjectPtr->delta_xy, ScannedObjectPtr->delta_z, SinogramPtr->Length_R, SinogramPtr->Length_T, TomoInputsPtr->StopThreshold, TomoInputsPtr->NumIter, TomoInputsPtr->RotCenter, TomoInputsPtr->alpha, TomoInputsPtr->time_reg, TomoInputsPtr->sinobin, TomoInputsPtr->initICD, TomoInputsPtr->Write2Tiff, TomoInputsPtr->No_Projection_Noise, ScannedObjectPtr->Rtime0, ScannedObjectPtr->delta_Rtime, ScannedObjectPtr->N_time, SinogramPtr->N_p, SinogramPtr->N_r, TomoInputsPtr->reconstruct, TomoInputsPtr->cost_thresh, PHANTOM_FILENAME, SinogramPtr->slice_begin, SinogramPtr->slice_end);
+XT_Profile.c:	fprintf(TomoInputsPtr->debug_file_ptr, "calculateVoxelProfile: MaxValLineIntegral = %f\n", MaxValLineIntegral);
+XT_Profile.c:	fprintf(TomoInputsPtr->debug_file_ptr, "calculateVoxelProfile: Calculated Voxel Profile with Check sum =%f\n",checksum);
+XT_Profile.c:  fprintf(TomoInputsPtr->debug_file_ptr, "initializeBeamProfile: Generated Beam Profile\n");
+XT_Profile.c:  if (TomoInputsPtr->Write2Tiff == 1)
+XT_Profile.c:  WriteMultiDimArray2Tiff (filename, dimTiff, 0, 1, 2, 3, &(VoxProfile[0][0]), 0, TomoInputsPtr->debug_file_ptr);
+XT_genSinogram.c:	/*fprintf(TomoInputsPtr->debug_file_ptr, "\n%s,%s,%d\n",REPEAT_DIGITS,file,TIME_DIGITS-time_step/10-1);		*/
+XT_genSinogram.c: 	if (fp==NULL) {fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: genSinogramFromPhantom: error in reading file %s\n",phantom_file); exit (1);}		
+XT_genSinogram.c:	fprintf(TomoInputsPtr->debug_file_ptr, "DebugMsg: genSinogramFromPhantom: Forward projecting phantoms - \n");	
+XT_genSinogram.c:		{fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: Reading file %s, Number of elements read does not match required, number of elements read=%d\n",phantom_file,result);}
+XT_genSinogram.c:	if (TomoInputsPtr->Write2Tiff == 1)
+XT_genSinogram.c:		WriteMultiDimArray2Tiff (detect_file, dimTiff, 0, 1, 2, 3, &(H_r[0][0]), 0, TomoInputsPtr->debug_file_ptr);
+XT_genSinogram.c:		//TomoInputsPtr->Weight[i][j] = val + sqrt(val)*random2();
+XT_genSinogram.c:		if (TomoInputsPtr->No_Projection_Noise == 1)
+XT_genSinogram.c:			TomoInputsPtr->Weight[i][slice][j] = fabs(val);
+XT_genSinogram.c:			TomoInputsPtr->Weight[i][slice][j] = fabs(val + sqrt(val)*normal());
+XT_genSinogram.c:		SinogramPtr->Projection[i][slice][j] = log(EXPECTED_COUNTS_FOR_PHANTOM_DATA/TomoInputsPtr->Weight[i][slice][j]);			
+XT_genSinogram.c:	Write2Bin (projection_file, 1, SinogramPtr->N_p, SinogramPtr->N_t, SinogramPtr->N_r, &(SinogramPtr->Projection[0][0][0]), TomoInputsPtr->debug_file_ptr);
+XT_genSinogram.c:	if (TomoInputsPtr->Write2Tiff == 1)
+XT_genSinogram.c:		WriteMultiDimArray2Tiff (projection_file, dimTiff, 0, 2, 1, 3, &(SinogramPtr->Projection[0][0][0]), 0, TomoInputsPtr->debug_file_ptr);
+XT_genSinogram.c:	Write2Bin (weight_file, 1, SinogramPtr->N_p, SinogramPtr->N_t, SinogramPtr->N_r, &(TomoInputsPtr->Weight[0][0][0]), TomoInputsPtr->debug_file_ptr);
+XT_genSinogram.c: 	if (fp==NULL) {fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: genSinogram_fromBin: error in reading file %s\n",sinofile); exit (1);}		
+XT_genSinogram.c:	{fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: Reading file %s, Number of elements read does not match required, number of elements read=%d\n",sinofile,result);}
+XT_genSinogram.c: 	if (fp==NULL) {fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: error in reading file %s\n",weightfile); exit (1);}		
+XT_genSinogram.c:	{fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: Reading file %s, Number of elements read does not match required, number of elements read=%d\n",weightfile,result);}
+XT_genSinogram.c:					TomoInputsPtr->Weight[i][slice][k]=weight[temp1+temp2+k];
+XT_genSinogram.c:	fprintf(TomoInputsPtr->debug_file_ptr, "DebugMsg: genSinogram_frombin: sinogram average = %f, Weight average = %f\n", sino_avg, weight_avg);
+XT_genSinogram.c://	fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: genSinogram: Total number of time instants required is greater than available\n");
+XT_genSinogram.c://	fprintf(TomoInputsPtr->debug_file_ptr, "genSinogram: Reading bright field image %s\n",file);
+XT_genSinogram.c://	fprintf(TomoInputsPtr->debug_file_ptr, "genSinogram: Reading bright field image %s\n",file);
+XT_genSinogram.c://					TomoInputsPtr->Weight[time_idx][rand_idx][n-COL_BEGIN]=((Real_t)pixels[temp1+n]<bright_avg)?(Real_t)pixels[temp1+n]:bright_avg;
+XT_genSinogram.c:		/*	fprintf(TomoInputsPtr->debug_file_ptr, "%d,%d,%d,%f, %f\n",j,m,n, SinogramPtr->Projection[angle_idx][m-ROW_BEGIN][n-COL_BEGIN][time_idx], TomoInputsPtr->Weight[angle_idx][n-COL_BEGIN][time_idx]);
+XT_genSinogram.c://  fprintf(TomoInputsPtr->debug_file_ptr, "genSinogram: Average of bright field is %f\n", br_avg/br_cnt); 
+XT_genSinogram.c://  fprintf(TomoInputsPtr->debug_file_ptr, "genSinogram: Function genSinogram - first angle index = %d, last angle index = %d\n", ANGLE_BEGIN, j-idx);
+XT_genSinogram.c://  Write2Bin (file, 1, SinogramPtr->N_p, SinogramPtr->N_r, &(TomoInputsPtr->Weight[0][0]));
