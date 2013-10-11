@@ -23,8 +23,89 @@ def decimate_count_data_in_t (data, true_length, reduced_length):
 	return new_data
 	
 
+def generate_projections_nersc (proj, recon, files, path2launch):
+	rank = recon['rank']
+	if (recon['sinobin'] != 1 and recon['sinobin'] != 3):
+		error_by_flag(1, "ERROR: sinobin should be either 1 or 3")
 
-def generate_projections (proj, recon, files, path2launch):
+	if (proj['recon_N_t'] % recon['node_num'] != 0 or proj['N_t'] % recon['node_num'] != 0 or recon['N_z'] % recon['node_num'] != 0 ):
+		error_by_flag(1, "ERROR: Number of nodes should divide N_t, recon_N_t and N_z")
+
+
+	if (recon['sinobin'] == 1):
+		projections = np.zeros((proj['recon_N_p'], proj['recon_N_r'], proj['recon_N_t']/recon['node_num']), dtype = np.float64, order = 'C')
+	else:	
+		bright = np.zeros((proj['recon_N_r'], proj['recon_N_t']/recon['node_num']), dtype = np.float64, order = 'C')
+
+	weight = np.zeros((proj['recon_N_p'], proj['recon_N_r'], proj['recon_N_t']/recon['node_num']), dtype = np.float64, order = 'C')
+#	proj['expected'] = np.zeros((proj['recon_N_p'], proj['recon_N_r']), dtype = np.float64, order = 'C')
+	
+	FILE = h5py.File(proj['Path2Dataset'], 'r')
+	FILE_wd = h5py.File(proj['Path2WhiteDark'], 'r')
+
+	extras_r = proj['N_r'] % proj['recon_N_r']
+	true_length_r = proj['N_r'] - extras_r
+
+	proj['length_r'] = proj['length_r']*true_length_r/proj['N_r']
+	recon['radius_obj'] = recon['radius_obj']*true_length_r/proj['N_r']
+	
+	index_r = range(extras_r/2, extras_r/2 + true_length_r)
+	index_t_start = proj['slice_t_start'] + rank*proj['N_t']/recon['node_num']
+	index_t_end = proj['slice_t_start'] + (rank+1)*proj['N_t']/recon['node_num']
+	
+	white = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'bak_' + str(0).zfill(4) + '_0000.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
+	dark = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'drk_' + str(0).zfill(4) + '_' + str(proj['N_theta']).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
+	for i in range(1, proj['Num_Bright_Dark']):
+		white = white + FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'bak_' + str(i).zfill(4) + '_0000.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
+		dark = dark + FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'drk_' + str(0).zfill(4) + '_' + str(proj['N_theta']).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
+	white = white/proj['Num_Bright_Dark']
+	dark = dark/proj['Num_Bright_Dark']
+	
+	count_expected = decimate_count_data_in_r((np.abs(white - dark)).astype(np.float64), true_length_r, proj['recon_N_r'])
+	count_expected = decimate_count_data_in_t(count_expected, proj['N_t']/recon['node_num'], proj['recon_N_t']/recon['node_num'])
+	if (recon['sinobin'] != 1):
+		bright = np.transpose(count_expected)
+	for i in range(proj['recon_N_p']):
+		data = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + '_0000_' + str(i).zfill(4) + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16)
+		count_data = decimate_count_data_in_r((np.abs(data - dark)).astype(np.float64), true_length_r, proj['recon_N_r'])	
+		count_data = decimate_count_data_in_t(count_data, proj['N_t']/recon['node_num'], proj['recon_N_t']/recon['node_num'])
+		#count_data = decimate_count_data((np.abs(data[i,...])).astype(np.float64), true_length_r, proj['recon_N_r'])	
+		weight[i,...] = np.transpose(count_data)
+		if (recon['sinobin'] == 1):
+			projections[i,...] = np.transpose(np.log(count_expected/count_data))
+				
+	if (recon['sinobin'] == 1):
+		projections = recon['BH_Quad_Coef']*(projections*projections) + projections
+		fid = open(path2launch + 'projection_n' + str(rank) + '.bin','wb')
+		projections.tofile(fid)
+		fid.close()
+		print "Mean of projections from node " + str(rank) + " is ", np.mean(projections)
+	else:
+		fid = open(path2launch + 'bright_n' + str(rank) + '.bin','wb')
+		bright.tofile(fid)
+		fid.close()
+		print "Mean of bright field data from node " + str(rank) + " is ", np.mean(bright)
+
+	fid = open(path2launch + 'weight_n' + str(rank) + '.bin','wb')
+	weight.tofile(fid)
+	fid.close()
+	print "Mean of weight data from node " + str(rank) + " is ", np.mean(weight)
+	
+	print "generate_projections: Generated projections for node ", rank
+	
+#	if (recon['sinobin'] == 1):
+#		print 'generate_projections: The average value of projection is ', np.mean(proj['projections'])
+#	else:	
+#		print 'generate_projections: The average value of bright field is ', np.mean(proj['bright'])
+
+#	print 'generate_projections: The average value of weight is ', np.mean(proj['weight'])
+
+	FILE.close()
+	FILE_wd.close()
+	return proj
+
+
+def generate_projections_purdue (proj, recon, files, path2launch):
 	rank = recon['rank']
 	if (recon['sinobin'] != 1 and recon['sinobin'] != 3):
 		error_by_flag(1, "ERROR: sinobin should be either 1 or 3")

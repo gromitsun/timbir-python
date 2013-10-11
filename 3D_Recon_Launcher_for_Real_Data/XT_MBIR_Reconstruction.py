@@ -1,7 +1,8 @@
 
 from os import system
 from XT_IOMisc import create_folder, error_by_flag
-from XT_Projections import generate_projections
+from XT_Projections import generate_projections_nersc
+from XT_Projections import generate_projections_purdue
 from XT_ObjectHDFIO import initpar_object4mHDF
 
 def write_views2file (path2save, views, times):
@@ -48,10 +49,10 @@ def do_MBIR_reconstruction(proj, recon, files):
 				if (recon['HPC'] == 'NERSC'):
 					for i in range(recon['node_num']):
 						recon['rank'] = i
-						generate_projections (proj, recon, files, path2launch)
+						generate_projections_nersc (proj, recon, files, path2launch)
 					recon['rank'] = 0
 				else:
-					generate_projections (proj, recon, files, path2launch)
+					generate_projections_nersc(proj, recon, files, path2launch)
 					
 
 			macros = ' -openmp -DBH_QUAD_COEF="' + str(recon['BH_Quad_Coef']) + '" -DHOUNSFIELD_MAX="' + str(recon['maxHU']) + '" -DHOUNSFIELD_MIN="' + str(recon['minHU']) + '"' 

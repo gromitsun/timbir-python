@@ -27,8 +27,10 @@ from XT_IOMisc import error_by_flag
 def proj_init (files):
 	proj = {}
 
-	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
-	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
+	proj['Path2Dataset'] = files['data_scratch'] + "/LBNL_Datasets/20131004_013841_parikh_soil_microaggregate_1-2_0-15.h5"
+	proj['Path2WhiteDark'] = files['data_scratch'] + "/LBNL_Datasets/20131004_013841_parikh_soil_microaggregate_1-2_0-15.h5"
+	proj['Dataset_Name'] = '20131004_013841_parikh_soil_microaggregate_1-2_0-15'
+	proj['Num_Bright_Dark'] = 30
 	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 #	proj['Path2Dataset'] = files['data_scratch'] + "/Data/k-32-08ms_1.hdf"
@@ -36,22 +38,22 @@ def proj_init (files):
 
 
 	proj['recon_N_r'] = 512 #Total number of detector elements to be used (crops to nearest power of 2 and then down samples to specified number 
-	proj['slice_t_start'] = 500 #parallel to z
+	proj['slice_t_start'] = 1000 #parallel to z
 	proj['N_t'] = 8*4 #Number of slices 
 	proj['recon_N_t'] = 8 #Downsampled to N_t
-	proj['rotation_center_r'] = 265.0 + 1.0/4 #detector pixels from left; To Do  
+	proj['rotation_center_r'] = 256 #detector pixels from left; To Do  
 	proj['proj_start'] = 0 #view index start
-	proj['proj_num'] = 2000 #num of views to use 
-	proj['N_p'] = 2000*4 #total number of supposed to be taken. For 3D take equal to proj_num
-	proj['K'] = 16 #Set to 1
-	proj['N_theta'] = 2000 #Equal to proj num
+	proj['proj_num'] = 1024 #num of views to use 
+	proj['N_p'] = 1024 #total number of supposed to be taken. For 3D take equal to proj_num
+	proj['K'] = 1 #Set to 1
+	proj['N_theta'] = 1024 #Equal to proj num
 
-	proj['N_r'] = 2080 #Total number of detector pixels
+	proj['N_r'] = 2560 #Total number of detector pixels
 	proj['length_r'] = 0.65*proj['N_r'] #0.65 is pixel size in micro meter	
 	proj['length_t'] = 0.65*proj['N_t']	
 	proj['L'] = proj['N_theta']/proj['K'] 
 	
-	min_time_btw_views = 0.014039 #default to 0; in units of sec
+	min_time_btw_views = 0 #default to 0; in units of sec
 	rotation_speed = 100 #rotation set to any number for 3d; degrees per sec
 
 	fps_of_camera = proj['L']/(180.0/rotation_speed) 
@@ -103,15 +105,15 @@ def proj_init (files):
 def recon_init (proj, recon):
 	recon['recon_type'] = 'MBIR'
 	
-	recon['r'] = [1] #recon per frame 
-	recon['c_s'] = [10**-6] #10^-6
-	recon['c_t'] = [10**-4]
+	recon['r'] = [1, 1, 1] #recon per frame 
+	recon['c_s'] = [10**-6, 10**-6, 10**-6] #10^-6
+	recon['c_t'] = [10**-4, 10**-4, 10**-4]
 
-	recon['sigma_s'] = [2*(10**5)] #need to automatically set. To Do
-	recon['sigma_t'] = [4*(10**2)] #Ignored for 3d recon
+	recon['sigma_s'] = [(10**7), 10**6, 10**4] #need to automatically set. To Do
+	recon['sigma_t'] = [4*(10**2), 10**2, 10**2] #Ignored for 3d recon
 	
-	recon['ZingerT'] = [30] #Need to set automatically
-	recon['ZingerDel'] = [0.1]
+	recon['ZingerT'] = [100000, 100000, 100000] #Need to set automatically
+	recon['ZingerDel'] = [0.1, 0.1, 0.1]
 
 	recon['init_object4mHDF'] = 0
 	
@@ -119,7 +121,7 @@ def recon_init (proj, recon):
 	recon['minHU'] = 10000
 	
 	recon['radius_obj'] = 0.65*proj['N_r']/2 #Used or not used?
-	recon['BH_Quad_Coef'] = 0.5;#need to make zero
+	recon['BH_Quad_Coef'] = 0;#need to make zero
 	
 	#recon['voxel_thresh'] = [10]
         #recon['cost_thresh'] = [10]
