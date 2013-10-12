@@ -12,7 +12,7 @@ from XT_IOMisc import write_tiff_from_object_bin_file
 import argparse
 import time
 import os
-from mpi4py import MPI
+#from mpi4py import MPI
 
 def main():
 	start_time = time.time()
