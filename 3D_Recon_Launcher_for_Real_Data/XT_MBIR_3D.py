@@ -29,8 +29,10 @@ def main():
         parser.add_argument("--stop_threshold",help="Stopping thresold as a percentage of average change in pixel values in units of HU",type=float,default=20)       
         parser.add_argument("--max_iter",help="Maximum number of ICD iterations for the algorithm",type=int,default=30)
         parser.add_argument("--num_res",help="Number of resolutions to be used",type=int,default=4)
-
-	args = parser.parse_args()
+        parser.add_argument("--num_nodes",help="Number of nodes to use",type=int,default=1)
+	parser.add_argument("--num_threads",help="Number of threads per node",type=int,default=32)
+	
+        args = parser.parse_args()
         
         inputs = {}
         inputs['input_hdf5'] = args.input_hdf5
@@ -49,6 +51,9 @@ def main():
         inputs['num_res'] = args.num_res
         inputs['num_views'] = args.num_views
         inputs['zinger_thresh'] = args.zinger_thresh
+        inputs['num_nodes'] = args.num_nodes   
+	inputs['num_threads']= args.num_threads
+
 	recon = {}
 	files = {}
         
