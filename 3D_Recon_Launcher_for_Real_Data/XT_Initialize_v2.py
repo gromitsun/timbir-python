@@ -1,7 +1,9 @@
 #! /usr/bin/python
 
+from XT_Interlaced_Angles import gen_interlaced_views_0_to_Inf,clip_list_of_views
 import numpy as np 
 from math import ceil
+from XT_IOMisc import error_by_flag
 
 """The variable 'proj' is a dictionary datatype containing information about the projections and the detector.
 ------- Dictionary Key - Explantion -----------------
@@ -50,16 +52,16 @@ def proj_init (inputs):
 	rotation_speed = 100 #rotation set to any number for 3D; degrees per sec
 
 	fps_of_camera = proj['L']/(180.0/rotation_speed) 
-	##angles, times = gen_interlaced_views_0_to_Inf(proj['K'], proj['N_theta'], proj['N_p']) #Generate the list
-	##angles_clip, times_clip, angles_del, times_del = clip_list_of_views (angles, times, min_time_btw_views, rotation_speed)
-	##print 'clip_list_of_views: Number of views deleted are ', angles_del.size, '. Deleted views are ' + str(angles_del) 
-	##print 'clip_list_of_views: Deleted views\' times are ' + str(times_del)
+	angles, times = gen_interlaced_views_0_to_Inf(proj['K'], proj['N_theta'], proj['N_p']) #Generate the list
+	angles_clip, times_clip, angles_del, times_del = clip_list_of_views (angles, times, min_time_btw_views, rotation_speed)
+	print 'clip_list_of_views: Number of views deleted are ', angles_del.size, '. Deleted views are ' + str(angles_del) 
+	print 'clip_list_of_views: Deleted views\' times are ' + str(times_del)
 
-	##proj['angles'] = angles_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
-	##proj['times'] = times_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
+	proj['angles'] = angles_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
+	proj['times'] = times_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
 	
-	##proj['recon_N_p'] = len(proj['angles']) #total number of angles to be used	
-	##print 'proj_init: Total number of projections used for reconstruction is ' + str(proj['recon_N_p'])
+	proj['recon_N_p'] = len(proj['angles']) #total number of angles to be used	
+	print 'proj_init: Total number of projections used for reconstruction is ' + str(proj['recon_N_p'])
 
 	return proj
 
@@ -102,7 +104,7 @@ def recon_init (proj, recon,inputs):
 	recon['c_s'] = [10**-6] #10^-6
 	recon['c_t'] = [10**-4] 
 
-	recon['sigma_s'] = (10**5)/inputs['smoothness'] #need to automatically set. To Do
+	recon['sigma_s'] = [(10**5)/inputs['smoothness']] #need to automatically set. To Do
 	recon['sigma_t'] = [1] #Ignored for 3d recon
 	
 	recon['ZingerT'] = inputs['zinger_thresh'] #Need to set automatically
@@ -124,7 +126,6 @@ def recon_init (proj, recon,inputs):
 
         recon['delta_xy'] = [2**j for j in range(0,inputs['num_res'])]
         recon['delta_xy'] = recon['delta_xy'][::-1] #reverse the list 
-        recon['delta_xy'] = inputs['final_res_multiple']*recon['delta_xy']
 
         recon['delta_z'] = recon['delta_xy'] #Mutli-res multi-resolution 
 
@@ -158,31 +159,31 @@ def recon_init (proj, recon,inputs):
 	recon['alpha'] = 1.5
 	recon['time_reg'] = 1 #0 disable, 1 enable
 
-##	recon['Rtime0'] = proj['times'][0] #always 1 for 3-D recon;
-##	recon['Rtime_num'] = [ceil(recon['r'][i]*float(proj['recon_N_p'])/proj['N_theta']) for i in range(len(recon['r']))]
-##	recon['Rtime_delta'] = [(proj['times'][-1]-proj['times'][0])/recon['Rtime_num'][i] for i in range(len(recon['r']))]
+	recon['Rtime0'] = proj['times'][0] #always 1 for 3-D recon;
+	recon['Rtime_num'] = [ceil(recon['r'][i]*float(proj['recon_N_p'])/proj['N_theta']) for i in range(len(recon['r']))]
+	recon['Rtime_delta'] = [(proj['times'][-1]-proj['times'][0])/recon['Rtime_num'][i] for i in range(len(recon['r']))]
 
 	recon['multi_res_stages'] = inputs['num_res']
-##	recon['N_xy'] = proj['recon_N_r']/recon['delta_xy'][-1] #-1 means last elemen in the list
-##	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
+	recon['N_xy'] = proj['recon_N_r']/recon['delta_xy'][-1] #-1 means last elemen in the list
+	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	
 	recon['calculate_cost'] = 0 #0 for no 1 for yes
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1 #Enable or disable NHICD algorithm
 
-##	recon['FBP_N_xy'] = proj['recon_N_r']
-##	if (recon['init_with_FBP'] == 1):
-	##	recon['FBP_N_xy'] = recon['FBP_N_xy']/recon['delta_xy'][0]
+	recon['FBP_N_xy'] = proj['recon_N_r']
+	if (recon['init_with_FBP'] == 1):
+		recon['FBP_N_xy'] = recon['FBP_N_xy']/recon['delta_xy'][0]
 
-##	if (proj['N_t'] % proj['recon_N_t'] != 0):
-	##	error_by_flag(1, 'ERROR: recon_init: recon_N_t must divide N_t')
+	if (proj['N_t'] % proj['recon_N_t'] != 0):
+		error_by_flag(1, 'ERROR: recon_init: recon_N_t must divide N_t')
 
-##	recon['updateProjOffset'] = np.asarray(recon['updateProjOffset'])	
+	recon['updateProjOffset'] = np.asarray(recon['updateProjOffset'])	
 	##if (len(recon['r']) != len(recon['c_s']) or len(recon['r']) != len(recon['c_t']) or len(recon['r']) != len(recon['sigma_s']) or len(recon['r']) != len(recon['sigma_t'])):
 		##error_by_flag (1, 'ERROR: recon_init: Lengths of r, c_t, c_s, sigma_s, sigma_t does not match')
 
-##	if (len(recon['delta_xy']) != len(recon['voxel_thresh']) or len(recon['delta_xy']) != len(recon['cost_thresh']) or len(recon['delta_xy']) != len(recon['initICD']) or len(recon['delta_xy']) != len(recon['writeTiff']) or len(recon['delta_xy']) != len(recon['delta_z'])):
-	##	error_by_flag (1, 'ERROR: recon_init: Lengths of delta_xy, voxel_thresh, cost_thresh, initICD, writeTiff, sigma_t does not match')
+	##if (len(recon['delta_xy']) != len(recon['voxel_thresh']) or len(recon['delta_xy']) != len(recon['cost_thresh']) or len(recon['delta_xy']) != len(recon['initICD']) or len(recon['delta_xy']) != len(recon['writeTiff']) or len(recon['delta_xy']) != len(recon['delta_z'])):
+		##error_by_flag (1, 'ERROR: recon_init: Lengths of delta_xy, voxel_thresh, cost_thresh, initICD, writeTiff, sigma_t does not match')
 	
 	return recon
 

@@ -1,10 +1,17 @@
 #! /usr/bin/python
 
+from XT_Initialize_v2 import proj_init, recon_init, files_init
+from XT_MBIR_Reconstruction import do_MBIR_reconstruction
+#from XT_FBP_Reconstruction import do_FBP_reconstruction
+from XT_IOMisc import error_by_flag
+from XT_IOMisc import write_object2HDF
+from XT_ObjectHDFIO import writepar_object2HDF
+from XT_ObjectHDFIO import writepar_tiff_from_object_bin_file
+from XT_IOMisc import write_tiff_from_object_bin_file
 import argparse
 import time
 import os
-from XT_Initialize_v2 import proj_init, recon_init, files_init
-
+#from mpi4py import MPI
 def main():
 	
 	parser = argparse.ArgumentParser()
@@ -14,7 +21,7 @@ def main():
 	parser.add_argument("--output_hdf5", help="Full path of the output hdf5 file")
         parser.add_argument("--rot_center", help="Center of rotation of the object in units of detector pixels",type=float,default=1280)
         parser.add_argument("--pix_size", help="Size of the detector pixels in micro meter",type=float,default=.6)
-	parser.add_argument("--num_views", help="Number of views for the data",type=int)
+	parser.add_argument("--num_views", help="Number of views for the data",type=int,default=1024)
 
         #Reconstruction parameters
         parser.add_argument("--x_width", help="Number of detector elements to use along x-direction",type=int,default=2560)
@@ -32,6 +39,13 @@ def main():
         parser.add_argument("--num_nodes",help="Number of nodes to use",type=int,default=1)
 	parser.add_argument("--num_threads",help="Number of threads per node",type=int,default=32)
 	
+        #Parameters from the old Main program which we need to talk about removing 
+        parser.add_argument("--create_objectHDFtiffonly", help="specify whether you want to create HDF and tiff output files only", action="store_true")
+	parser.add_argument("--setup_launch_folder", help="Specify whether you want to setup the launch folder", action="store_true")
+	parser.add_argument("--run_reconstruction", help="Run reconstruction code", action="store_true")
+	parser.add_argument("--NERSC", help="Use NERSC when running on NERSC systems", action="store_true")
+	parser.add_argument("--Purdue", help="Use Purdue when running on Conte or Carter", action="store_true")
+
         args = parser.parse_args()
         
         inputs = {}
@@ -56,10 +70,53 @@ def main():
 
 	recon = {}
 	files = {}
-        
+	recon['node_num'] = inputs['num_nodes']
+
+        if (args.Purdue):
+		recon['num_threads'] = inputs['num_threads']
+		files['scratch'] = os.environ['RCAC_SCRATCH']
+		files['data_scratch'] = os.environ['RCAC_SCRATCH']
+		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) + ' -machinefile nodefile '
+		recon['compile_command'] = 'mpicc '
+		recon['HPC'] = 'Purdue' 
+		recon['rank'] = MPI.COMM_WORLD.rank
+	elif (args.NERSC):
+		recon['num_threads'] = inputs['num_threads']
+		files['scratch'] = os.environ['SCRATCH']
+		files['data_scratch'] = os.environ['GSCRATCH']
+		recon['run_command'] = 'aprun -j 2 -n ' + str(recon['node_num']) + ' -N 1 -d ' + str(recon['num_threads']) + ' -cc none '
+		recon['compile_command'] = 'cc '
+		recon['HPC'] = 'NERSC'
+		recon['rank'] = 0		
+	else:
+		error_by_flag(1, 'HPC system not recognized')
+
+       
         proj = proj_init(inputs)
         recon = recon_init(proj, recon,inputs)
-#        files = files_init(files,inputs)
+        files = files_init(files,inputs)
+
+	recon['set_up_launch_folder'] = 0	
+	if args.setup_launch_folder:
+		recon['set_up_launch_folder'] = 1
+
+	recon['reconstruct'] = 0
+	if (args.run_reconstruction and args.create_objectHDFtiffonly == False):
+		recon['reconstruct'] = 1
+
+	if (recon['recon_type'] == 'MBIR'):
+		print 'main: Will do MBIR reconstruction'
+		do_MBIR_reconstruction(proj, recon, files)
+	else:
+		print 'ERROR: main: Reconstruction type not recognized'
+
+	if (args.create_objectHDFtiffonly):
+		if (recon['HPC'] == 'Purdue'):
+			recon['size'] = MPI.COMM_WORLD.size
+#			writepar_object2HDF (proj, recon, files)
+			writepar_tiff_from_object_bin_file (proj, recon, files)
+		else:
+			write_tiff_from_object_bin_file (proj, recon, files)
     	
         print proj
         print recon

@@ -1,3 +1,4 @@
+#! /usr/bin/python
 
 from os import system
 from XT_IOMisc import create_folder, error_by_flag
