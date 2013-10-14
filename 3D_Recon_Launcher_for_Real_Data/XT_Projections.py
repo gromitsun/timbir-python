@@ -66,7 +66,7 @@ def generate_projections_nersc (proj, recon, files, path2launch):
 	if (recon['sinobin'] != 1):
 		bright = np.transpose(count_expected)
 	for i in range(proj['recon_N_p']):
-		data = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + '_0000_' + str(i).zfill(4) + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16)
+		data = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + '_0000_' + str(proj['proj_start'] + i*proj['view_subsmpl_fact']).zfill(4) + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16)
 		count_data = decimate_count_data_in_r((np.abs(data - dark)).astype(np.float64), true_length_r, proj['recon_N_r'])	
 		count_data = decimate_count_data_in_t(count_data, proj['N_t']/recon['node_num'], proj['recon_N_t']/recon['node_num'])
 		#count_data = decimate_count_data((np.abs(data[i,...])).astype(np.float64), true_length_r, proj['recon_N_r'])	
