@@ -22,7 +22,8 @@ def main():
         parser.add_argument("--rot_center", help="Center of rotation of the object in units of detector pixels",type=float,default=1280)
         parser.add_argument("--pix_size", help="Size of the detector pixels in micro meter",type=float,default=.6)
 	parser.add_argument("--num_views", help="Number of views for the data",type=int,default=1024)
-
+        parser.add_argument("--view_subsmpl_fact", help="View skipping factor. This can be used to subset the data in terms of views",type=int,default=1)
+    
         #Reconstruction parameters
         parser.add_argument("--x_width", help="Number of detector elements to use along x-direction",type=int,default=2560)
         parser.add_argument("--z_start", help="Starting detector pixel along z-direction",type=int,default=0)
@@ -55,6 +56,7 @@ def main():
         inputs['rot_center'] = args.rot_center        
         inputs['pix_size'] = args.pix_size
         inputs['num_views'] = args.num_views
+	inputs['view_subsmpl_fact'] = args.view_subsmpl_fact
         inputs['x_width'] = args.x_width
         inputs['z_start'] = args.z_start
         inputs['z_numElts'] = args.z_numElts

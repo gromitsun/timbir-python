@@ -46,6 +46,7 @@ def proj_init (inputs):
 	proj['K'] = 1 #Set to 1
 	proj['N_theta'] = inputs['num_views'] #Equal to proj num
 
+        proj['view_subsmpl_fact'] = inputs['view_subsmpl_fact']
 	proj['N_r'] = 2560 #Total number of detector pixels
 	proj['length_r'] = inputs['pix_size']*proj['N_r'] #0.65 is pixel size in micro meter	
 	proj['length_t'] = inputs['pix_size']*proj['N_t']	
