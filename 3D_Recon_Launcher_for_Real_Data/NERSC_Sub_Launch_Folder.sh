@@ -2,9 +2,9 @@
 
 #Sets up Launch folder : Creates data; binaries; splits into mpi tasks, copies into launch folder
 
-#PBS -q regular
+#PBS -q debug
 #PBS -l mppwidth=1
-#PBS -l walltime=01:00:00
+#PBS -l walltime=00:30:00
 #PBS -N setupFolders
 #PBS -e my_job.$PBS_JOBID.err
 #PBS -o my_job.$PBS_JOBID.out
