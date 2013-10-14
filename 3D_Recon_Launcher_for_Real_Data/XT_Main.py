@@ -72,6 +72,7 @@ def main():
 	if (recon['recon_type'] == 'MBIR'):
 		print 'main: Will do MBIR reconstruction'
 		do_MBIR_reconstruction(proj, recon, files)
+		write_object2HDF (proj, recon, files)
 	elif (recon['recon_type'] == 'FBP'):
 		print 'main: Will do FBP reconstruction'
 		do_FBP_reconstruction(proj, recon, files)
