@@ -34,11 +34,11 @@ def proj_init (files):
 	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 
-	proj['recon_N_r'] = 512 #Total number of detector elements to be used (crops to nearest power of 2 and then down samples to specified number 
+	proj['recon_N_r'] = 1024 #Total number of detector elements to be used (crops to nearest power of 2 and then down samples to specified number 
 	proj['slice_t_start'] = 1000 #parallel to z
-	proj['N_t'] = 8*4 #Number of slices 
-	proj['recon_N_t'] = 8 #Downsampled to N_t
-	proj['rotation_center_r'] = 256 -1/4 #detector pixels from left; To Do  
+	proj['N_t'] = 64 #Number of slices 
+	proj['recon_N_t'] = 64 #Downsampled to N_t
+	proj['rotation_center_r'] = 256*2 -1/2 #detector pixels from left; To Do  
 	proj['proj_start'] = 0 #view index start
 	proj['proj_num'] = 1024 #num of views to use 
 	proj['N_p'] = 1024 #total number of supposed to be taken. For 3D take equal to proj_num
@@ -133,16 +133,16 @@ def recon_init (proj, recon):
         #recon['only_Edge_Updates'] = [0]
         #recon['initMagUpMap'] = [1]
 	
-	recon['voxel_thresh'] = [5, 10, 20, 20] #4 stage multi-resolution, with stopping in HU
+	recon['voxel_thresh'] = [10, 20, 35, 35] #4 stage multi-resolution, with stopping in HU
         recon['cost_thresh'] = [10, 10, 10, 10] #percentage change presnt-prev / present - initial
         recon['delta_xy'] = [8, 4, 2, 1] #Multi-res multiple of det pixel size
-        recon['delta_z'] = [1, 1, 1, 1] #Mutli-res multi-resolution 
+        recon['delta_z'] = [8, 4, 2, 1] #Mutli-res multi-resolution 
         recon['initICD'] = [0, 2, 2, 2] #upsampling factor; 0 - no umpsample , 2 - xy upsampling, 3 - xy,z upsampling
         recon['sinobin'] = 1 #1-multi-res or 3-mult-grid  
         recon['writeTiff'] = [1, 1, 1, 1] #1 writes upon termination
         recon['WritePerIter'] = [0, 0, 0, 1] #Writes after each iteration
         recon['updateProjOffset'] = [0, 2, 3, 3] #update gain fluction 0 - no estimation, 1 - initialize and not estimated, 2 - not read but estimated , 3 initialized and estimated
-        recon['iterations'] = [30, 20, 10] #max iter
+        recon['iterations'] = [30, 20, 10, 10] #max iter
         recon['only_Edge_Updates'] = [0, 0, 0, 0] #DO NOT USE
         recon['initMagUpMap'] = [0, 1, 1, 1] #Update Mag Map 
 	
@@ -164,7 +164,7 @@ def recon_init (proj, recon):
 	recon['N_xy'] = proj['recon_N_r']/recon['delta_xy'][-1] #-1 means last elemen in the list
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	
-	recon['calculate_cost'] = 1 #0 for no 1 for yes
+	recon['calculate_cost'] = 0 #0 for no 1 for yes
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1 #Enable or disable NHICD algorithm
 

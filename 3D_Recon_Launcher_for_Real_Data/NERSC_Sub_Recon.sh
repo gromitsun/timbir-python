@@ -2,7 +2,7 @@
 
 #PBS -q regular
 #PBS -l mppwidth=48
-#PBS -l walltime=4:00:00
+#PBS -l walltime=5:00:00
 #PBS -N mpi_test
 #PBS -e my_job.$PBS_JOBID.err
 #PBS -o my_job.$PBS_JOBID.out
