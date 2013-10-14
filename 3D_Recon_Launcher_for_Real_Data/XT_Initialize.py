@@ -137,7 +137,7 @@ def recon_init (proj, recon):
         recon['cost_thresh'] = [10, 10, 10, 10] #percentage change presnt-prev / present - initial
         recon['delta_xy'] = [8, 4, 2, 1] #Multi-res multiple of det pixel size
         recon['delta_z'] = [8, 4, 2, 1] #Mutli-res multi-resolution 
-        recon['initICD'] = [0, 2, 2, 2] #upsampling factor; 0 - no umpsample , 2 - xy upsampling, 3 - xy,z upsampling
+        recon['initICD'] = [0, 3, 3, 3] #upsampling factor; 0 - no umpsample , 2 - xy upsampling, 3 - xy,z upsampling
         recon['sinobin'] = 1 #1-multi-res or 3-mult-grid  
         recon['writeTiff'] = [1, 1, 1, 1] #1 writes upon termination
         recon['WritePerIter'] = [0, 0, 0, 1] #Writes after each iteration

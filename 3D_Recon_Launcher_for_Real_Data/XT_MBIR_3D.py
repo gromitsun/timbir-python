@@ -45,6 +45,7 @@ def main():
 	parser.add_argument("--run_reconstruction", help="Run reconstruction code", action="store_true")
 	parser.add_argument("--NERSC", help="Use NERSC when running on NERSC systems", action="store_true")
 	parser.add_argument("--Purdue", help="Use Purdue when running on Conte or Carter", action="store_true")
+        parser.add_argument("--Carver", help="Used to indicate HPC", action="store_true")
 
         args = parser.parse_args()
         
@@ -88,9 +89,16 @@ def main():
 		recon['compile_command'] = 'cc '
 		recon['HPC'] = 'NERSC'
 		recon['rank'] = 0		
+	elif (args.Carver):
+		recon['num_threads'] = inputs['num_threads']
+		files['scratch'] = os.environ['SCRATCH']
+		files['data_scratch'] = os.environ['GSCRATCH']
+		recon['run_command'] = 'mpirun -np ' + str(recon['node_num']) + ' -bynode '
+		recon['compile_command'] = 'mpicc '
+		recon['HPC'] = 'NERSC'
+		recon['rank'] = 0
 	else:
 		error_by_flag(1, 'HPC system not recognized')
-
        
         proj = proj_init(inputs)
         recon = recon_init(proj, recon,inputs)

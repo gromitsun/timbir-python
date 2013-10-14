@@ -28,7 +28,10 @@ def proj_init (inputs):
 	proj = {}
 	proj['Path2Dataset'] = inputs['input_hdf5']
 	proj['Path2WhiteDark'] = inputs['input_hdf5']
-	proj['Dataset_Name'] =  inputs['input_hdf5'][:-3] #This removes the .h5 extension from the file for LBNL data sets
+
+        Temp1 = inputs['input_hdf5'].split("/") #splits the string into separate parts delimited by /
+        Temp2 = Temp1[-1] #extracts the last element of the parsed string which contains the input hdf5
+	proj['Dataset_Name'] =  Temp2[:-3] #This removes the .h5 extension from the file for LBNL data sets
 
 	proj['Num_Bright_Dark'] = 30
 
@@ -107,7 +110,7 @@ def recon_init (proj, recon,inputs):
 	recon['sigma_s'] = [(10**5)/inputs['smoothness']] #need to automatically set. To Do
 	recon['sigma_t'] = [1] #Ignored for 3d recon
 	
-	recon['ZingerT'] = inputs['zinger_thresh'] #Need to set automatically
+	recon['ZingerT'] = [inputs['zinger_thresh']] #Need to set automatically
 	recon['ZingerDel'] = [0.1]
 
 	recon['init_object4mHDF'] = 0
