@@ -27,23 +27,29 @@ from XT_IOMisc import error_by_flag
 def proj_init (files):
 	proj = {}
 
-	proj['Path2Dataset'] = files['data_scratch'] + "/LBNL_Datasets/20131004_013841_parikh_soil_microaggregate_1-2_0-15.h5"
-	proj['Path2WhiteDark'] = files['data_scratch'] + "/LBNL_Datasets/20131004_013841_parikh_soil_microaggregate_1-2_0-15.h5"
-	proj['Dataset_Name'] = '20131004_013841_parikh_soil_microaggregate_1-2_0-15'
+	#proj['Path2Dataset'] = files['data_scratch'] + "/LBNL_Datasets/20131004_013841_parikh_soil_microaggregate_1-2_0-15.h5"
+	#proj['Path2WhiteDark'] = files['data_scratch'] + "/LBNL_Datasets/20131004_013841_parikh_soil_microaggregate_1-2_0-15.h5"
+	#proj['Dataset_Name'] = '20131004_013841_parikh_soil_microaggregate_1-2_0-15'
+	
+	proj['Path2Dataset'] = files['data_scratch'] + "/LBNL_Datasets/20130118_150718_chevron_orig_again_WLa.h5"
+	proj['Path2WhiteDark'] = files['data_scratch'] + "/LBNL_Datasets/20130118_150718_chevron_orig_again_WLa.h5"
+	proj['Dataset_Name'] = '20130118_150718_chevron_orig_again_WLa'
 	proj['Num_Bright_Dark'] = 30
 	#proj['Path2Dataset'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
 	#proj['Path2WhiteDark'] = "/Volumes/Stack-1/APS_Datasets/Solidification_Small_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_2_ROI_2000x2080_Ramp_5/k-32-02ms_1.hdf"
-
-	proj['recon_N_r'] = 1024 #Total number of detector elements to be used (crops to nearest power of 2 and then down samples to specified number 
-	proj['slice_t_start'] = 1000 #parallel to z
-	proj['N_t'] = 64 #Number of slices 
-	proj['recon_N_t'] = 64 #Downsampled to N_t
-	proj['rotation_center_r'] = 256*2 -1/2 #detector pixels from left; To Do  
+	
+	proj['view_subsmpl_fact'] = 4
+	proj['recon_N_r'] = 2560/4 #Total number of detector elements to be used (crops to nearest power of 2 and then down samples to specified number 
+	proj['slice_t_start'] = 100 #parallel to z
+	proj['N_t'] = 4*4 #Number of slices 
+	proj['recon_N_t'] = 4 #Downsampled to N_t
+	#proj['rotation_center_r'] = 1276.0 #detector pixels from left; To Do  
+	proj['rotation_center_r'] = 1179.0/4 #detector pixels from left; To Do  
 	proj['proj_start'] = 0 #view index start
-	proj['proj_num'] = 1024 #num of views to use 
-	proj['N_p'] = 1024 #total number of supposed to be taken. For 3D take equal to proj_num
+	proj['proj_num'] = 2048 #num of views to use 
+	proj['N_p'] = 2048 #total number of supposed to be taken. For 3D take equal to proj_num
 	proj['K'] = 1 #Set to 1
-	proj['N_theta'] = 1024 #Equal to proj num
+	proj['N_theta'] = 2048 #Equal to proj num
 
 	proj['N_r'] = 2560 #Total number of detector pixels
 	proj['length_r'] = 0.65*proj['N_r'] #0.65 is pixel size in micro meter	
@@ -59,8 +65,8 @@ def proj_init (files):
 	print 'clip_list_of_views: Number of views deleted are ', angles_del.size, '. Deleted views are ' + str(angles_del) 
 	print 'clip_list_of_views: Deleted views\' times are ' + str(times_del)
 
-	proj['angles'] = angles_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
-	proj['times'] = times_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
+	proj['angles'] = angles_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num'] : proj['view_subsmpl_fact']]
+	proj['times'] = times_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num'] : proj['view_subsmpl_fact']]
 	
 	proj['recon_N_p'] = len(proj['angles']) #total number of angles to be used	
 	print 'proj_init: Total number of projections used for reconstruction is ' + str(proj['recon_N_p'])
@@ -106,7 +112,7 @@ def recon_init (proj, recon):
 	recon['c_s'] = [10**-6] #10^-6
 	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [(10**5)] #need to automatically set. To Do
+	recon['sigma_s'] = [8*(10**5)] #need to automatically set. To Do
 	recon['sigma_t'] = [(10**2)] #Ignored for 3d recon
 	
 	recon['ZingerT'] = [100000] #Need to set automatically
