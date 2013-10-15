@@ -2,7 +2,7 @@
 
 #PBS -l nodes=2:ppn=1
 #PBS -l pvmem=10GB
-#PBS -l walltime=00:20:00
+#PBS -l walltime=02:00:00
 #PBS -N setupFolders
 #PBS -e my_job.$PBS_JOBID.err
 #PBS -o my_job.$PBS_JOBID.out
