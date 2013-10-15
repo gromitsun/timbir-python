@@ -61,8 +61,8 @@ def proj_init (inputs):
 	print 'clip_list_of_views: Number of views deleted are ', angles_del.size, '. Deleted views are ' + str(angles_del) 
 	print 'clip_list_of_views: Deleted views\' times are ' + str(times_del)
 
-	proj['angles'] = angles_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
-	proj['times'] = times_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
+	proj['angles'] = angles_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num'] : proj['view_subsmpl_fact']
+	proj['times'] = times_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num'] : proj['view_subsmpl_fact']]
 	
 	proj['recon_N_p'] = len(proj['angles']) #total number of angles to be used	
 	print 'proj_init: Total number of projections used for reconstruction is ' + str(proj['recon_N_p'])
