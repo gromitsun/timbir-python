@@ -3,7 +3,7 @@
 #PBS -q regular
 #PBS -l nodes=2:ppn=1
 #PBS -l pvmem=10GB
-#PBS -l walltime=02:00:00
+#PBS -l walltime=00:30:00
 #PBS -N mpi_test
 #PBS -e my_job.$PBS_JOBID.err
 #PBS -o my_job.$PBS_JOBID.out
@@ -12,6 +12,8 @@
 set mpi_tasks=2
 cd $PBS_O_WORKDIR
 
+module swap pgi intel
+module swap openmpi openmpi-intel
 module load python/2.7.3
 module load h5py
 module load pil

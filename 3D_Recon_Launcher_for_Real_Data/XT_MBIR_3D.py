@@ -117,6 +117,7 @@ def main():
 	if (recon['recon_type'] == 'MBIR'):
 		print 'main: Will do MBIR reconstruction'
 		do_MBIR_reconstruction(proj, recon, files)
+		write_object2HDF (proj, recon, files)
 	else:
 		print 'ERROR: main: Reconstruction type not recognized'
 
