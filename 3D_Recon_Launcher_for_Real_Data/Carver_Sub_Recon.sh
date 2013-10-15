@@ -11,6 +11,8 @@
 set mpi_tasks=2
 cd $PBS_O_WORKDIR
 
+module swap pgi intel
+module swap openmpi openmpi-intel
 module load python/2.7.3
 module load h5py
 module load pil
