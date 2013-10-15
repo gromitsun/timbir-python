@@ -14,7 +14,6 @@ cd $PBS_O_WORKDIR
 #module swap PrgEnv-pgi PrgEnv-intel
 #module load PrgEnv-intel
 module load python/2.7.3
-#module swap python/2.7.1 python/2.7.3
 module load h5py
 module load pil
 module load mpi4py

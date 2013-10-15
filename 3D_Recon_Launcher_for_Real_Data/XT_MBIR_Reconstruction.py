@@ -48,8 +48,8 @@ def do_MBIR_reconstruction(proj, recon, files):
 				error_by_flag(flag, 'ERROR: cannot copy projection.bin/weight.bin')
 			else:
 				if (recon['HPC'] == 'NERSC'):
-					for i in range(recon['node_num']):
-						recon['rank'] = i
+					for j in range(recon['node_num']):
+						recon['rank'] = j
 						generate_projections_nersc (proj, recon, files, path2launch)
 					recon['rank'] = 0
 				else:
