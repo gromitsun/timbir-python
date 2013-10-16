@@ -11,6 +11,7 @@ from XT_IOMisc import write_tiff_from_object_bin_file
 import argparse
 import time
 import os
+import math
 #from mpi4py import MPI
 def main():
 	
@@ -20,15 +21,16 @@ def main():
         parser.add_argument("--input_hdf5", help="Full path of the input hdf5 file")
 	parser.add_argument("--output_hdf5", help="Full path of the output hdf5 file")
         parser.add_argument("--code_launch_folder", help="Full path where the code executable is going to reside")
-        parser.add_argument("--rot_center", help="Center of rotation of the object in units of detector pixels",type=float,default=1280)
-        parser.add_argument("--pix_size", help="Size of the detector pixels in micro meter",type=float,default=.6)
-	parser.add_argument("--num_views", help="Number of views for the data",type=int,default=1024)
+        parser.add_argument("--rot_center", help="Center of rotation of the object in units of detector pixels",type=float,default=-1)
+        parser.add_argument("--pix_size", help="Size of the detector pixels in micro meter",type=float)
+	parser.add_argument("--num_views", help="Number of views for the data",type=int)
         parser.add_argument("--view_subsmpl_fact", help="View skipping factor. This can be used to subset the data in terms of views",type=int,default=1)
     
         #Reconstruction parameters
-        parser.add_argument("--x_width", help="Number of detector elements to use along x-direction",type=int,default=2560)
-        parser.add_argument("--z_start", help="Starting detector pixel along z-direction",type=int,default=0)
-        parser.add_argument("--z_numElts", help="Number of detector pixels to use along z-direction",type=int,default=8)
+        parser.add_argument("--x_width", help="Number of detector elements along x-direction",type=int)
+        parser.add_argument("--recon_x_width", help="Number of detector elements along x-direction",type=int,default=-1)
+        parser.add_argument("--z_start", help="Starting detector pixel along z-direction",type=int)
+        parser.add_argument("--z_numElts", help="Number of detector pixels to use along z-direction",type=int)
         parser.add_argument("--p",help="qGGMRF prior model parameter use to control how smooth the edge smoothness",type=float,default=1.2)
         parser.add_argument("--final_res_multiple",help="Final desired resolution of the reconstruction as a multiple of the detector pixel size",type=int,default=1)
 	parser.add_argument("--smoothness",help="A scaling parameter use to control the balance between resolution and noise in the reconstruction. This value is multiplied by a predtermined internal value",type=float,default=1)
@@ -55,11 +57,28 @@ def main():
         inputs['input_hdf5'] = args.input_hdf5
         inputs['output_hdf5']= args.output_hdf5
 	inputs['code_launch_folder']=args.code_launch_folder
-        inputs['rot_center'] = args.rot_center        
+
         inputs['pix_size'] = args.pix_size
         inputs['num_views'] = args.num_views
 	inputs['view_subsmpl_fact'] = args.view_subsmpl_fact
         inputs['x_width'] = args.x_width
+
+        if(args.recon_x_width != -1):
+            inputs['recon_x_width'] = args.recon_x_width
+        else:
+            inputs['recon_x_width'] = inputs['x_width']
+
+        if(args.rot_center != -1): #This means the user has input a center of rotation
+           if(args.x_width == args.recon_x_width): #If the recon width is same as original det, use same value
+	       inputs['rot_center'] = args.rot_center        
+           else: #else compute the center for this cropped/subsampled data
+               temp = inputs['recon_x_width']/2 + (args.recon_x_width/(2**math.floor(math.log(args.x_width,2))))*(args.rot_center-args.x_width/2)
+               inputs['rot_center'] = temp
+               print 'New computed center ='
+               print inputs['rot_center'] 
+        else: #If nothing is entered simple default it to the center of the detector
+	   inputs['rot_center'] = inputs['recon_x_width']/2
+
         inputs['z_start'] = args.z_start
         inputs['z_numElts'] = args.z_numElts
         inputs['p'] = args.p
@@ -131,9 +150,9 @@ def main():
 		else:
 			write_tiff_from_object_bin_file (proj, recon, files)
     	
-        print proj
-        print recon
-        print files		
+#        print proj
+#        print recon
+#        print files		
         
 	print 'main: Done!'
 

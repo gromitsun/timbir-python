@@ -33,9 +33,8 @@ def proj_init (inputs):
         Temp2 = Temp1[-1] #extracts the last element of the parsed string which contains the input hdf5
 	proj['Dataset_Name'] =  Temp2[:-3] #This removes the .h5 extension from the file for LBNL data sets
 
-	proj['Num_Bright_Dark'] = 30
+	proj['Num_Bright_Dark'] = 30 #TO DO : Need to remove
 
-	proj['recon_N_r'] = inputs['x_width'] #Total number of detector elements to be used (crops to nearest power of 2 and then down samples to specified number 
 	proj['slice_t_start'] = inputs['z_start'] #parallel to z
 	proj['N_t'] = inputs['z_numElts'] #Number of slices 
 	proj['recon_N_t'] =  inputs['z_numElts'] #Downsampled to N_t
@@ -44,11 +43,14 @@ def proj_init (inputs):
 	proj['proj_num'] = inputs['num_views'] #num of views to use - how to read this from the hdf file?  
 	proj['N_p'] = inputs['num_views'] #total number of supposed to be taken. For 3D take equal to proj_num
 	proj['K'] = 1 #Set to 1
-	proj['N_theta'] = inputs['num_views'] #Equal to proj num
 
+	proj['N_theta'] = inputs['num_views'] #Equal to proj num
         proj['view_subsmpl_fact'] = inputs['view_subsmpl_fact']
-	proj['N_r'] = 2560 #Total number of detector pixels
-	proj['length_r'] = inputs['pix_size']*proj['N_r'] #0.65 is pixel size in micro meter	
+
+	proj['N_r'] = inputs['x_width'] #Total number of detector pixels in the data
+	proj['recon_N_r'] =  inputs['recon_x_width'] #Total number of detector elements to be used (crops to nearest power of 2 and then down samples to specified number 
+
+	proj['length_r'] = inputs['pix_size']*proj['N_r'] #pix_size is pixel size in micro meter	
 	proj['length_t'] = inputs['pix_size']*proj['N_t']	
 	proj['L'] = proj['N_theta']/proj['K'] 
 	
