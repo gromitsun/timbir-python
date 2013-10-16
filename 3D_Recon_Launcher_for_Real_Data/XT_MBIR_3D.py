@@ -72,7 +72,7 @@ def main():
            if(args.x_width == args.recon_x_width): #If the recon width is same as original det, use same value
 	       inputs['rot_center'] = args.rot_center        
            else: #else compute the center for this cropped/subsampled data
-               temp = inputs['recon_x_width']/2 + (args.recon_x_width/(2**math.floor(math.log(args.x_width,2))))*(args.rot_center-args.x_width/2)
+               temp = inputs['recon_x_width']/2.0 + (args.recon_x_width/(2.0**math.floor(math.log(args.x_width,2))))*(args.rot_center-args.x_width/2)
                inputs['rot_center'] = temp
                print 'New computed center ='
                print inputs['rot_center'] 

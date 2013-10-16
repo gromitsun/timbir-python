@@ -21,4 +21,4 @@ module load mpi4py
 
 setenv OMP_NUM_THREADS 8
 
-python XT_MBIR_3D.py --setup_launch_folder --run_reconstruction --Carver --input_hdf5 $SCRATCH/LBNL_Datasets/20131004_013841_parikh_soil_microaggregate_1-2_0-15.h5 --code_launch_folder $SCRATCH/Recon_Runs/LBNL_Recons/XT_run/ --output_hdf5 $SCRATCH/Results/Carver/ --pix_size 0.65 --num_views 1024 --x_width 2560 --recon_x_width 2560 --z_start 1000 --z_numElts 256 --num_nodes 4 --num_threads 8 --rot_center 1276 --final_res_multiple 1 --smoothness .25 --zinger_thresh 40 --stop_threshold 35 --view_subsmpl_fact 2 
+python XT_MBIR_3D.py --setup_launch_folder --run_reconstruction --Carver --input_hdf5 $SCRATCH/LBNL_Datasets/20131004_013841_parikh_soil_microaggregate_1-2_0-15.h5 --code_launch_folder $SCRATCH/Recon_Runs/LBNL_Recons/XT_run/ --output_hdf5 $SCRATCH/Results/Carver/ --pix_size 0.65 --num_views 1024 --x_width 2560 --recon_x_width 2560 --z_start 1000 --z_numElts 256 --num_nodes 4 --num_threads 8 --rot_center 1276 --final_res_multiple 1 --smoothness .5 --zinger_thresh 40 --stop_threshold 35 --view_subsmpl_fact 2 
