@@ -57,8 +57,8 @@ def do_MBIR_reconstruction(proj, recon, files):
 					dev = dev/recon['node_num']			
 					sigma_s = convert_um2HU(dev*np.array(recon['sigma_s']))
 					#print convert_um2HU(dev)
-					#print recon['sigma_s']
-					print 'The regularization parameter is sigma_s = ' + sigma_s
+					print recon['sigma_s']
+					#print 'The regularization parameter is sigma_s = ' + sigma_s
 					recon['rank'] = 0
 				else:
 					generate_projections_nersc(proj, recon, files, path2launch)
