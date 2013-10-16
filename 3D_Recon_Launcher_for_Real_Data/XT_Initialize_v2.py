@@ -110,7 +110,10 @@ def recon_init (proj, recon,inputs):
 	recon['c_s'] = [10**-6] #10^-6
 	recon['c_t'] = [10**-4] 
 
-	recon['sigma_s'] = [(10**5)/inputs['smoothness']] #need to automatically set. To Do
+	temp = ((inputs['pix_size']**3)*(proj['times'][-1] - proj['times'][0]))**(1.0/inputs['p'])
+	temp = temp/inputs['pix_size']
+	recon['smoothness'] = [inputs['smoothness']]
+	recon['sigma_s'] = [temp/inputs['smoothness']] #need to automatically set. To Do
 	recon['sigma_t'] = [1] #Ignored for 3d recon
 	
 	recon['ZingerT'] = [inputs['zinger_thresh']] #Need to set automatically

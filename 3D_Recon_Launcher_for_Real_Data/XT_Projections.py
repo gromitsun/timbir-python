@@ -4,6 +4,16 @@ import numpy as np
 import h5py
 #from mpi4py import MPI
 
+def calcAvgDeviationCount (weight, num_views, num_slices):
+	dev = 0.0
+	for i in range(num_views):
+		for j in range(num_slices):
+			data = weight[i,j,:]
+			mean = np.mean(np.log(data[data > 0]))
+			dev = dev + np.mean(np.absolute(np.log(data[data > 0]) - mean))
+	dev = dev/(num_views*num_slices)
+	return dev
+
 def decimate_count_data_in_r (data, true_length, reduced_length):
 	ratio = true_length/reduced_length
 	shape = data.shape
@@ -69,7 +79,8 @@ def generate_projections_nersc (proj, recon, files, path2launch):
 		data = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + '_0000_' + str(proj['proj_start'] + i*proj['view_subsmpl_fact']).zfill(4) + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16)
 		count_data = decimate_count_data_in_r((np.abs(data - dark)).astype(np.float64), true_length_r, proj['recon_N_r'])	
 		count_data = decimate_count_data_in_t(count_data, proj['N_t']/recon['node_num'], proj['recon_N_t']/recon['node_num'])
-		#count_data = decimate_count_data((np.abs(data[i,...])).astype(np.float64), true_length_r, proj['recon_N_r'])	
+		#count_data = decimate_count_data((np.abs(data[i,...])).astype(np.float64), true_length_r, proj['recon_N_r'])
+			
 		weight[i,...] = np.transpose(count_data)
 		if (recon['sinobin'] == 1):
 			projections[i,...] = np.transpose(np.log(count_expected/count_data))
@@ -92,6 +103,7 @@ def generate_projections_nersc (proj, recon, files, path2launch):
 	print "Mean of weight data from node " + str(rank) + " is ", np.mean(weight)
 	
 	print "generate_projections: Generated projections for node ", rank
+	dev = calcAvgDeviationCount (weight, proj['recon_N_p'], proj['recon_N_t']/recon['node_num'])/proj['length_r']
 	
 #	if (recon['sinobin'] == 1):
 #		print 'generate_projections: The average value of projection is ', np.mean(proj['projections'])
@@ -102,7 +114,7 @@ def generate_projections_nersc (proj, recon, files, path2launch):
 
 	FILE.close()
 	FILE_wd.close()
-	return proj
+	return dev
 
 
 def generate_projections_purdue (proj, recon, files, path2launch):
@@ -176,6 +188,7 @@ def generate_projections_purdue (proj, recon, files, path2launch):
 	fid = open(path2launch + 'weight_n' + str(rank) + '.bin','wb')
 	weight.tofile(fid)
 	fid.close()
+	
 	print "Mean of weight data from node " + str(rank) + " is ", np.mean(weight)
 	
 	print "generate_projections: Generated projections for node ", rank
@@ -189,7 +202,6 @@ def generate_projections_purdue (proj, recon, files, path2launch):
 
 	FILE.close()
 	FILE_wd.close()
-	return proj
 
 
 """

@@ -5,6 +5,8 @@ from XT_IOMisc import create_folder, error_by_flag
 from XT_Projections import generate_projections_nersc
 from XT_Projections import generate_projections_purdue
 from XT_ObjectHDFIO import initpar_object4mHDF
+from XT_IOMisc import convert_um2HU
+import numpy as np
 
 def write_views2file (path2save, views, times):
 	fid = open(path2save + 'view_info.txt', 'w')
@@ -23,7 +25,7 @@ def do_MBIR_reconstruction(proj, recon, files):
 ###############################################################################
 
 	for i in range(len(recon['sigma_s'])):
-		path2launch = launch_folder + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + '/'
+		path2launch = launch_folder + 'run_' + 'smooth_' + str(recon['smoothness'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + '/'
 		if (recon['set_up_launch_folder'] == 1):
 			if (recon['rank'] == 0):
 				print 'Setting up run folder by node with rank ', recon['rank']
@@ -47,13 +49,20 @@ def do_MBIR_reconstruction(proj, recon, files):
 				flag = system('cp ' + path2source + 'bright*.bin ' + path2source + 'projection*.bin ' + path2source + 'weight*.bin ' + path2launch + '.')
 				error_by_flag(flag, 'ERROR: cannot copy projection.bin/weight.bin')
 			else:
+				dev = 0.0
 				if (recon['HPC'] == 'NERSC'):
 					for j in range(recon['node_num']):
 						recon['rank'] = j
-						generate_projections_nersc (proj, recon, files, path2launch)
+						dev = dev + generate_projections_nersc (proj, recon, files, path2launch)
+					dev = dev/recon['node_num']			
+					sigma_s = convert_um2HU(dev*np.array(recon['sigma_s']))
+					#print convert_um2HU(dev)
+					#print recon['sigma_s']
+					print 'The regularization parameter is sigma_s = ' + sigma_s
 					recon['rank'] = 0
 				else:
 					generate_projections_nersc(proj, recon, files, path2launch)
+					sigma_s = recon['sigma_s']
 					
 
 			macros = ' -openmp -DBH_QUAD_COEF="' + str(recon['BH_Quad_Coef']) + '" -DHOUNSFIELD_MAX="' + str(recon['maxHU']) + '" -DHOUNSFIELD_MIN="' + str(recon['minHU']) + '"' 
@@ -87,7 +96,7 @@ def do_MBIR_reconstruction(proj, recon, files):
 				ZingerT = recon['ZingerT'][i]
 				if (recon['ZingerDel'][i] == 0 and multidx == 0):
 					ZingerT = 100000 
-				command = recon['run_command'] + ' ./XT_Engine --p ' + str(recon['p']) + ' --sigma_s ' + str(recon['sigma_s'][i]) + ' --sigma_t ' + str(recon['sigma_t'][i]) + ' --c_s ' + str(recon['c_s'][i]) + ' --c_t ' + str(recon['c_t'][i]) + ' --delta_xy ' + str(recon['delta_xy'][multidx]) + ' --delta_z ' + str(recon['delta_z'][multidx]) + ' --length_r ' + str(proj['length_r']) + ' --length_t ' + str(proj['length_t']) + ' --voxel_thresh ' + str(recon['voxel_thresh'][multidx]) + ' --cost_thresh ' + str(recon['cost_thresh'][multidx]) + ' --iter ' + str(recon['iterations'][multidx]) + ' --rotation_center ' + str(proj['rotation_center_r']) + ' --alpha ' + str(recon['alpha']) + ' --sinobin ' + str(recon['sinobin']) + ' --initICD ' + str(recon['initICD'][multidx]) + ' --Rtime0 ' + str(recon['Rtime0']) + ' --Rtime_delta ' + str(recon['Rtime_delta'][i]) + ' --Rtime_num ' + str(recon['Rtime_num'][i]) + ' --num_projections ' + str(proj['recon_N_p']) + ' --N_r ' + str(proj['recon_N_r']) + ' --N_t ' + str(proj['recon_N_t']) + ' --detector_slice_begin ' + '0' + ' --detector_slice_end ' + str(proj['recon_N_t']-1) + ' --num_threads ' + str(recon['num_threads']) + ' --radius_obj ' + str(recon['radius_obj']) + ' --updateProjOffset ' + str(recon['updateProjOffset'][multidx]) + ' --writeTiff ' + str(recon['writeTiff'][multidx]) + ' --zingerT ' + str(ZingerT) + ' --zingerDel ' + str(recon['ZingerDel'][i])
+				command = recon['run_command'] + ' ./XT_Engine --p ' + str(recon['p']) + ' --sigma_s ' + str(sigma_s[i]) + ' --sigma_t ' + str(recon['sigma_t'][i]) + ' --c_s ' + str(recon['c_s'][i]) + ' --c_t ' + str(recon['c_t'][i]) + ' --delta_xy ' + str(recon['delta_xy'][multidx]) + ' --delta_z ' + str(recon['delta_z'][multidx]) + ' --length_r ' + str(proj['length_r']) + ' --length_t ' + str(proj['length_t']) + ' --voxel_thresh ' + str(recon['voxel_thresh'][multidx]) + ' --cost_thresh ' + str(recon['cost_thresh'][multidx]) + ' --iter ' + str(recon['iterations'][multidx]) + ' --rotation_center ' + str(proj['rotation_center_r']) + ' --alpha ' + str(recon['alpha']) + ' --sinobin ' + str(recon['sinobin']) + ' --initICD ' + str(recon['initICD'][multidx]) + ' --Rtime0 ' + str(recon['Rtime0']) + ' --Rtime_delta ' + str(recon['Rtime_delta'][i]) + ' --Rtime_num ' + str(recon['Rtime_num'][i]) + ' --num_projections ' + str(proj['recon_N_p']) + ' --N_r ' + str(proj['recon_N_r']) + ' --N_t ' + str(proj['recon_N_t']) + ' --detector_slice_begin ' + '0' + ' --detector_slice_end ' + str(proj['recon_N_t']-1) + ' --num_threads ' + str(recon['num_threads']) + ' --radius_obj ' + str(recon['radius_obj']) + ' --updateProjOffset ' + str(recon['updateProjOffset'][multidx]) + ' --writeTiff ' + str(recon['writeTiff'][multidx]) + ' --zingerT ' + str(ZingerT) + ' --zingerDel ' + str(recon['ZingerDel'][i])
 			
 				if (recon['time_reg'] == 1):
 					command = command + ' --time_reg'
@@ -114,7 +123,7 @@ def do_MBIR_reconstruction(proj, recon, files):
 				if (recon['reconstruct'] == 0):
 					break
 				
-		path2results = result_folder + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '_zinger_' + str(recon['ZingerT'][i]) + '_' + str(recon['ZingerDel'][i]) + '/'
+		path2results = result_folder + 'MBIR_' + 'smooth_' + str(recon['smoothness'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + '/'
 		create_folder(path2results)	
 
 	        #Copy the output tiffs to the result folder

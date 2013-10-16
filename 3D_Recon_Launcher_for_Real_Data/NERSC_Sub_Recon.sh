@@ -1,8 +1,8 @@
 #!/bin/tcsh
 
-#PBS -q regular
+#PBS -q debug
 #PBS -l mppwidth=48
-#PBS -l walltime=6:00:00
+#PBS -l walltime=00:30:00
 #PBS -N mpi_test
 #PBS -e my_job.$PBS_JOBID.err
 #PBS -o my_job.$PBS_JOBID.out
