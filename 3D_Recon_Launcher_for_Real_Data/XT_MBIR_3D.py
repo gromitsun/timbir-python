@@ -19,6 +19,7 @@ def main():
         #Parameters associated with the acquired data
         parser.add_argument("--input_hdf5", help="Full path of the input hdf5 file")
 	parser.add_argument("--output_hdf5", help="Full path of the output hdf5 file")
+        parser.add_argument("--code_launch_folder", help="Full path where the code executable is going to reside")
         parser.add_argument("--rot_center", help="Center of rotation of the object in units of detector pixels",type=float,default=1280)
         parser.add_argument("--pix_size", help="Size of the detector pixels in micro meter",type=float,default=.6)
 	parser.add_argument("--num_views", help="Number of views for the data",type=int,default=1024)
@@ -53,6 +54,7 @@ def main():
         inputs = {}
         inputs['input_hdf5'] = args.input_hdf5
         inputs['output_hdf5']= args.output_hdf5
+	inputs['code_launch_folder']=args.code_launch_folder
         inputs['rot_center'] = args.rot_center        
         inputs['pix_size'] = args.pix_size
         inputs['num_views'] = args.num_views

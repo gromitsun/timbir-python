@@ -199,14 +199,9 @@ def recon_init (proj, recon,inputs):
 	copy_projections - If '1', copies projection.bin and weight.bin from source code folder. If '0' reads the projection data from HDF files, as is described in XT_Projections.py"""
 
 def files_init (files,inputs):
-	files['C_Source_Folder'] = "../Source_Code_3D/"
-	#files['Result_Folder'] = "../XT_Result_Repository/"
-	files['Result_Folder'] = inputs['output_hdf5'] #files['scratch'] + "/Recon_Runs/LBNL_Recons/XT_Result_Repository/" #Unncessary?
-
-	files['Proj_Offset_File'] = "../Source_Code_3D/proj_offset.bin" #Not used if 0 is mult-res gain parameter estimation
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/LBNL_Recons/XT_run/" #input by programmers
-	#files['Launch_Folder'] = "../XT_run/"
-
+	files['C_Source_Folder'] = "../Source_Code_3D/" #The script expects the C Code to be in this directory relative to the python scripts
+	files['Result_Folder'] = inputs['output_hdf5'] 
+	files['Launch_Folder'] = inputs['code_launch_folder']
 	files['copy_executables'] = 0 #0 - dont exec, copy code + compile; TO DO : Test if we can only copy this 
 	files['copy_projections'] = 0 #0 always for 3D
 
