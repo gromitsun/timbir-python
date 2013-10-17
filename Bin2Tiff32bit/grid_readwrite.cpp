@@ -37,7 +37,7 @@ void GridReadWrite::WriteFloatv2(double* data, string output_name, long image_si
 	
 	for(uint32 row = 0; row < image_size; row++){
 		for(int col = 0; col < image_size; col++){
-		  buf[col] = float(data[col+row*image_size])*1000; //convert from \mu m ^{-1} to mm^{-1}
+		  buf[col] = 10000.0*float(data[col+row*image_size]); //convert from \mu m ^{-1} to cm^{-1}
 		}
 		if (TIFFWriteScanline(result_tif, buf, row, 0) < 0){
 			cout << "Write Error!\n";

@@ -1,5 +1,9 @@
 #! /usr/bin/python
 
+#main function to take in a file path containing several bin files
+#corresponding to separate nodes and turning them to tiffs
+#usage: Bin2Tiff.py [-h] [--input_path INPUT_PATH][--output_tiff_path OUTPUT_TIFF_PATH]	[--tiff_base_name TIFF_BASE_NAME] [--num_nodes NUM_NODES][--z_start Z_START] [--z_numElts Z_NUMELTS][--im_width IM_WIDTH] [--pix_size PIX_SIZE]
+
 from SeparateBin2Tiff import Convert2Tiffs
 import argparse
 import time
