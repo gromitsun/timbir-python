@@ -131,7 +131,7 @@ def recon_init (proj, recon,inputs):
         if inputs['num_res'] > 1:
            recon['voxel_thresh'][0]=recon['voxel_thresh'][0]/2 #The the coarsest resolution lower the threshold
        
-        recon['cost_thresh'] = [20, 20, 20, 20] #percentage change presnt-prev / present - initial - Irrelevant
+        recon['cost_thresh'] = [20]*inputs['num_res'] #percentage change presnt-prev / present - initial - Irrelevant
 
         recon['delta_xy'] = [2**j for j in range(0,inputs['num_res'])]
         recon['delta_xy'] = recon['delta_xy'][::-1] #reverse the list 

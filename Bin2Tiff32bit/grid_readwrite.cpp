@@ -1,10 +1,16 @@
 #include "grid_readwrite.h"
 using namespace std;
 
-/* Inputs: */
+/* Inputs: 
+  data : A 1-D array containing the image with values in micrometer^-1 organized one row after another
+  output_name : The full name including path of the tiff file to be written
+  image_size : Number of rows and columns in the tiff 
+  pixel_size : size of each pixel in micro meter
+   */
 void GridReadWrite::WriteFloatv2(double* data, string output_name, long image_size, float pixel_size)
 {
-	float x_resolution = 10.0/pixel_size, y_resolution = 10.0/pixel_size;
+  float x_resolution = 10000.0/pixel_size, y_resolution = 10000.0/pixel_size; //number of pixels per centimeter
+
 	std::cout<<"Entering tiff writer "<<std::endl;
 
 	TIFF* result_tif = TIFFOpen(output_name.c_str(), "w");
@@ -31,7 +37,7 @@ void GridReadWrite::WriteFloatv2(double* data, string output_name, long image_si
 	
 	for(uint32 row = 0; row < image_size; row++){
 		for(int col = 0; col < image_size; col++){
-		  buf[col] = float(data[col+row*image_size])/pixel_size;
+		  buf[col] = float(data[col+row*image_size])*1000; //convert from \mu m ^{-1} to mm^{-1}
 		}
 		if (TIFFWriteScanline(result_tif, buf, row, 0) < 0){
 			cout << "Write Error!\n";

@@ -16,7 +16,7 @@ def Convert2Tiffs (inputs):
        for i in range(0,inputs['num_nodes']):
            temp_z_start = inputs['z_start']+ i*slices_per_node
            tmp_file = 'object_n'+str(i)+'_time_0.bin'
-           flag = system('./Bin2Tiff.x ' + inputs['input_path'] + tmp_file + ' ' + inputs['output_tiff_path'] + ' ' + inputs['tiff_base_name'] + ' ' + str(inputs['im_width']) + ' ' + str(temp_z_start) + ' ' + str(slices_per_node) + ' ' + str(inputs['pix_size']))	
+           flag = system('./Bin2Tiff ' + inputs['input_path'] + tmp_file + ' ' + inputs['output_tiff_path'] + ' ' + inputs['tiff_base_name'] + ' ' + str(inputs['im_width']) + ' ' + str(temp_z_start) + ' ' + str(slices_per_node) + ' ' + str(inputs['pix_size']))	
        	
 
        return flag
