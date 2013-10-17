@@ -40,6 +40,8 @@ def main():
         parser.add_argument("--stop_threshold",help="Stopping thresold as a percentage of average change in pixel values in units of HU",type=float,default=20)       
         parser.add_argument("--max_iter",help="Maximum number of ICD iterations for the algorithm",type=int,default=30)
         parser.add_argument("--num_res",help="Number of resolutions to be used",type=int,default=4)
+        parser.add_argument("--multires_2D", help="specify whether to use only 2-D multiresolution. This will slow the 3-D reconstruction but is useful for reconstructing a few slices quickly", action="store_true")
+
         parser.add_argument("--num_nodes",help="Number of nodes to use",type=int,default=1)
 	parser.add_argument("--num_threads",help="Number of threads per node",type=int,default=32)
 	
@@ -87,6 +89,14 @@ def main():
         inputs['stop_threshold'] = args.stop_threshold
         inputs['max_iter'] = args.max_iter
         inputs['num_res'] = args.num_res
+        
+
+        if (args.multires_2D):
+            inputs['multires_2D'] = 1 #A boolean variable
+        else:
+            inputs['multires_2D'] = 0
+        print inputs['multires_2D']
+
         inputs['num_views'] = args.num_views
         inputs['zinger_thresh'] = args.zinger_thresh
         inputs['num_nodes'] = args.num_nodes   

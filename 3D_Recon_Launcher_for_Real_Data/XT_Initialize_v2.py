@@ -135,11 +135,18 @@ def recon_init (proj, recon,inputs):
 
         recon['delta_xy'] = [2**j for j in range(0,inputs['num_res'])]
         recon['delta_xy'] = recon['delta_xy'][::-1] #reverse the list 
+        
+        if(inputs['multires_2D'] == 0):
+            recon['delta_z'] = recon['delta_xy'] #3D Mutli-res multi-resolution
+            recon['initICD'] = [3]*inputs['num_res'] #upsampling factor; 0 - no umpsample , 2 - xy upsampling, 3 - xy,z upsampling
+        else:
+            recon['delta_z'] = [1]*inputs['num_res'] #2D multiresolution
+            recon['initICD'] = [2]*inputs['num_res'] #upsampling factor; 0 - no umpsample , 2 - xy upsampling, 3 - xy,z upsampling
 
-        recon['delta_z'] = recon['delta_xy'] #Mutli-res multi-resolution 
-
-        recon['initICD'] = [3]*inputs['num_res'] #upsampling factor; 0 - no umpsample , 2 - xy upsampling, 3 - xy,z upsampling
-        recon['initICD'][0] = 0 
+        recon['initICD'][0] = 0 #at the coarsest resolution do not do an interpolation
+        print recon['delta_xy']
+        print recon['delta_z']
+        print recon['initICD']
 
         recon['sinobin'] = 1 #1-multi-res or 3-mult-grid  
         recon['writeTiff'] = [1]*inputs['num_res'] #1 writes upon termination
