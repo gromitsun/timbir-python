@@ -1118,7 +1118,7 @@ int ICD_BackProject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
 			for (k = 0; k < ScannedObjectPtr->N_x; k++){
 				x = ScannedObjectPtr->x0 + ((Real_t)k + 0.5)*ScannedObjectPtr->delta_xy;
 				y = ScannedObjectPtr->y0 + ((Real_t)j + 0.5)*ScannedObjectPtr->delta_xy;
-				if (x*x + y*y < ScannedObjectPtr->Length_X*ScannedObjectPtr->Length_X/4.0)
+				if (x*x + y*y < TomoInputsPtr->radius_obj*TomoInputsPtr->radius_obj)
 				{
 					for (l = 0; l < ScannedObjectPtr->N_z; l++)
 						Mask[i][j][k][l] = 1;
