@@ -190,12 +190,12 @@ def main():
 		print 'ERROR: main: Reconstruction type not recognized'
 
 	if (args.create_objectHDFtiffonly):
-		if (recon['HPC'] == 'Purdue'):
-			recon['size'] = MPI.COMM_WORLD.size
+#		if (recon['HPC'] == 'Purdue'):
+#			recon['size'] = MPI.COMM_WORLD.size
 #			writepar_object2HDF (proj, recon, files)
-			writepar_tiff_from_object_bin_file (proj, recon, files)
-		else:
-			write_tiff_from_object_bin_file (proj, recon, files)
+#			writepar_tiff_from_object_bin_file (proj, recon, files)
+#		else:
+		write_tiff_from_object_bin_file (proj, recon, files)
     	
 #        print proj
 #        print recon

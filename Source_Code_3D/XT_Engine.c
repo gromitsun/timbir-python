@@ -77,7 +77,8 @@ int computeWriteSinogram(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr,
 	char proj_file[100]=PROJECTION_FILENAME;
 	char weight_file[100]=WEIGHT_MATRIX_FILENAME;
 	int dim[4];
-
+	int32_t i, j, k;
+	
 	sprintf(proj_file, "%s_n%d", proj_file, TomoInputsPtr->node_rank);
 	sprintf(weight_file, "%s_n%d", weight_file, TomoInputsPtr->node_rank);
 	if(TomoInputsPtr->sinobin == 1)
@@ -102,6 +103,11 @@ int computeWriteSinogram(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr,
 		WriteMultiDimArray2Tiff (weight_file, dim, 0, 3, 1, 2, &(TomoInputsPtr->Weight[0][0][0]), 0, TomoInputsPtr->debug_file_ptr);
 	}
 
+	for (k = 0; k < SinogramPtr->N_p; k++)
+	for (i = 0; i < SinogramPtr->N_r; i++)
+	for (j = 0; j < SinogramPtr->N_t; j++)
+		TomoInputsPtr->Weight[k][i][j] /= TomoInputsPtr->var_est;
+	
 	return (0);
 }
 
