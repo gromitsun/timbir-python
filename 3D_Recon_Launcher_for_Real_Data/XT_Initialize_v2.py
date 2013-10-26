@@ -150,7 +150,7 @@ def recon_init (proj, recon,inputs):
 	recon['sigma_t'] = [1] #Ignored for 3d recon
 	
 	recon['ZingerT'] = [inputs['zinger_thresh']] #Need to set automatically
-	recon['ZingerDel'] = [0.1]
+	recon['ZingerDel'] = [1.0]
 
 	recon['init_object4mHDF'] = 0
 	
@@ -185,10 +185,10 @@ def recon_init (proj, recon,inputs):
         recon['writeTiff'] = [1]*inputs['num_res'] #1 writes upon termination
         recon['WritePerIter'] = [0]*inputs['num_res']#Writes after each iteration
 
-        recon['updateProjOffset'] = [3]*inputs['num_res'] #[0, 2, 3, 3] #update gain fluction 0 - no estimation, 1 - initialize and not estimated, 2 - not read but estimated , 3 initialized and estimated
+        recon['updateProjOffset'] = [0]*inputs['num_res'] #[0, 2, 3, 3] #update gain fluction 0 - no estimation, 1 - initialize and not estimated, 2 - not read but estimated , 3 initialized and estimated
         if inputs['num_res'] > 2:
             recon['updateProjOffset'][0]=0
-            recon['updateProjOffset'][1]=2
+            recon['updateProjOffset'][1]=0
 
 	recon['estVariance'] = [1]*inputs['num_res']
         recon['iterations'] = [inputs['max_iter']]*inputs['num_res'] #max iter
@@ -216,7 +216,7 @@ def recon_init (proj, recon,inputs):
 	recon['N_xy'] = proj['recon_N_r']/recon['delta_xy'][-1] #-1 means last elemen in the list
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	
-	recon['calculate_cost'] = 1 #0 for no 1 for yes
+	recon['calculate_cost'] = 0 #0 for no 1 for yes
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1 #Enable or disable NHICD algorithm
 

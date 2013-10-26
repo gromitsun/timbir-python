@@ -150,7 +150,7 @@ def main():
 		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) + ' -machinefile nodefile '
 		recon['compile_command'] = 'mpicc '
 		recon['HPC'] = 'Purdue' 
-		recon['rank'] = MPI.COMM_WORLD.rank
+		recon['rank'] = 0
 	elif (args.NERSC):
 		recon['num_threads'] = inputs['num_threads']
 		files['scratch'] = os.environ['SCRATCH']
