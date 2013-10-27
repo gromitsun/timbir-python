@@ -998,7 +998,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
 
 int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr,  Real_t** DetectorResponse, AMatrixCol* VoxelLineResponse, Real_t*** ErrorSino, int32_t Iter, Real_t**** MagUpdateMap, uint8_t**** Mask)
 {
-	Real_t AverageUpdate = 0, tempUpdate;
+	Real_t AverageUpdate = 0, tempUpdate, avg_update_percentage;
 	int32_t xy_start, xy_end, i, j, K, block, idx, **z_start, **z_stop;
 	Real_t tempTotPix = 0, total_pix = 0;
 	long int **zero_count, total_zero_count = 0;	
@@ -1134,6 +1134,9 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 
         AverageUpdate = tempUpdate/(tempTotPix);
         AverageUpdate = convert2Hounsfield(AverageUpdate);
+
+	if (Iter == 1)
+		TomoInputsPtr->average_update_iter0 = AverageUpdate;
             
         fprintf(TomoInputsPtr->debug_file_ptr, "\nupdateVoxelsTimeSlices: Average voxel update over all voxels is %f, total voxels is %f\n", AverageUpdate, tempTotPix);
         fprintf(TomoInputsPtr->debug_file_ptr, "updateVoxelsTimeSlices: Zero count is %ld\n", total_zero_count);
@@ -1146,7 +1149,10 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 	free(recv_reqs);
 /*	multifree(offset_numerator,2);
 	multifree(offset_denominator,2);*/
-        if (AverageUpdate < TomoInputsPtr->StopThreshold)
+        avg_update_percentage = 100*AverageUpdate/(TomoInputsPtr->average_update_iter0);
+        fprintf(TomoInputsPtr->debug_file_ptr, "updateVoxelsTimeSlices: percentage change in average magnitude is %f\n", avg_update_percentage);
+	
+	if (avg_update_percentage < TomoInputsPtr->StopThreshold)
         {   
                 fprintf(TomoInputsPtr->debug_file_ptr, "updateVoxelsTimeSlices: Reached average magnitude of change in voxels threshold\n");
 		return (1);

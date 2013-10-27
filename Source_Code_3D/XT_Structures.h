@@ -178,6 +178,7 @@ typedef struct
     int32_t max_HICD_iter;
     int32_t node_num;
     int32_t node_rank;
+    Real_t average_update_iter0;
 
     uint8_t updateVar;
     uint8_t initMagUpMap;

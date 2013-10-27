@@ -176,6 +176,7 @@ def recon_init (proj, recon,inputs):
             recon['delta_z'] = [1]*inputs['num_res'] #2D multiresolution
             recon['initICD'] = [2]*inputs['num_res'] #upsampling factor; 0 - no umpsample , 2 - xy upsampling, 3 - xy,z upsampling
 
+	recon['Variance_Est'] = inputs['Variance_Est']
         recon['initICD'][0] = 0 #at the coarsest resolution do not do an interpolation
         print recon['delta_xy']
         print recon['delta_z']
@@ -184,6 +185,7 @@ def recon_init (proj, recon,inputs):
         recon['sinobin'] = 1 #1-multi-res or 3-mult-grid  
         recon['writeTiff'] = [1]*inputs['num_res'] #1 writes upon termination
         recon['WritePerIter'] = [0]*inputs['num_res']#Writes after each iteration
+        recon['WritePerIter'][-1] = 1 #Writes after each iteration
 
         recon['updateProjOffset'] = [3]*inputs['num_res'] #[0, 2, 3, 3] #update gain fluction 0 - no estimation, 1 - initialize and not estimated, 2 - not read but estimated , 3 initialized and estimated
         if inputs['num_res'] > 2:
