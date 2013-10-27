@@ -79,6 +79,7 @@ typedef double Real_t;
     Real_t OffsetT; /*increments of distance between the center of the voxel and the midpoint of the detector along t axis*/
     Real_t *ViewPtr;
     Real_t *TimePtr;
+
     int32_t slice_begin; /*Detector slice begin*/
     int32_t slice_end; /*Detector slice end*/
   } Sinogram;
@@ -148,6 +149,7 @@ typedef struct
     Real_t Time_Filter[(NHOOD_TIME_MAXDIM-1)/2]; /*Filter is the weighting kernel used in the prior model*/
     
     Real_t*** Weight;
+    Real_t var_est;
     
     Real_t alpha; /*Value of over-relaxation*/
     Real_t cost_thresh; 
@@ -176,7 +178,9 @@ typedef struct
     int32_t max_HICD_iter;
     int32_t node_num;
     int32_t node_rank;
+    Real_t average_update_iter0;
 
+    uint8_t updateVar;
     uint8_t initMagUpMap;
     FILE *debug_file_ptr;
   } TomoInputs;
