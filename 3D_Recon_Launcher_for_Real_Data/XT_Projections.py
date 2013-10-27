@@ -97,8 +97,8 @@ def generate_projections_nersc (proj, recon, files, path2launch):
 	index_t_start = proj['slice_t_start'] + rank*proj['N_t']/recon['node_num']
 	index_t_end = proj['slice_t_start'] + (rank+1)*proj['N_t']/recon['node_num']
 	
-        bakdrk_idx = 0
-#       bakdrk_idx = proj['N_theta']
+        #bakdrk_idx = 0
+	bakdrk_idx = proj['N_theta']
 	white = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'bak_' + str(0).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
 	dark = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'drk_' + str(0).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
 	for i in range(1, proj['Num_Bright_Dark']):

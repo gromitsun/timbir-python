@@ -1047,8 +1047,6 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 		MPI_Send_Recv_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 0);
 		if (TomoInputsPtr->updateProjOffset > 1)
 			update_Sinogram_Offset (SinogramPtr, TomoInputsPtr, ErrorSino);
-		if (TomoInputsPtr->updateVar == 1)
-			update_variance_parameter (SinogramPtr, TomoInputsPtr, ErrorSino);
 		MPI_Wait_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 0);
 
 		#pragma omp parallel for collapse(2) private(i, block, idx, xy_start, xy_end)
@@ -1070,8 +1068,6 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 		MPI_Send_Recv_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 1);
 		if (TomoInputsPtr->updateProjOffset > 1)
 			update_Sinogram_Offset (SinogramPtr, TomoInputsPtr, ErrorSino);
-		if (TomoInputsPtr->updateVar == 1)
-			update_variance_parameter (SinogramPtr, TomoInputsPtr, ErrorSino);
 		MPI_Wait_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 1);
 
 		VSC_based_Voxel_Line_Select(ScannedObjectPtr, TomoInputsPtr, MagUpdateMap);			
@@ -1094,8 +1090,6 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 			MPI_Send_Recv_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 0);
 			if (TomoInputsPtr->updateProjOffset > 1)
 				update_Sinogram_Offset (SinogramPtr, TomoInputsPtr, ErrorSino);
-			if (TomoInputsPtr->updateVar == 1)
-				update_variance_parameter (SinogramPtr, TomoInputsPtr, ErrorSino);
 			MPI_Wait_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 0);
 			
 			#pragma omp parallel for collapse(2) private(i, block, idx)
@@ -1114,13 +1108,14 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 			MPI_Send_Recv_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 1);
 			if (TomoInputsPtr->updateProjOffset > 1)
 				update_Sinogram_Offset (SinogramPtr, TomoInputsPtr, ErrorSino);
-			if (TomoInputsPtr->updateVar == 1)
-				update_variance_parameter (SinogramPtr, TomoInputsPtr, ErrorSino);
 			MPI_Wait_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 1);
 		}
 	}
  
-        fprintf(TomoInputsPtr->debug_file_ptr, "updateVoxelsTimeSlices: Time Slice, Z Start, Z End - Thread : ");
+	if (TomoInputsPtr->updateVar == 1)
+		update_variance_parameter (SinogramPtr, TomoInputsPtr, ErrorSino);
+        
+	fprintf(TomoInputsPtr->debug_file_ptr, "updateVoxelsTimeSlices: Time Slice, Z Start, Z End - Thread : ");
   	total_pix = 0;
         for (i=0; i<ScannedObjectPtr->N_time; i++){
         	for (block=0; block<TomoInputsPtr->num_z_blocks; block++){
