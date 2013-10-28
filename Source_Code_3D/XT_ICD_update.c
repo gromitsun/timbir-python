@@ -327,7 +327,7 @@ Real_t computeCost(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoI
 }
 
 
-uint8_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, int32_t slice_end, int32_t xy_begin, int32_t xy_end, int32_t* x_rand_select, int32_t* y_rand_select, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, Real_t** DetectorResponse_XY, AMatrixCol* VoxelLineResponse, int32_t Iter, long int *zero_count, Real_t** MagUpdateMap, uint8_t*** Mask)
+Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, int32_t slice_end, int32_t xy_begin, int32_t xy_end, int32_t* x_rand_select, int32_t* y_rand_select, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, Real_t** DetectorResponse_XY, AMatrixCol* VoxelLineResponse, int32_t Iter, long int *zero_count, Real_t** MagUpdateMap, uint8_t*** Mask)
 {
   Real_t UpdatedVoxelValue, ProjectionEntry;
   int32_t i_r, i_t;
@@ -336,6 +336,7 @@ uint8_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin,
   bool ZSFlag;
   int32_t sino_view;
   int32_t z_min, z_max;
+  Real_t total_vox_mag = 0.0;
 
   z_min = 0;
   z_max = ScannedObjectPtr->N_z + 1;
@@ -526,6 +527,7 @@ uint8_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin,
 		}
 	    }
 	    MagUpdateMap[j_new][k_new] += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] - V);
+	    total_vox_mag += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new]);
  	}
 		else
 		    (*zero_count)++;
@@ -541,7 +543,7 @@ uint8_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin,
      	free(AMatrixPtr[p].index);
      }
      free(AMatrixPtr);
-      return (0);
+      return (total_vox_mag);
 }
 
 
@@ -998,7 +1000,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
 
 int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr,  Real_t** DetectorResponse, AMatrixCol* VoxelLineResponse, Real_t*** ErrorSino, int32_t Iter, Real_t**** MagUpdateMap, uint8_t**** Mask)
 {
-	Real_t AverageUpdate = 0, tempUpdate, avg_update_percentage;
+	Real_t AverageUpdate = 0, tempUpdate, avg_update_percentage, total_vox_mag = 0.0, vox_mag = 0.0;
 	int32_t xy_start, xy_end, i, j, K, block, idx, **z_start, **z_stop;
 	Real_t tempTotPix = 0, total_pix = 0;
 	long int **zero_count, total_zero_count = 0;	
@@ -1028,7 +1030,8 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 	fprintf(TomoInputsPtr->debug_file_ptr, "Number of NHICD iterations is %d\n", K);
 	for (j = 0; j < K; j++)
 	{
-		#pragma omp parallel for collapse(2) private(i, block, idx, xy_start, xy_end)
+		total_vox_mag = 0.0;
+		#pragma omp parallel for collapse(2) private(i, block, idx, xy_start, xy_end) reduction(+:total_vox_mag)
 		for (i = 0; i < ScannedObjectPtr->N_time; i++)
 		for (block = 0; block < TomoInputsPtr->num_z_blocks; block = block + 2)
 		{
@@ -1039,7 +1042,7 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 			xy_start = j*floor(TomoInputsPtr->UpdateSelectNum[i][idx]/K);
 			xy_end = (j + 1)*floor(TomoInputsPtr->UpdateSelectNum[i][idx]/K) - 1;
 			xy_end = (j == K - 1) ? TomoInputsPtr->UpdateSelectNum[i][idx] - 1: xy_end;
-			updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], xy_start, xy_end, TomoInputsPtr->x_rand_select[i][idx], TomoInputsPtr->y_rand_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, VoxelLineResponse, Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
+			total_vox_mag += updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], xy_start, xy_end, TomoInputsPtr->x_rand_select[i][idx], TomoInputsPtr->y_rand_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, VoxelLineResponse, Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
 			thread_num[i][idx] = omp_get_thread_num();
 /*			printf ("i = %d, idx = %d, z_start = %d, z_stop = %d, xy_start = %d, xy_end = %d\n", i, idx, z_start, z_stop, xy_start, xy_end);*/
 		}
@@ -1049,7 +1052,7 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 			update_Sinogram_Offset (SinogramPtr, TomoInputsPtr, ErrorSino);
 		MPI_Wait_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 0);
 
-		#pragma omp parallel for collapse(2) private(i, block, idx, xy_start, xy_end)
+		#pragma omp parallel for collapse(2) private(i, block, idx, xy_start, xy_end) reduction(+:total_vox_mag)
 		for (i = 0; i < ScannedObjectPtr->N_time; i++)
 		for (block = 0; block < TomoInputsPtr->num_z_blocks; block = block + 2)
 		{			
@@ -1060,7 +1063,7 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 			xy_start = j*floor(TomoInputsPtr->UpdateSelectNum[i][idx]/K);
 			xy_end = (j + 1)*floor(TomoInputsPtr->UpdateSelectNum[i][idx]/K) - 1;
 			xy_end = (j == K - 1) ? TomoInputsPtr->UpdateSelectNum[i][idx] - 1: xy_end;
-			updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], xy_start, xy_end, TomoInputsPtr->x_rand_select[i][idx], TomoInputsPtr->y_rand_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, VoxelLineResponse, Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
+			total_vox_mag += updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], xy_start, xy_end, TomoInputsPtr->x_rand_select[i][idx], TomoInputsPtr->y_rand_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, VoxelLineResponse, Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
 			thread_num[i][idx] = omp_get_thread_num();
 			/*printf ("i = %d, idx = %d, z_start = %d, z_stop = %d, xy_start = %d, xy_end = %d\n", i, idx, z_start, z_stop, xy_start, xy_end);*/
 		}
@@ -1131,13 +1134,11 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
  
 	MPI_Allreduce(&AverageUpdate, &tempUpdate, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 	MPI_Allreduce(&total_pix, &tempTotPix, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(&total_vox_mag, &vox_mag, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
         AverageUpdate = tempUpdate/(tempTotPix);
         AverageUpdate = convert2Hounsfield(AverageUpdate);
 
-	if (Iter == 1)
-		TomoInputsPtr->average_update_iter0 = AverageUpdate;
-            
         fprintf(TomoInputsPtr->debug_file_ptr, "\nupdateVoxelsTimeSlices: Average voxel update over all voxels is %f, total voxels is %f\n", AverageUpdate, tempTotPix);
         fprintf(TomoInputsPtr->debug_file_ptr, "updateVoxelsTimeSlices: Zero count is %ld\n", total_zero_count);
 	
@@ -1149,7 +1150,7 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 	free(recv_reqs);
 /*	multifree(offset_numerator,2);
 	multifree(offset_denominator,2);*/
-        avg_update_percentage = 100*AverageUpdate/(TomoInputsPtr->average_update_iter0);
+        avg_update_percentage = 100*tempUpdate/vox_mag;
         fprintf(TomoInputsPtr->debug_file_ptr, "updateVoxelsTimeSlices: percentage change in average magnitude is %f\n", avg_update_percentage);
 	
 	if (avg_update_percentage < TomoInputsPtr->StopThreshold)

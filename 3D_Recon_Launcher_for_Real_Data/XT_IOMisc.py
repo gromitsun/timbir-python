@@ -113,7 +113,7 @@ def write_tiff_from_object_bin_file (proj, recon, files):
 def write_object2HDF (proj, recon, files):
 	Object = np.zeros((recon['N_z'], recon['N_xy'], recon['N_xy']), dtype = np.float64, order = 'C')
         for i in range(len(recon['r'])):
-                path2results = files['Launch_Folder'] + 'run_' + 'smooth_' + str(recon['smoothness'][i]) + '_T_' + str(recon['ZingerT'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '/'
+                path2results = files['Launch_Folder'] + 'run_' + 'smooth_' + str(recon['smoothness'][i]) + '_slice_start_' + str(proj['slice_t_start']) + '_slice_num_' + str(proj['recon_N_t']) + '_T_' + str(recon['ZingerT'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '/'
                 file = h5py.File(path2results + 'object.hdf5', 'w');
 #               dset = file.create_dataset('object', (recon['Rtime_num'][i], recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True, compression='lzf');
                 dset = file.create_dataset('object', (recon['Rtime_num'][i], recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True);

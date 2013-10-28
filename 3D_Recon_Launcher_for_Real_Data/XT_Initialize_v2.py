@@ -161,9 +161,12 @@ def recon_init (proj, recon,inputs):
 	recon['BH_Quad_Coef'] = 0;#need to make zero
 	
 	recon['voxel_thresh'] = [inputs['stop_threshold']]*inputs['num_res'] #[5, 10, 20, 20] #4 stage multi-resolution, with stopping in HU
-        if inputs['num_res'] > 1:
-           recon['voxel_thresh'][0]=recon['voxel_thresh'][0]/2 #The the coarsest resolution lower the threshold
-       
+        #if inputs['num_res'] > 1:
+	#	recon['voxel_thresh'][0]=recon['voxel_thresh'][0]/2 #The the coarsest resolution lower the threshold
+
+	for i in range(inputs['num_res']):
+		recon['voxel_thresh'][i] = recon['voxel_thresh'][i]/(inputs['num_res']-i)	      
+ 
         recon['cost_thresh'] = [20]*inputs['num_res'] #percentage change presnt-prev / present - initial - Irrelevant
 
         recon['delta_xy'] = [2**j for j in range(0,inputs['num_res'])]
@@ -189,8 +192,8 @@ def recon_init (proj, recon,inputs):
 
         recon['updateProjOffset'] = [3]*inputs['num_res'] #[0, 2, 3, 3] #update gain fluction 0 - no estimation, 1 - initialize and not estimated, 2 - not read but estimated , 3 initialized and estimated
         if inputs['num_res'] > 2:
-            recon['updateProjOffset'][0]=0
-            recon['updateProjOffset'][1]=2
+            recon['updateProjOffset'][0]=2
+            recon['updateProjOffset'][1]=3
 
 	recon['estVariance'] = [1]*inputs['num_res']
         recon['iterations'] = [inputs['max_iter']]*inputs['num_res'] #max iter
@@ -218,7 +221,7 @@ def recon_init (proj, recon,inputs):
 	recon['N_xy'] = proj['recon_N_r']/recon['delta_xy'][-1] #-1 means last elemen in the list
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	
-	recon['calculate_cost'] = 0 #0 for no 1 for yes
+	recon['calculate_cost'] = 1 #0 for no 1 for yes
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1 #Enable or disable NHICD algorithm
 
