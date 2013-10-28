@@ -150,7 +150,7 @@ def recon_init (proj, recon,inputs):
 	recon['sigma_t'] = [1] #Ignored for 3d recon
 	
 	recon['ZingerT'] = [inputs['zinger_thresh']] #Need to set automatically
-	recon['ZingerDel'] = [0.1]
+	recon['ZingerDel'] = [0.05]
 
 	recon['init_object4mHDF'] = 0
 	
