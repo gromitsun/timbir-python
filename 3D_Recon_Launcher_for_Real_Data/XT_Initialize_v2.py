@@ -192,8 +192,8 @@ def recon_init (proj, recon,inputs):
 
         recon['updateProjOffset'] = [3]*inputs['num_res'] #[0, 2, 3, 3] #update gain fluction 0 - no estimation, 1 - initialize and not estimated, 2 - not read but estimated , 3 initialized and estimated
         if inputs['num_res'] > 2:
-            recon['updateProjOffset'][0]=2
-            recon['updateProjOffset'][1]=3
+            recon['updateProjOffset'][0]=0
+            recon['updateProjOffset'][1]=2
 
 	recon['estVariance'] = [1]*inputs['num_res']
         recon['iterations'] = [inputs['max_iter']]*inputs['num_res'] #max iter
