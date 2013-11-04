@@ -54,6 +54,7 @@ def main():
 
         #Parameters associated with the acquired data
         parser.add_argument("--input_hdf5", help="Full path of the input hdf5 file")
+        parser.add_argument("--group_hdf5", help="Full path of the input group to reconstruct")
 	parser.add_argument("--output_hdf5", help="Full path of the output hdf5 file")
         parser.add_argument("--code_launch_folder", help="Full path where the code executable is going to reside")
         parser.add_argument("--rot_center", help="Center of rotation of the object in units of detector pixels",type=float,default=-1)
@@ -95,6 +96,12 @@ def main():
         
         inputs = {}
         inputs['input_hdf5'] = args.input_hdf5
+        inputs['group_hdf5'] = args.group_hdf5
+        #The group name has to start with a "/"
+        if (inputs['group_hdf5'][0] != '/'):
+            print 'Group name has to start with a /'
+            return -1
+
         inputs['output_hdf5']= args.output_hdf5
 	inputs['code_launch_folder']=args.code_launch_folder
 

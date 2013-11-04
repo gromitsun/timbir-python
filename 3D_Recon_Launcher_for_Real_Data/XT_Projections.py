@@ -108,20 +108,20 @@ def generate_projections_nersc (proj, recon, files, path2launch):
 	bakdrk_idx = proj['N_theta']
 
         #Read the first "0th" file into an image
-	white = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'bak_' + str(0).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
+	white = FILE[proj['Dataset_Name'] + '/' + proj['File_BaseName'] + 'bak_' + str(0).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
         #Read in the brights and add them up 
         for i in range(1, proj['Num_Bright']):
-		white = white + FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'bak_' + str(i).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
+		white = white + FILE[proj['Dataset_Name'] + '/' + proj['File_BaseName'] + 'bak_' + str(i).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
 
         #Take average value of the brights and darks 
 	white = white/proj['Num_Bright']
 	
         #If the number of darks is non-zero read the files into an image array
         if (proj['Num_Dark'] != 0):
-	    dark = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'drk_' + str(0).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
+	    dark = FILE[proj['Dataset_Name'] + '/' + proj['File_BaseName'] + 'drk_' + str(0).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
             #Read in the darks and add them up 
             for i in range(1, proj['Num_Dark']):
-                dark = dark + FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'drk_' + str(i).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)        
+                dark = dark + FILE[proj['Dataset_Name'] + '/' + proj['File_BaseName'] + 'drk_' + str(i).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)        
 	     
             dark = dark/proj['Num_Dark']
 	else:
@@ -140,7 +140,7 @@ def generate_projections_nersc (proj, recon, files, path2launch):
 	if (recon['sinobin'] != 1):
 		bright = np.transpose(count_expected)
 	for i in range(proj['recon_N_p']):
-		data = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + '_0000_' + str(proj['proj_start'] + i*proj['view_subsmpl_fact']).zfill(4) + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16)
+		data = FILE[proj['Dataset_Name'] + '/' + proj['File_BaseName'] + '_0000_' + str(proj['proj_start'] + i*proj['view_subsmpl_fact']).zfill(4) + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16)
 		count_data = decimate_count_data_in_r((np.abs(data - dark)).astype(np.float64), true_length_r, proj['recon_N_r'])	
 		count_data = decimate_count_data_in_t(count_data, proj['N_t']/recon['node_num'], proj['recon_N_t']/recon['node_num'])
 		#count_data = decimate_count_data((np.abs(data[i,...])).astype(np.float64), true_length_r, proj['recon_N_r'])

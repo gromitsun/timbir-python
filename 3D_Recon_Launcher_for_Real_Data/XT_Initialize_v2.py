@@ -61,10 +61,17 @@ def proj_init (inputs):
 	proj = {}
 	proj['Path2Dataset'] = inputs['input_hdf5']
 	proj['Path2WhiteDark'] = inputs['input_hdf5']
+        #Temp1 = inputs['input_hdf5'].split("/") #splits the string into separate parts delimited by /
+        #Temp2 = Temp1[-1] #extracts the last element of the parsed string which contains the input hdf5
+	#proj['Dataset_Name'] =  Temp2[:-3] #This removes the .h5 extension from the file for LBNL data sets
 
-        Temp1 = inputs['input_hdf5'].split("/") #splits the string into separate parts delimited by /
+        #remove the starting / from the group name 
+        inputs['group_hdf5']=inputs['group_hdf5'][1:len(inputs['group_hdf5'])]
+        #Set the data set path inside the hdf5 of the form xxxx/yyyy
+        proj['Dataset_Name'] =  inputs['group_hdf5']
+        Temp1 = inputs['group_hdf5'].split("/")
         Temp2 = Temp1[-1] #extracts the last element of the parsed string which contains the input hdf5
-	proj['Dataset_Name'] =  Temp2[:-3] #This removes the .h5 extension from the file for LBNL data sets
+        proj['File_BaseName'] = Temp2
 
 	proj['Num_Bright'] = inputs['num_bright'] #TO DO : Need to remove
         proj['Num_Dark'] = inputs['num_dark'] #TO DO : Need to remove
