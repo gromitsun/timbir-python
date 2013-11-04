@@ -59,7 +59,8 @@ def main():
         parser.add_argument("--rot_center", help="Center of rotation of the object in units of detector pixels",type=float,default=-1)
         parser.add_argument("--pix_size", help="Size of the detector pixels in micro meter",type=float)
 	parser.add_argument("--num_views", help="Number of views for the data",type=int)
-        parser.add_argument("--num_bright_dark",help="Number of dark and bright fields acquired prior the the experiment",type=int)
+        parser.add_argument("--num_bright",help="Number of bright fields acquired prior the the experiment",type=int)
+        parser.add_argument("--num_dark",help="Number of dark fields acquired prior the the experiment",type=int)
         parser.add_argument("--view_subsmpl_fact", help="View skipping factor. This can be used to subset the data in terms of views",type=int,default=1)
     
         #Reconstruction parameters
@@ -99,7 +100,8 @@ def main():
 
 	inputs['Variance_Est']=args.Variance_Est
         inputs['pix_size'] = args.pix_size
-        inputs['num_bright_dark'] = args.num_bright_dark
+        inputs['num_bright'] = args.num_bright
+        inputs['num_dark'] = args.num_dark
         inputs['num_views'] = args.num_views
 	inputs['view_subsmpl_fact'] = args.view_subsmpl_fact
         inputs['x_width'] = args.x_width

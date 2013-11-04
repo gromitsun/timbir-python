@@ -68,6 +68,13 @@ def decimate_count_data_in_t (data, true_length, reduced_length):
 	
 
 def generate_projections_nersc (proj, recon, files, path2launch):
+       
+        #Hacks in case the darks are = 0 in LBNL data 
+        DetSiz = 2560;
+        Dark_LessDetSiz = 100;#Dark counts if size is smaller than  
+        Dark_GrDetSiz = 400;
+        #end of LBNL hacks 
+
 	rank = recon['rank']
 	if (recon['sinobin'] != 1 and recon['sinobin'] != 3):
 		error_by_flag(1, "ERROR: sinobin should be either 1 or 3")
@@ -99,14 +106,35 @@ def generate_projections_nersc (proj, recon, files, path2launch):
 	
         #bakdrk_idx = 0
 	bakdrk_idx = proj['N_theta']
+
+        #Read the first "0th" file into an image
 	white = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'bak_' + str(0).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
-	dark = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'drk_' + str(0).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
-	for i in range(1, proj['Num_Bright_Dark']):
+        #Read in the brights and add them up 
+        for i in range(1, proj['Num_Bright']):
 		white = white + FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'bak_' + str(i).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
-		dark = dark + FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'drk_' + str(i).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
-	white = white/proj['Num_Bright_Dark']
-	dark = dark/proj['Num_Bright_Dark']
+
+        #Take average value of the brights and darks 
+	white = white/proj['Num_Bright']
 	
+        #If the number of darks is non-zero read the files into an image array
+        if (proj['Num_Dark'] != 0):
+	    dark = FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'drk_' + str(0).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)
+            #Read in the darks and add them up 
+            for i in range(1, proj['Num_Dark']):
+                dark = dark + FILE[proj['Dataset_Name'] + '/' + proj['Dataset_Name'] + 'drk_' + str(i).zfill(4) + '_' + str(bakdrk_idx).zfill(4)  + '.tif'][0, index_t_start:index_t_end, index_r].astype(np.uint16).astype(np.float64)        
+	     
+            dark = dark/proj['Num_Dark']
+	else:
+            #LBNL HACKS: If the number of darks is zero, logic to initialize 
+            if(proj['N_r'] > DetSiz):
+                print 'Since no darks, setting to'
+                print Dark_GrDetSiz
+                dark = Dark_GrDetSiz*np.ones((index_t_end-index_t_start,true_length_r), dtype = np.float64, order = 'C')
+            else:
+                print 'Since no darks, setting to'
+                print Dark_LessDetSiz
+                dark = Dark_LessDetSiz*np.ones((index_t_end-index_t_start, true_length_r), dtype = np.float64, order = 'C')
+
 	count_expected = decimate_count_data_in_r((np.abs(white - dark)).astype(np.float64), true_length_r, proj['recon_N_r'])
 	count_expected = decimate_count_data_in_t(count_expected, proj['N_t']/recon['node_num'], proj['recon_N_t']/recon['node_num'])
 	if (recon['sinobin'] != 1):

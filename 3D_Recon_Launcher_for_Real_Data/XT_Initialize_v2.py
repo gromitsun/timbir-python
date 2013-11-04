@@ -66,7 +66,8 @@ def proj_init (inputs):
         Temp2 = Temp1[-1] #extracts the last element of the parsed string which contains the input hdf5
 	proj['Dataset_Name'] =  Temp2[:-3] #This removes the .h5 extension from the file for LBNL data sets
 
-	proj['Num_Bright_Dark'] = inputs['num_bright_dark'] #TO DO : Need to remove
+	proj['Num_Bright'] = inputs['num_bright'] #TO DO : Need to remove
+        proj['Num_Dark'] = inputs['num_dark'] #TO DO : Need to remove
 
 	proj['slice_t_start'] = inputs['z_start'] #parallel to z
 	proj['N_t'] = inputs['z_numElts'] #Number of slices 
