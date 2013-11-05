@@ -67,7 +67,7 @@ def proj_init (inputs):
 
         #remove the starting / from the group name 
         inputs['group_hdf5']=inputs['group_hdf5'][1:len(inputs['group_hdf5'])]
-        #Set the data set path inside the hdf5 of the form xxxx/yyyy
+        #Set the data set path inside the hdf5 of the form xxxx/yyyy or just yyyy
         proj['Dataset_Name'] =  inputs['group_hdf5']
         Temp1 = inputs['group_hdf5'].split("/")
         Temp2 = Temp1[-1] #extracts the last element of the parsed string which contains the input hdf5

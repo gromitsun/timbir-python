@@ -1,15 +1,15 @@
 #!/bin/tcsh
 
-#PBS -q debug
-#PBS -l mppwidth=24
-#PBS -l walltime=00:30:00
+#PBS -q regular
+#PBS -l mppwidth=192
+#PBS -l walltime=06:00:00
 #PBS -N mpi_test
 #PBS -e my_job.$PBS_JOBID.err
 #PBS -o my_job.$PBS_JOBID.out
 #PBS -V
 
 cd $PBS_O_WORKDIR
-setenv OMP_NUM_THREADS 24
+setenv OMP_NUM_THREADS 32
 setenv CRAY_ROOTFS DSL
 
 module load PrgEnv-intel
@@ -27,4 +27,4 @@ module load mpi4py
 
 #python XT_MBIR_3D.py --setup_launch_folder --run_reconstruction --NERSC --input_hdf5 $GSCRATCH/LBNL_Datasets/20131004_013841_parikh_soil_microaggregate_1-2_0-15.h5 --code_launch_folder $GSCRATCH/DemoFolder/ --output_hdf5 $GSCRATCH/DemoFolder/Results/ --pix_size 0.65 --num_views 1024 --x_width 2560 --recon_x_width 1024 --z_start 1000 --z_numElts 32 --num_nodes 1 --num_threads 32 --rot_center 1276 --final_res_multiple 1 --view_subsmpl_fact 4 --num_bright_dark 30
 
-python XT_MBIR_3D.py --setup_launch_folder --run_reconstruction --NERSC --input_hdf5 $GSCRATCH/LBNL_Datasets/20130719_222857_HN2_2011-RT-20N-scan1_x0y0.h5 --code_launch_folder $GSCRATCH/Recon_Runs/ICASSP_MBIR_Corr_Recons/XT_run/ --output_hdf5 $GSCRATCH/Recon_Runs/ICASSP_MBIR_Corr_Recons/XT_Result_Repository/ --pix_size 0.65 --num_views 1024 --x_width 2560 --recon_x_width 2560 --z_start 0 --z_numElts 4 --num_nodes 1 --num_threads 24 --rot_center 1333 --smoothness 0.5 --view_subsmpl_fact 2 --num_bright 30 --num_dark 30 --zinger_thresh 3.5 --Variance_Est 10 --num_res 7 --multires_2D --stop_threshold 2
+python XT_MBIR_3D.py --setup_launch_folder --run_reconstruction --NERSC --input_hdf5 $GSCRATCH/LBNL_Datasets/20130719_222857_HN2_2011-RT-20N-scan1_x0y0.h5 --group_hdf5 /20130719_222857_HN2_2011-RT-20N-scan1_x0y0 --code_launch_folder $GSCRATCH/Recon_Runs/ICASSP_MBIR_Corr_Recons/XT_run/ --output_hdf5 $GSCRATCH/Recon_Runs/ICASSP_MBIR_Corr_Recons/XT_Result_Repository/ --pix_size 0.65 --num_views 1024 --x_width 2560 --recon_x_width 2560 --z_start 0 --z_numElts 256 --num_nodes 8 --num_threads 32 --rot_center 1333 --smoothness 1 --view_subsmpl_fact 4 --num_bright 30 --num_dark 30 --zinger_thresh 3.5 --Variance_Est 1 --stop_threshold 2
