@@ -32,15 +32,16 @@ def proj_init (files):
 	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
 	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
 
-	proj['recon_N_r'] = 2048
-	proj['slice_t_start'] = 500
-	proj['N_t'] = 8
+	proj['recon_N_r'] = 512
+	proj['slice_t_start'] = 1000
+	proj['N_t'] = 8*2
 	proj['recon_N_t'] = 8
-	proj['rotation_center_r'] = 265.0*4 + 1.0/4
+	proj['rotation_center_r'] = 265.0 + 1.0/4
 #	proj['proj_start'] = 998
 #	proj['proj_num'] = 7969 - 998
 	proj['proj_start'] = 1969
-	proj['proj_num'] = 7873 - 1969
+	proj['proj_num'] = 1984
+#	proj['proj_num'] = 7873 - 1969
 	proj['N_p'] = 1984*4
 #	proj['N_p'] = 2000*4
 	proj['K'] = 32
@@ -109,7 +110,7 @@ def recon_init (proj, recon):
 	recon['c_s'] = [10**-6]
 	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [25*(10**4)]
+	recon['sigma_s'] = [201*(10**3)]
 	recon['sigma_t'] = [8*(10**2)]
 	
 	recon['ZingerT'] = [40]
@@ -136,18 +137,19 @@ def recon_init (proj, recon):
         #recon['only_Edge_Updates'] = [0]
         #recon['initMagUpMap'] = [1]
 	
-	recon['voxel_thresh'] = [5, 5, 5, 10, 10, 10]
-        recon['cost_thresh'] = [10, 10, 10, 10, 10, 10]
-        recon['delta_xy'] = [32, 16, 8, 4, 2, 1]
-        recon['delta_z'] = [1, 1, 1, 1, 1, 1]
-        recon['initICD'] = [0, 2, 2, 2, 2, 2]
+	recon['voxel_thresh'] = [5, 5, 5, 10]
+        recon['cost_thresh'] = [10, 10, 10, 10]
+        recon['delta_xy'] = [8, 4, 2, 1]
+        recon['delta_z'] = [1, 1, 1, 1]
+        recon['initICD'] = [0, 2, 2, 2]
         recon['sinobin'] = 1 
-        recon['writeTiff'] = [1, 1, 1, 1, 1, 1]
-        recon['WritePerIter'] = [0, 0, 0, 0, 1, 1]
-        recon['updateProjOffset'] = [0, 2, 3, 3, 3, 3]
-        recon['iterations'] = [300, 200, 100, 50, 20, 10]
-        recon['only_Edge_Updates'] = [0, 0, 0, 0, 0, 0]
-        recon['initMagUpMap'] = [0, 1, 1, 1, 1, 1]
+        recon['writeTiff'] = [1, 1, 1, 1]
+        recon['WritePerIter'] = [0, 0, 0, 1]
+        recon['updateProjOffset'] = [0, 2, 3, 3]
+        recon['iterations'] = [300, 200, 100, 50]
+        recon['only_Edge_Updates'] = [0, 0, 0, 0]
+        recon['initMagUpMap'] = [0, 1, 1, 1]
+	recon['readSino4mHDF'] = [0, 0, 0, 0]	
 	
 	recon['init_with_FBP'] = 0
 	#recon['num_threads'] = 1
@@ -184,7 +186,7 @@ def recon_init (proj, recon):
 		error_by_flag (1, 'ERROR: recon_init: Lengths of r, c_t, c_s, sigma_s, sigma_t does not match')
 
 	if (len(recon['delta_xy']) != len(recon['voxel_thresh']) or len(recon['delta_xy']) != len(recon['cost_thresh']) or len(recon['delta_xy']) != len(recon['initICD']) or len(recon['delta_xy']) != len(recon['writeTiff']) or len(recon['delta_xy']) != len(recon['delta_z'])):
-		error_by_flag (1, 'ERROR: recon_init: Lengths of delta_xy, voxel_thresh, cost_thresh, initICD, writeTiff, sigma_t does not match')
+		error_by_flag (1, 'ERROR: recon_init: Lengths of delta_xy, voxel_thresh, cost_thresh, initICD, writeTiff does not match')
 	
 	return recon
 

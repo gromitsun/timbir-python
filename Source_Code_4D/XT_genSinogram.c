@@ -15,8 +15,6 @@
 #include "XT_Profile.h"
 #include "randlib.h"
 
-/*function read16bitTiff() is defined in TiffUtilities.cpp*/
-unsigned short* read16bitTiff(char* file);
 
 /*'gen_projection_filename' generates the name of the projection files given to us complete with the folder heirarchy.*/
 void gen_projection_filename (char *file, int time_step, int slice_num)

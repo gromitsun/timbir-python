@@ -46,7 +46,7 @@ typedef double Real_t;
     Real_t *ViewPtr;
     Real_t *TimePtr;
     int32_t slice_begin; /*Detector slice begin*/
-    int32_t slice_end; /*Detector slice end*/
+    int32_t slice_num; /*Detector slice end*/
   } Sinogram;
 
   typedef struct
@@ -144,6 +144,7 @@ typedef struct
     int32_t node_rank;
 
     uint8_t initMagUpMap;
+    uint8_t readSino4mHDF;
     FILE *debug_file_ptr;
   } TomoInputs;
 

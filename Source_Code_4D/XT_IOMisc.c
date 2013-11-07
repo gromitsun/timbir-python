@@ -81,7 +81,7 @@ void Write2Tiff(char* filename, int height, int width, Real_t** img, int hounsfi
 		avgpix+=img[i][j];	
 	}
 	avgpix/=(height*width);
-/*	fprintf(debug_file_ptr, "Write2Tiff:file=%s,maxpix=%f,minpix=%f,avgpix=%f,height=%d,width=%d\n",filename,maxpix,minpix,avgpix,height,width);*/
+	fprintf(debug_file_ptr, "Write2Tiff:file=%s,maxpix=%f,minpix=%f,avgpix=%f,height=%d,width=%d\n",filename,maxpix,minpix,avgpix,height,width);
 
 	if(hounsfield_flag==1){
 		maxpix=HOUNSFIELD_MAX;

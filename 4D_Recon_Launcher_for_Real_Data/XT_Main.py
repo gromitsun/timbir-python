@@ -12,7 +12,7 @@ from XT_IOMisc import write_tiff_from_object_bin_file
 import argparse
 import time
 import os
-from mpi4py import MPI
+#from mpi4py import MPI
 
 def main():
 	start_time = time.time()
@@ -34,7 +34,7 @@ def main():
 		files['scratch'] = os.environ['RCAC_SCRATCH']
 		files['data_scratch'] = os.environ['RCAC_SCRATCH']
 		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) + ' -machinefile nodefile '
-		recon['compile_command'] = 'mpicc '
+		recon['compile_command'] = 'mpicc -ansi -Wall '
 		recon['HPC'] = 'Purdue' 
 		recon['rank'] = MPI.COMM_WORLD.rank
 	elif (args.NERSC):
@@ -42,7 +42,7 @@ def main():
 		files['scratch'] = os.environ['SCRATCH']
 		files['data_scratch'] = os.environ['GSCRATCH']
 		recon['run_command'] = 'aprun -j 2 -n ' + str(recon['node_num']) + ' -N 1 -d ' + str(recon['num_threads']) + ' -cc none '
-		recon['compile_command'] = 'cc '
+		recon['compile_command'] = 'cc -ansi -Wall '
 		recon['HPC'] = 'NERSC'
 		recon['rank'] = 0		
 	else:
