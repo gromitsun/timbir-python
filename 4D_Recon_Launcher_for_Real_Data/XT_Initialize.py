@@ -32,11 +32,11 @@ def proj_init (files):
 	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
 	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
 
-	proj['recon_N_r'] = 512
+	proj['recon_N_r'] = 2048
 	proj['slice_t_start'] = 1000
-	proj['N_t'] = 8*2
+	proj['N_t'] = 8
 	proj['recon_N_t'] = 8
-	proj['rotation_center_r'] = 265.0 + 1.0/4
+	proj['rotation_center_r'] = 265.0*4 + 1
 #	proj['proj_start'] = 998
 #	proj['proj_num'] = 7969 - 998
 	proj['proj_start'] = 1969
@@ -110,10 +110,10 @@ def recon_init (proj, recon):
 	recon['c_s'] = [10**-6]
 	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [201*(10**3)]
-	recon['sigma_t'] = [8*(10**2)]
+	recon['sigma_s'] = [202*(10**4)]
+	recon['sigma_t'] = [2*(10**4)]
 	
-	recon['ZingerT'] = [40]
+	recon['ZingerT'] = [5]
 	recon['ZingerDel'] = [0.1]
 
 	recon['init_object4mHDF'] = 0
@@ -137,20 +137,22 @@ def recon_init (proj, recon):
         #recon['only_Edge_Updates'] = [0]
         #recon['initMagUpMap'] = [1]
 	
-	recon['voxel_thresh'] = [5, 5, 5, 10]
-        recon['cost_thresh'] = [10, 10, 10, 10]
-        recon['delta_xy'] = [8, 4, 2, 1]
-        recon['delta_z'] = [1, 1, 1, 1]
-        recon['initICD'] = [0, 2, 2, 2]
+	recon['voxel_thresh'] = [5, 5, 5, 10, 10, 10]
+        recon['cost_thresh'] = [10, 10, 10, 10, 10, 10]
+        recon['delta_xy'] = [32, 16, 8, 4, 2, 1]
+        recon['delta_z'] = [1, 1, 1, 1, 1, 1]
+        recon['initICD'] = [0, 2, 2, 2, 2, 2]
         recon['sinobin'] = 1 
-        recon['writeTiff'] = [1, 1, 1, 1]
-        recon['WritePerIter'] = [0, 0, 0, 1]
-        recon['updateProjOffset'] = [0, 2, 3, 3]
-        recon['iterations'] = [300, 200, 100, 50]
-        recon['only_Edge_Updates'] = [0, 0, 0, 0]
-        recon['initMagUpMap'] = [0, 1, 1, 1]
-	recon['readSino4mHDF'] = [0, 0, 0, 0]	
-	
+        recon['writeTiff'] = [1, 1, 1, 1, 1, 1]
+        recon['WritePerIter'] = [0, 0, 0, 0, 0, 1]
+        recon['updateProjOffset'] = [0, 2, 3, 3, 3, 3]
+        recon['iterations'] = [300, 200, 100, 50, 40, 30]
+        recon['only_Edge_Updates'] = [0, 0, 0, 0, 0, 0]
+        recon['initMagUpMap'] = [0, 1, 1, 1, 1, 1]
+	recon['readSino4mHDF'] = [0, 0, 0, 0, 0, 0]	
+	recon['do_VarEstimate'] = [1]*len(recon['voxel_thresh'])
+
+	recon['Estimate_of_Var'] = 20;	
 	recon['init_with_FBP'] = 0
 	#recon['num_threads'] = 1
 	recon['positivity_constraint'] = 0;

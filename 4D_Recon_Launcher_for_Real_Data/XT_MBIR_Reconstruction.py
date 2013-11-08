@@ -48,7 +48,7 @@ def do_MBIR_reconstruction(proj, recon, files):
 				if (recon['HPC'] == 'NERSC'):
 					for j in range(recon['node_num']):
 						recon['rank'] = j
-						generate_projections (proj, recon, files, path2launch)
+						generate_projections(proj, recon, files, path2launch)
 					recon['rank'] = 0
 				else:
 					generate_projections (proj, recon, files, path2launch)
@@ -94,7 +94,7 @@ def do_MBIR_reconstruction(proj, recon, files):
 				ZingerT = recon['ZingerT'][i]
 				if (recon['ZingerDel'][i] == 0 and multidx == 0):
 					ZingerT = 100000 
-				command = recon['run_command'] + ' ./XT_Engine --p ' + str(recon['p']) + ' --sigma_s ' + str(recon['sigma_s'][i]) + ' --sigma_t ' + str(recon['sigma_t'][i]) + ' --c_s ' + str(recon['c_s'][i]) + ' --c_t ' + str(recon['c_t'][i]) + ' --delta_xy ' + str(recon['delta_xy'][multidx]) + ' --delta_z ' + str(recon['delta_z'][multidx]) + ' --length_r ' + str(proj['length_r']) + ' --length_t ' + str(proj['length_t']) + ' --voxel_thresh ' + str(recon['voxel_thresh'][multidx]) + ' --cost_thresh ' + str(recon['cost_thresh'][multidx]) + ' --iter ' + str(recon['iterations'][multidx]) + ' --rotation_center ' + str(proj['rotation_center_r']) + ' --alpha ' + str(recon['alpha']) + ' --sinobin ' + str(recon['sinobin']) + ' --initICD ' + str(recon['initICD'][multidx]) + ' --Rtime0 ' + str(recon['Rtime0']) + ' --Rtime_delta ' + str(recon['Rtime_delta'][i]) + ' --Rtime_num ' + str(recon['Rtime_num'][i]) + ' --num_projections ' + str(proj['recon_N_p']) + ' --N_r ' + str(proj['recon_N_r']) + ' --N_t ' + str(proj['recon_N_t']) + ' --detector_slice_begin ' + str(proj['slice_t_start']) + ' --detector_slice_num ' + str(proj['N_t']) + ' --num_threads ' + str(recon['num_threads']) + ' --radius_obj ' + str(recon['radius_obj']) + ' --updateProjOffset ' + str(recon['updateProjOffset'][multidx]) + ' --writeTiff ' + str(recon['writeTiff'][multidx]) + ' --zingerT ' + str(ZingerT) + ' --zingerDel ' + str(recon['ZingerDel'][i])
+				command = recon['run_command'] + ' ./XT_Engine --p ' + str(recon['p']) + ' --sigma_s ' + str(recon['sigma_s'][i]) + ' --sigma_t ' + str(recon['sigma_t'][i]) + ' --c_s ' + str(recon['c_s'][i]) + ' --c_t ' + str(recon['c_t'][i]) + ' --delta_xy ' + str(recon['delta_xy'][multidx]) + ' --delta_z ' + str(recon['delta_z'][multidx]) + ' --length_r ' + str(proj['length_r']) + ' --length_t ' + str(proj['length_t']) + ' --voxel_thresh ' + str(recon['voxel_thresh'][multidx]) + ' --cost_thresh ' + str(recon['cost_thresh'][multidx]) + ' --iter ' + str(recon['iterations'][multidx]) + ' --rotation_center ' + str(proj['rotation_center_r']) + ' --alpha ' + str(recon['alpha']) + ' --sinobin ' + str(recon['sinobin']) + ' --initICD ' + str(recon['initICD'][multidx]) + ' --Rtime0 ' + str(recon['Rtime0']) + ' --Rtime_delta ' + str(recon['Rtime_delta'][i]) + ' --Rtime_num ' + str(recon['Rtime_num'][i]) + ' --num_projections ' + str(proj['recon_N_p']) + ' --N_r ' + str(proj['recon_N_r']) + ' --N_t ' + str(proj['recon_N_t']) + ' --detector_slice_begin ' + str(proj['slice_t_start']) + ' --detector_slice_num ' + str(proj['N_t']) + ' --num_threads ' + str(recon['num_threads']) + ' --radius_obj ' + str(recon['radius_obj']) + ' --updateProjOffset ' + str(recon['updateProjOffset'][multidx]) + ' --writeTiff ' + str(recon['writeTiff'][multidx]) + ' --zingerT ' + str(ZingerT) + ' --zingerDel ' + str(recon['ZingerDel'][i]) + ' --Est_of_Var ' + str(recon['Estimate_of_Var'])
 			
 				if (recon['time_reg'] == 1):
 					command = command + ' --time_reg'
@@ -116,7 +116,10 @@ def do_MBIR_reconstruction(proj, recon, files):
 				
 				if (recon['readSino4mHDF'][multidx] == 1):
 					command = command + ' --readSino4mHDF'
-				
+			
+				if (recon['do_VarEstimate'][multidx] == 1):
+					command = command + ' --do_VarEst '
+	
 				print 'Will run reconstruction code for delta_xy = ' + str(recon['delta_xy'][multidx]) + ' and delta_z = ' + str(recon['delta_z'][multidx])
 				flag = system('cd ' + path2launch + ';' + command)
 				error_by_flag(flag, 'ERROR: Was not able to run - ' + command)
