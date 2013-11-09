@@ -61,27 +61,27 @@ typedef double Real_t;
 /*Structure 'Sinogram' contains the sinogram itself and also other parameters related to the sinogram and the detector*/
   typedef struct
   {
-   Real_t ***Projection; /*Stores the sinogram*/
-   Real_t **ProjOffset; /*Projection offset*/
-   bool ***ProjSelect;
-    int32_t N_r;/*Number of measurements in r direction*/
-    int32_t N_t;/*Number of measurements in t direction to be reconstructed*/
-    int32_t N_p;/*Number of available angles*/
-    int32_t total_t_slices;/*Number of slices in t-direction*/
-    Real_t delta_r;/*Distance between successive measurements along r*/
-    Real_t delta_t;/*Distance between successive measurements along t*/
-    Real_t R0,RMax;/*location of leftmost corner of detector along r*/
-    Real_t T0,TMax;/*location of rightmost corner of detector along r*/
-    Real_t *cosine, *sine; /*stores the cosines and sines of the values in angles. angles consist of the angles of the different views of the object with respect to the detector*/
+   Real_t ***Projection; /*Stores the projection values (sinogram)*/
+   Real_t **ProjOffset; /*stores the additive projection error offsets (called 'd' in paper)*/
+   bool ***ProjSelect; /*Mask which determines whether a measurement is classified as anamolous or not. (called 'b' in paper)*/
+    int32_t N_r;/*Number of detector elements in r direction (parallel to x-axis)*/
+    int32_t N_t;/*Number of detector elements in t direction to be reconstructed (parallel to z axis)*/
+    int32_t N_p;/*Total number of projections used in reconstruction*/
+    int32_t total_t_slices;/*Total number of slices in t-direction*/
+    Real_t delta_r;/*Distance between successive measurements along r (or detector pixel width along t)*/
+    Real_t delta_t;/*Distance between successive measurements along t (or detector pixel width along t)*/
+    Real_t R0,RMax;/*location of leftmost and rightmost corner of detector along r*/
+    Real_t T0,TMax;/*location of leftmost and rightmost corner of detector along t*/
+    Real_t *cosine, *sine; /*stores the cosines and sines of the angles at which projections are acquired*/
     Real_t Length_R; /*Length of the detector along the r-dimension*/
     Real_t Length_T; /*Length of the detector along the t-dimension*/
     Real_t OffsetR; /*increments of distance between the center of the voxel and the midpoint of the detector along r axis */
     Real_t OffsetT; /*increments of distance between the center of the voxel and the midpoint of the detector along t axis*/
-    Real_t *ViewPtr;
-    Real_t *TimePtr;
+    Real_t *ViewPtr; /*contains the values of projection angles*/
+    Real_t *TimePtr; /*contains the corresponding times of projections*/
 
-    int32_t slice_begin; /*Detector slice begin*/
-    int32_t slice_num; /*Detector slice end*/
+    int32_t slice_begin; /*Starting index of detector slices (along t-axis)*/
+    int32_t slice_num; /*Total number of detector slices starting from 'slice_begin'*/
   } Sinogram;
 
   typedef struct
@@ -93,18 +93,18 @@ typedef double Real_t;
     int32_t N_x;/*Number of voxels in x direction*/
     int32_t N_z;/*Number of voxels in z direction*/
     int32_t N_y;/*Number of voxels in y direction*/
-/*Now, we assume the voxel is a cube and also the resolution is equal in all the 3 dimensions*/
-    int32_t N_time;/*Number of measurements in time*/
+/*However, we assume the voxel is a cube and also the resolution is equal in all the 3 dimensions*/
+    int32_t N_time;/*Number of time slices of the object*/
     /*Coordinates of the left corner of the object along x, y and z*/
     Real_t x0;
     Real_t z0;
     Real_t y0;
     Real_t delta_xy;/*Voxel size in the x-y direction*/
     Real_t delta_z;/*Voxel size in the z direction*/
-    Real_t mult_xy;
-    Real_t mult_z;
+    Real_t mult_xy;/*voxel size as a multiple of detector pixel size along r*/
+    Real_t mult_z;/*Voxel size as a multiple of detector pixel size along t*/
 
-/*again, for the time being we assume, delta_x = delta_y = delta_z*/ 
+/*However, at finest resolution, delta_x = delta_y = delta_z*/ 
     Real_t BeamWidth; /*Beamwidth of the detector response*/
     Real_t Sigma_S; /*regularization parameter over space (over x-y slice). Its a parameter of qGGMRF prior model*/ 
     Real_t Sigma_T; /*regularization parameter across time. Its a parameter of qGGMRF prior model*/ 
@@ -113,12 +113,12 @@ typedef double Real_t;
     Real_t C_S; /*parameter c of qGGMRF prior model*/
     Real_t C_T; /*parameter c of qGGMRF prior model*/
 
-    int32_t **ProjIdxPtr;
-    int32_t *ProjNum;
+    int32_t **ProjIdxPtr; /*Dictates the mapping of projection views to time slices*/
+    int32_t *ProjNum; /*Number of projections assigned to each time slices*/
 
-   Real_t gamma;
-   Real_t Rtime0;
-   Real_t delta_Rtime;
+   Real_t gamma; /*percentage of voxel lines selected in NHICD*/
+   Real_t Rtime0; /*start time of first time slices in reconstruction*/
+   Real_t delta_Rtime; /*Time gap between time slices in reconstruction*/
   } ScannedObject;
 
   /*Structure to store a single column(A_i) of the A-matrix*/
@@ -134,7 +134,7 @@ typedef struct
     int32_t NumIter; /*Maximum number of iterations that the ICD can be run. Normally, ICD converges before completing all the iterations and exits*/
     Real_t StopThreshold; /*ICD exits after the average update of the voxels becomes less than this threshold. Its specified in units of HU.*/
     Real_t RotCenter; /*Center of rotation of the object as measured on the detector in units of pixels*/ 
-    int32_t CountAngles; 
+    int32_t CountAngles; /**/ 
     
     int32_t phantom_N_xy; 
     int32_t phantom_N_z; 

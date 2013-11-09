@@ -45,6 +45,14 @@
 #include "XT_IOMisc.h"
 #include "XT_HDFIO.h"
 
+/*Parses the input text file and extracts words delimited by any non-alphanumeric character.
+In this code, it is used to parse view_info.txt and extract the time and angle information.
+--Inputs--
+fp - Text file pointer
+str - pointer to memory where extracted text is stored
+numbytes - number of bytes read
+--Outputs--
+returns the last character which acted as a delimiter for the extracted text*/
 char readFileStream(FILE **fp, char* str, int32_t *numbytes)
 {
 	char lastchar;
@@ -66,6 +74,11 @@ char readFileStream(FILE **fp, char* str, int32_t *numbytes)
 	return (lastchar);
 }
 
+/*For each time slice in the reconstruction, the function copies the corresponding view indices to a new array (which is then usedafter copying). 
+--Inputs--
+time - index of time slice
+ViewIndex - contains the indices of the views which are assumed to be the forward projections of reconstruction at index 'time'
+ViewNum - Number of such views*/
 void copyViewIndexMap (ScannedObject* ScannedObjectPtr, int32_t time, int32_t* ViewIndex, int32_t ViewNum)
 {
 	int32_t i;
@@ -79,6 +92,9 @@ void copyViewIndexMap (ScannedObject* ScannedObjectPtr, int32_t time, int32_t* V
 #endif
 }
 
+/*Maps the projections to reconstruction time slices.
+A projection at time 'projection_time' is assigned to a certain time slice in the reconstruction
+ if the start and end time of the time slice includes the 'projection_time'. */
 void initSparseAnglesOfObject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	int32_t  i;
@@ -108,7 +124,9 @@ void initSparseAnglesOfObject(Sinogram* SinogramPtr, ScannedObject* ScannedObjec
 	free(ViewIndex);
 }
 
-
+/*Function which parses view_info.txt containing information about the views
+and the corresponding times at which they were acquired.
+All text before '-' is considered to be the time and all text before a ',' or '\n' is considered to the view angle*/
 void initSparseAnglesfrmFile(Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr)
 {
         char filename[] = SPARSE_ANGLES_LIST_FILE;
@@ -143,6 +161,7 @@ void initSparseAnglesfrmFile(Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr)
 	}
 }
 
+/*Populates the Views and times of each projection from the text file view_info.txt into arrays*/
 void initRandomAngles (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	int32_t i;
@@ -177,11 +196,17 @@ void initRandomAngles (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, T
 
 }
 
+/*Computes the Euclidean distance of a voxel to its neighboring voxels
+--Inputs--
+i, j, k, l are the indices of neighoring voxels
+--Outputs--
+Returns the distance */
 Real_t distance2node(uint8_t i, uint8_t j, uint8_t k, uint8_t l)
 {
 	return(sqrt(pow((Real_t)i-1.0, 2.0)+pow((Real_t)j-1.0, 2.0)+pow((Real_t)k-1.0, 2.0)+pow((Real_t)l-1.0, 2.0)));
 }
 
+/*Initializes the weights w_{ij} used in the qGGMRF models*/
 void initFilter (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	uint8_t i,j,k;
@@ -228,6 +253,7 @@ void initFilter (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 #endif /*#ifdef DEBUG_EN*/
 }
 
+/*Initializes the sines and cosines of angles at which projections are acquired. It is then used when computing the voxel profile*/
 void calculateSinCos(Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr)
 {
   int32_t i;
@@ -244,7 +270,8 @@ void calculateSinCos(Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr)
 }
 
 
-
+/*Initializes the variables in the three major structures used throughout the code -
+Sinogram, ScannedObject, TomoInputs. It also allocates memory for several variables.*/
 void initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	/*Initializing Sinogram parameters*/
@@ -392,7 +419,7 @@ void initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tom
 }
 
 
-
+/*Function which parses the command line input to the C code and initializes several variables.*/
 void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	int option_index;
