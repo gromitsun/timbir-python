@@ -134,56 +134,60 @@ typedef struct
     int32_t NumIter; /*Maximum number of iterations that the ICD can be run. Normally, ICD converges before completing all the iterations and exits*/
     Real_t StopThreshold; /*ICD exits after the average update of the voxels becomes less than this threshold. Its specified in units of HU.*/
     Real_t RotCenter; /*Center of rotation of the object as measured on the detector in units of pixels*/ 
-    int32_t CountAngles; /**/ 
     
-    int32_t phantom_N_xy; 
-    int32_t phantom_N_z; 
+    int32_t phantom_N_xy; /*Number of voxels in the phantom along either x or y direction (Assuming same number of voxels along both x and y)*/ 
+    int32_t phantom_N_z; /*Number of voxels in phantom along z*/
      
-    Real_t radius_obj;	
-    Real_t Sigma_S_Q;
-    Real_t Sigma_T_Q;
-    Real_t Sigma_S_Q_P;
-    Real_t Sigma_T_Q_P;
+    Real_t radius_obj;	/*Radius of the object within which the voxels are updated*/
+    Real_t Sigma_S_Q; /*The parameter sigma_s raised to power of q*/
+    Real_t Sigma_T_Q; /*Parameter sigma_t raised to power of q*/
+    Real_t Sigma_S_Q_P; /*Parameter sigma_s raised to power of q-p*/
+    Real_t Sigma_T_Q_P; /*Parameter sigma_t raised to power of q-p*/
     
     Real_t Spatial_Filter[NHOOD_Z_MAXDIM][NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM]; /*Filter is the weighting kernel used in the prior model*/
     Real_t Time_Filter[(NHOOD_TIME_MAXDIM-1)/2]; /*Filter is the weighting kernel used in the prior model*/
     
-    Real_t*** Weight;
-    Real_t var_est;
+    Real_t*** Weight; /*Stores the weight matrix (noise matrix) values used in forward model*/
+    Real_t var_est; /*Value of the estimated variance parameter*/
     
     Real_t alpha; /*Value of over-relaxation*/
-    Real_t cost_thresh; 
-    uint8_t time_reg; 
-    uint8_t sinobin; /*If set, intializes the sinogram from bin file*/
-    uint8_t initICD; /*used to specify the method of initializing the object before ICD*/
+    Real_t cost_thresh; /*Convergence threshold on cost*/
+    uint8_t time_reg; /*Enforces time regularization (NOT USED PRESENTLY)*/
+    uint8_t sinobin; /*If set, intializes the sinogram from bin file.*/
+    /*If 1, initializes projection and weight from bin. If 3 initializes weights and bright field data from bin and 
+     computes the projection from within the C code. Value of 2 is currently not used.*/
+    uint8_t initICD; /*used to specify the method of initializing the object before ICD
+    If 0 object is initialized to 0. If 1, object is initialized from bin file directly without interpolation.
+    If 2 object is interpolated by a factor of 2 in x-y plane and then initialized.
+    If 3 object is interpolated by a factor of 2 in x-y-z space and then initialized*/
     uint8_t Write2Tiff; /*If set, tiff files are written*/
-    uint8_t No_Projection_Noise; 
-    uint8_t reconstruct; 
-    int32_t num_threads;
-    uint8_t updateProjOffset;
-    uint8_t no_NHICD;
-    uint8_t WritePerIter;
-    int32_t num_z_blocks;	
-    int32_t*** x_NHICD_select;
+    uint8_t No_Projection_Noise; /*If 0 no noise is added to projections when using phantom data*/ 
+    uint8_t reconstruct; /*If 0, no reconstruction is done*/ 
+    int32_t num_threads; /*Number of threads to be used for shared mem parallelization*/
+    uint8_t updateProjOffset; /*If set, updates the addivitive projection offset error 'd'*/
+    uint8_t no_NHICD; /*If set, reconstruction goes not use NHICD*/
+    uint8_t WritePerIter; /*If set, object and projection offset are written to bin and tiff files after every ICD iteration*/
+    int32_t num_z_blocks; /*z axis slices are split to num_z_blocks which are then used for multithreading*/
+    int32_t*** x_NHICD_select; 
+	/*x_NHICD_select and y_NHICD_select as pair 
+	determines the voxels lines which are updated in a iteration of NHICD*/
     int32_t*** y_NHICD_select;
     int32_t*** x_rand_select;
     int32_t*** y_rand_select;
-    int32_t** UpdateSelectNum;
-    int32_t** NHICDSelectNum;
+    int32_t** UpdateSelectNum; /*Number of voxels selected for HICD updates*/
+    int32_t** NHICDSelectNum; /*Number of voxels selected for NHICD updates*/
 
-    Real_t ErrorSinoThresh;
-    Real_t ErrorSinoDelta;
+    Real_t ErrorSinoThresh; /*Parameter T in the generalized Huber function*/
+    Real_t ErrorSinoDelta; /*Parameter delta in the generalized Huber function*/
 
-    uint8_t only_Edge_Updates;
-    int32_t max_HICD_iter;
-    int32_t node_num;
-    int32_t node_rank;
+    uint8_t only_Edge_Updates; /*If set, finds and updates only a region around edges in the reconstruction*/
+    int32_t node_num; /*Number of nodes used*/
+    int32_t node_rank; /*Rank of node*/
 
-    uint8_t updateVar;
-    uint8_t initMagUpMap;
-    uint8_t readSino4mHDF;
-    FILE *debug_file_ptr;
+    uint8_t updateVar; /*If set, updates the variance parameter*/
+    uint8_t initMagUpMap; /*if set, initializes the magnitude update map*/
+    uint8_t readSino4mHDF; /*If set, directly reads data from HDF file*/
+    FILE *debug_file_ptr; /*ptr to debug.log file*/
   } TomoInputs;
-
 
 #endif /*#define XT_STRUCTURES_H*/

@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include "allocate.h"
 
+/*Instead of reading projection and weight data from binary files, use the function below to read those directly from
+HDF files.*/
 void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	hid_t data_file_id, wd_file_id, white_dataset, dark_dataset, proj_dataset;
@@ -27,8 +29,10 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 	sprintf(weight_filename, "%s_n%d", weight_filename, TomoInputsPtr->node_rank);
 	sprintf(proj_filename, "%s_n%d", proj_filename, TomoInputsPtr->node_rank);
 
+	/*HDF file pointers*/
 	data_file_id = H5Fopen(data_hdf_filename, H5F_ACC_RDONLY, H5P_DEFAULT);
 	wd_file_id = H5Fopen(wd_hdf_filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+	/*dataset pointers*/
 	white_dataset = H5Dopen(wd_file_id, "/exchange/data_white", H5P_DEFAULT);
 	dark_dataset = H5Dopen(wd_file_id, "/exchange/data_dark", H5P_DEFAULT);
 	proj_dataset = H5Dopen(data_file_id, "/exchange/data", H5P_DEFAULT);
@@ -36,6 +40,7 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 	white_dataspace = H5Dget_space (white_dataset);    /* dataspace handle */
 	dark_dataspace = H5Dget_space (dark_dataset);    /* dataspace handle */
 	proj_dataspace = H5Dget_space (proj_dataset);    /* dataspace handle */
+	/*Gives the number of dimensions in a dataset*/
     	wd_rank = H5Sget_simple_extent_ndims (white_dataspace);
     	proj_rank = H5Sget_simple_extent_ndims (proj_dataspace);
 	
@@ -44,7 +49,8 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 		printf("ERROR: gen_projection_4m_HDF: The rank of one of the datasets in the HDF file is not 3\n");
 		exit(1);
 	}
-	
+
+	/*finds the dimension of the dataset and stores them in dims_wd and dims_proj*/	
 	status = H5Sget_simple_extent_dims (white_dataspace, dims_wd, NULL);
 	status = H5Sget_simple_extent_dims (proj_dataspace, dims_proj, NULL);
 	fprintf(TomoInputsPtr->debug_file_ptr, "gen_projection_4m_HDF: size of white (/exchange/data_white) dataset is %zux%zux%zu\n", dims_wd[0], dims_wd[1], dims_wd[2]);
@@ -95,6 +101,7 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 	Projection = (Real_t***)multialloc(sizeof(Real_t), 3, SinogramPtr->N_p, SinogramPtr->N_r, total_t_slices);
 	Weight = (Real_t***)multialloc(sizeof(Real_t), 3, SinogramPtr->N_p, SinogramPtr->N_r, total_t_slices);
 
+	/*Selects ROI in the dataset which should be read into arrays*/
     	status = H5Sselect_hyperslab (white_dataspace, H5S_SELECT_SET, wd_offset, NULL, wd_count, NULL);
     	status = H5Sselect_hyperslab (dark_dataspace, H5S_SELECT_SET, wd_offset, NULL, wd_count, NULL);
     	status = H5Sselect_hyperslab (proj_dataspace, H5S_SELECT_SET, proj_offset, NULL, proj_count, NULL);

@@ -38,6 +38,7 @@
 #include "allocate.h"
 #include "XT_Structures.h"
 
+/*Converts values from HU to um^-1*/
 Real_t convert_HU2um (Real_t val)
 {
        Real_t slope_HU=(HOUNSFIELD_WATER_MAP-HOUNSFIELD_AIR_MAP)/(WATER_MASS_ATT_COEFF*WATER_DENSITY-AIR_MASS_ATT_COEFF*AIR_DENSITY)/HFIELD_UNIT_CONV_CONST;
@@ -46,6 +47,7 @@ Real_t convert_HU2um (Real_t val)
        return((val-c_HU)/slope_HU);
 }
 
+/*Appends values in 'img' to a binary file with name filename. dimensions of img are specified by dim1, dim2, dim3 and dim4*/
 void Append2Bin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t* img, FILE *debug_file_ptr)
 {
   FILE *fp;
@@ -57,6 +59,7 @@ void Append2Bin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t*
   fclose(fp);
 }
 
+/*Writes values in 'img' to a binary file with name filename. dimensions of img are specified by dim1, dim2, dim3 and dim4*/
 void Write2Bin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t* img, FILE *debug_file_ptr)
 {
   FILE *fp;
@@ -68,6 +71,7 @@ void Write2Bin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t* 
   fclose(fp);
 }
 
+/*Reads values in 'img' to a binary file with name filename. dimensions of img are specified by dim1, dim2, dim3 and dim4*/
 void Read4mBin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t* img, FILE *debug_file_ptr)
 {
   	char file[100];
@@ -84,6 +88,8 @@ void Read4mBin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t* 
 	fclose(fp);
 }
 
+/*Writes values in 'img' to tiff files. dimensions of img are specified by height and width.
+hounsfield_flag if set, converts all values to HU and scales appropriately before writing to tiff file*/
 void Write2Tiff(char* filename, int height, int width, Real_t** img, int hounsfield_flag, FILE *debug_file_ptr)
 {
 	struct TIFF_img out_img;
@@ -149,6 +155,7 @@ void Write2Tiff(char* filename, int height, int width, Real_t** img, int hounsfi
   fclose ( fp );
 }
 
+/*Writes to tiff files from a int32 array*/
 void WriteInt32Tiff(char* filename, int height, int width, int32_t** imgin, int hounsfield_flag, FILE *debug_file_ptr)
 {
 	Real_t** img;
@@ -162,7 +169,9 @@ void WriteInt32Tiff(char* filename, int height, int width, int32_t** imgin, int 
 	multifree(img,2);
 }
 
-
+/*Writes a multi-dimension array in 'img' to tiff files with dimension given in dim[4].
+dim2loop_1 and dim2loop_2 specifies the dimension over which we loop and write the tiff files.
+dim2write_1 and dim2write_2 specifies the dimensions which are written to tiff files.*/
 void WriteMultiDimArray2Tiff (char *filename, int dim[4], int dim2loop_1, int dim2loop_2, int dim2write_1, int dim2write_2, Real_t* img, int hounsfield_flag, FILE* debug_file_ptr)
 {
 	char file[100];
@@ -228,6 +237,7 @@ void write_ObjectProjOff2TiffBinPerIter (Sinogram* SinogramPtr, ScannedObject* S
 
 }
 
+/*Writes boolean array to tif files*/
 void WriteBoolArray2Tiff (char *filename, int dim[4], int dim2loop_1, int dim2loop_2, int dim2write_1, int dim2write_2, bool* imgin, int hounsfield_flag, FILE* debug_file_ptr)
 {
 	Real_t* img;

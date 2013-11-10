@@ -73,7 +73,7 @@ void gen_projection_filename (char *file, int time_step, int slice_num)
 	/*fprintf(TomoInputsPtr->debug_file_ptr, "\n%s,%s,%d\n",REPEAT_DIGITS,file,TIME_DIGITS-time_step/10-1);		*/
 }
 
-
+/*initializes structures used when generating projection data from phantom*/
 void initPhantomStructures(Sinogram* Sino, ScannedObject* ScanObj, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	*Sino = *SinogramPtr;
@@ -90,6 +90,7 @@ void initPhantomStructures(Sinogram* Sino, ScannedObject* ScanObj, Sinogram* Sin
 	Sino->OffsetT = ((ScanObj->delta_z/2) + Sino->delta_t/2)/DETECTOR_RESPONSE_BINS;
 }
 
+/*generates projection data from phantom*/
 void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	FILE *fp;
@@ -245,6 +246,7 @@ int genSinogram_fromBin(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, 
 	return(0);	
 }
 
+/*Computes projection data from weight binary file and bright field counts binary file.*/
 int genSinogram_subsampleCounts(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	FILE *fp;

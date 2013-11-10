@@ -43,7 +43,10 @@
 #include <math.h>
 #include "XT_IOMisc.h"
 
-/*'calcAMatrixColumnforAngle' computes the A matrix column for any voxel and angle of choice. This function is called repeatedy during ICD optimization. The indexing in angle is required since this code implements sparse angle sampling.*/
+/*'calcAMatrixColumnforAngle' computes the A matrix column for any voxel and angle of choice. This function is called repeatedy during ICD optimization. The indexing in angle is required since this code implements sparse angle sampling.
+Ai - Pointer of A Matrix
+row, col - row and column of detector for which the A Matrix values are computed
+proj_idx - angle index at which A matrix values are computed for the given row, col*/
 void calcAMatrixColumnforAngle (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Real_t** DetectorResponse, AMatrixCol *Ai, int32_t row, int32_t col, int32_t proj_idx)
 {
   int32_t j;

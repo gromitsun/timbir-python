@@ -37,6 +37,12 @@
 #include <mpi.h>
 #include "XT_Structures.h"
 
+/*Sends the x-y slices in from each z-block assigned to each node to the neighboring node's (in terms of rank) z-blocks.
+This ensures that when each node does ICD on the assigned blocks they have information about the neighboring 
+x-y slices which aren't updated in the same node.*/
+/*send_reqs - contains information about send requests
+recv_reqs - contains information on receive requests 
+select - chooses whether to communicate the top x-y slice or the bottom in relation to odd and even time sllices*/
 void MPI_Send_Recv_Z_Slices (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, MPI_Request* send_reqs, MPI_Request* recv_reqs, uint8_t select)
 {
 	int32_t i, num, N_z, off1, off2;
@@ -73,7 +79,11 @@ void MPI_Send_Recv_Z_Slices (ScannedObject* ScannedObjectPtr, TomoInputs* TomoIn
 	}
 }
 			
-
+/*Once the x-y slices are initiated for communication, the offset error and variance parameter are updated since they
+don't require the neighboring slices from neighboring nodes. Then, the function below is used to wait for all communication to end.
+send_reqs - contains information about send requests
+recv_reqs - contains information on receive requests 
+select - chooses whether to communicate the top x-y slice or the bottom in relation to odd and even time sllices*/
 void MPI_Wait_Z_Slices (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, MPI_Request* send_reqs, MPI_Request* recv_reqs, uint8_t select)
 {
 	int32_t i, num, N_z, off1, off2;
