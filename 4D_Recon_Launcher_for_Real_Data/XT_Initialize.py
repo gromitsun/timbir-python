@@ -110,7 +110,7 @@ def recon_init (proj, recon):
 	recon['c_s'] = [10**-6]
 	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [202*(10**4)]
+	recon['sigma_s'] = [200*(10**4)]
 	recon['sigma_t'] = [2*(10**4)]
 	
 	recon['ZingerT'] = [5]
@@ -149,7 +149,7 @@ def recon_init (proj, recon):
         recon['iterations'] = [300, 200, 100, 50, 40, 30]
         recon['only_Edge_Updates'] = [0, 0, 0, 0, 0, 0]
         recon['initMagUpMap'] = [0, 1, 1, 1, 1, 1]
-	recon['readSino4mHDF'] = [0, 0, 0, 0, 0, 0]	
+	recon['readSino4mHDF'] = [1, 0, 0, 0, 0, 0]	
 	recon['do_VarEstimate'] = [1]*len(recon['voxel_thresh'])
 
 	recon['Estimate_of_Var'] = 20;	

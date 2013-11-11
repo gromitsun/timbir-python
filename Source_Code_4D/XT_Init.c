@@ -434,41 +434,42 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
                {"c_t",  required_argument, 0, 'e'}, 
                {"delta_xy",  required_argument, 0, 'f'}, /*normalized value w.r.t. delta_r*/
                {"delta_z",  required_argument, 0, 'z'}, /*normalized value w.r.t. delta_t*/
-               {"length_r",  required_argument, 0, 'g'}, /*length of detector in mm*/
+               {"length_r",  required_argument, 0, 'g'}, /*length of detector across r axis in mm*/
                {"num_threads",  required_argument, 0, 'h'}, /*Number of threads*/
-               {"length_t",  required_argument, 0, '3'}, /*length of detector in mm*/
+               {"length_t",  required_argument, 0, '3'}, /*length of detector across t axis in mm*/
                {"voxel_thresh",    required_argument, 0, 'j'}, /*Optimization stops once average magnitude of update exceeds this threshold*/
                {"iter",    required_argument, 0, 'k'}, /*Maximum number of iterations of optimization algorithm*/
                {"rotation_center",    required_argument, 0, 'l'}, /*Center of rotation of object*/
                {"alpha",    required_argument, 0, 'm'}, /*Over-relaxation value. Can be between 1 and 2*/
                {"time_reg",    no_argument, 0, 'n'}, /*If true enables time regularization*/
-               {"sinobin",    required_argument, 0, 'o'}, /*If true reads projection values from bin file*/
-               {"initICD",    required_argument, 0, 'p'}, /*Value of n, initializes ICD with upsampled by n values from bin file*/
+               {"sinobin",    required_argument, 0, 'o'}, /*If 1, reads projection and weight values from bin file. If 3, then reads in bright field counts and weight*/
+               {"initICD",    required_argument, 0, 'p'}, /*parameter which specifies the type of interpolation used when initializing object*/
                {"writeTiff",    required_argument, 0, 'q'}, /*Enables writes to Tiff file. If 1 write tiff file. If 2 in addition write object and offset to bin to tiff every iteration*/
                {"NoNoise",    no_argument, 0, 'r'}, /*Does not add noise to projections if true*/
                {"Rtime0",  required_argument, 0, 's'}, /*Time of start of piecewise constant object*/
                {"Rtime_delta",  required_argument, 0, 't'}, /*Length of subinterval of the piecewise constant object along time*/
                {"Rtime_num",  required_argument, 0, 'u'}, /*Number of reconstructions*/
-               {"num_projections",  required_argument, 0, 'v'}, /*Length of subinterval of the piecewise constant object along time*/
-               {"N_r",  required_argument, 0, 'w'}, /*Length of subinterval of the piecewise constant object along time*/
+               {"num_projections",  required_argument, 0, 'v'}, /*number of projections used in reconstruction*/
+               {"N_r",  required_argument, 0, 'w'}, /*N_r is the number of detector bins along r-axis. parallel to x-axis*/
                {"dont_reconstruct",    no_argument, 0, 'x'}, /*if used, program will not do reconstruction*/
-               {"cost_thresh",  required_argument, 0, 'y'}, /*Length of subinterval of the piecewise constant object along time*/
+               {"cost_thresh",  required_argument, 0, 'y'}, /*threshold on cost which decides convergence*/
                {"radius_obj",  required_argument, 0, 'i'}, /*Radius of object. Code will update voxels only in the circular region*/
                {"detector_slice_begin",  required_argument, 0, '1'}, /*First slice to be reconstructed*/
-               {"detector_slice_num",  required_argument, 0, '2'}, /*Last slice to be reconstructed*/
+               {"detector_slice_num",  required_argument, 0, '2'}, /*Number of slices to be reconstructed*/
                {"phantom_N_xy",  required_argument, 0, '4'}, /*Resolution of phantom along x-y dimension*/
                {"phantom_N_z",  required_argument, 0, '5'}, /*Resolution of phantom along z dimension*/
-               {"N_t",  required_argument, 0, '6'}, /*If 1, just initializes the offset error. If 2, does not initialize but updates error offset. If 3, initializes and updates error offset*/
+               {"N_t",  required_argument, 0, '6'},/*Number of detector bins along t-axis (parallel to z axis)*/ 
                {"updateProjOffset",  required_argument, 0, '7'}, 
-               {"no_NHICD",  no_argument, 0, '8'}, 
-               {"WritePerIter",  no_argument, 0, '+'}, 
-               {"only_Edge_Updates",  no_argument, 0, '-'}, 
-               {"zingerT",  required_argument, 0, '*'}, 
-               {"zingerDel",  required_argument, 0, '^'}, 
-               {"initMagUpMap",  no_argument, 0, '&'}, 
-               {"readSino4mHDF",  no_argument, 0, '>'}, 
-               {"do_VarEst",  no_argument, 0, '%'}, 
-               {"Est_of_Var",  required_argument, 0, '('}, 
+		/*If 1, just initializes the offset error. If 2, does not initialize but updates error offset. If 3, initializes and updates error offset*/
+               {"no_NHICD",  no_argument, 0, '8'},/*if set, the code does not use NHICD*/ 
+               {"WritePerIter",  no_argument, 0, '+'}, /*Writes the object and projection offset data to binary file every iteration of ICD*/
+               {"only_Edge_Updates",  no_argument, 0, '-'}, /*Only updates the edges of the object*/
+               {"zingerT",  required_argument, 0, '*'}, /*Threshold T of generalized Huber function above which measurement is considered anamolous*/
+               {"zingerDel",  required_argument, 0, '^'}, /*Threshold \delta of generalized Huber function*/
+               {"initMagUpMap",  no_argument, 0, '&'}, /*if set, initializes the magnitude update map from coarse resolution reconstruction*/
+               {"readSino4mHDF",  no_argument, 0, '>'}, /*if set, reads the count values from HDF file and computes the projections*/ 
+               {"do_VarEst",  no_argument, 0, '%'},/*if set, estimates the variance parameter*/ 
+               {"Est_of_Var",  required_argument, 0, '('}, /*contains an initial estimate of variance parameter*/
                {0, 0, 0, 0}
          };
 
@@ -551,6 +552,8 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
 	}
 
 	sprintf(debug_filename ,"DEBUG_n%d_delta_xy_%d_delta_z_%d.log", TomoInputsPtr->node_rank, (int)ScannedObjectPtr->mult_xy, (int)ScannedObjectPtr->mult_z);
+	if (TomoInputsPtr->readSino4mHDF == 1)
+		sprintf(debug_filename ,"DEBUG_HDF_Read_n%d.log", TomoInputsPtr->node_rank);
 	TomoInputsPtr->debug_file_ptr = fopen(debug_filename, "w" );
 	printf ("Refer to %s for more information\n", debug_filename);
 /*	TomoInputsPtr->debug_file_ptr = stdout;*/

@@ -102,9 +102,6 @@ def do_MBIR_reconstruction(proj, recon, files):
 				if (recon['WritePerIter'][multidx] == 1):
 					command = command + ' --WritePerIter'
 				
-				if (recon['reconstruct'] == 0):
-					command = command + ' --dont_reconstruct'
-			
 				if (recon['NHICD'] == 0):
 					command = command + ' --no_NHICD'		
 			
@@ -114,12 +111,16 @@ def do_MBIR_reconstruction(proj, recon, files):
 				if (recon['initMagUpMap'][multidx] == 1):
 					command = command + ' --initMagUpMap'
 				
-				if (recon['readSino4mHDF'][multidx] == 1):
-					command = command + ' --readSino4mHDF'
-			
 				if (recon['do_VarEstimate'][multidx] == 1):
 					command = command + ' --do_VarEst '
 	
+				if (recon['readSino4mHDF'][multidx] == 1):
+					print 'Generating projection, weight, bright field data from HDF file'
+					flag = system('cd ' + path2launch + ';' + command + ' --dont_reconstruct --readSino4mHDF')
+					error_by_flag(flag, 'ERROR: Was not able to run - ' + command)
+				
+				if (recon['reconstruct'] == 0):
+					command = command + ' --dont_reconstruct'
 				print 'Will run reconstruction code for delta_xy = ' + str(recon['delta_xy'][multidx]) + ' and delta_z = ' + str(recon['delta_z'][multidx])
 				flag = system('cd ' + path2launch + ';' + command)
 				error_by_flag(flag, 'ERROR: Was not able to run - ' + command)

@@ -68,6 +68,10 @@ void freeMemory(Sinogram* SinogramPtr, ScannedObject *ScannedObjectPtr, TomoInpu
 	multifree(SinogramPtr->ProjOffset,2);
 	multifree(SinogramPtr->ProjSelect,3);
 	multifree(TomoInputsPtr->Weight,3);	
+	free(SinogramPtr->ViewPtr);
+	free(SinogramPtr->TimePtr);
+	free(SinogramPtr->cosine);
+	free(SinogramPtr->sine);
 	free(SinogramPtr);
 	free(ScannedObjectPtr);
 	free(TomoInputsPtr);
