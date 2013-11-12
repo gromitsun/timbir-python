@@ -50,4 +50,47 @@ c_s, c_t		- Spatial and temporal qGGMRF parameter which dictates the transition 
 			  quadratic regularization to GGMRF regularization.
 delta_xy		- The voxel size as a multiple of detector pixel size in the x-y plane (size is side length).
 delta_z			- The voxel size as a multiple of detector pixel size along z axis. 
+length_r		- Length of the detector along r-axis (in um)
+length_t		- Length of the detector along t-axis (in um) (limited to the part chosen for reconstruction)
+num_threads		- Number of threads used by OpenMP
+voxel_thresh		- Convergence threshold on average magnitude of change in update
+iter			- Total number of iterations
+rotation_center		- Center of rotation of the object (in units of detector pixels)
+alpha			- Over-relaxation parameter
+time_reg (FLAG)		- Enables time regularization
+sinobin			- Values (Use '1' or '3')
+			  '1' reads projection & weight data from corresponding binary files
+			  '3' reads bright field and weight data from corresponding binary files
+initICD			- Values (Use '0', '1', '2' or '3')
+			  '0' initializes object to all 0s.
+			  '1' initializes object from corresponding binary file without interpolation
+			  '2' initializes object from corresponding binary file after interpolation by a factor of 2 in x-y plane
+			  '3' initializes object from corresponding binary file after interpolation by a factor of 2 in x-y-z plane
+writeTiff		- If '1', writes tiff files. Otherwise use '0'.
+NoNoise	(FLAG)		- Doesn't add noise to projections after generating projections from phantom data (NOT USED PRESENTLY)
+Rtime0			- Beginning time of the first reconstruction time slice.
+Rtime_delta		- Time between reconstruction time slices
+Rtime_num		- Number of reconstruction time slices
+num_projections		- Total number of projections
+N_r			- Number of detector pixels along r-axis
+dont_reconstruct (FLAG)	- If used, then code does not do reconstruction
+cost_thresh		- Convergence threshold on percentage change in cost normalized by change in cost in first iteration
+radius_obj		- Radius of object (in um)
+detector_slice_begin	- First slice along t-axis from which reconstruction is done
+detector_slice_num	- Total number of t-slices used for reconstruction
+N_t			- Total number of t-slices (should be a factor of 'detector_slice_num').
+			  All 'detector_slice_num' slices are subsampled to 'N_t' number of slices when reading directly from HDF file.
+updateProjOffset	- Values (Use '0', '1', '2' or '3')
+			  '0' - Don't initialize nor update projection offset.
+			  '1' - Initialize projection offset but don't update.
+			  '2' - Don't initialize projection offset but update it.
+			  '3' - Initialize and update projection offset
+no_NHICD (FLAG)		- Don't use NHICD
+WritePerIter (FLAG)	- Write object binary and tiff files after every iteration
+only_Edge_Updates (FLAG)- Only updates edges of object
+zingerT			- Threshold T of generalized Huber function
+zingerDel		- Parameter delta of generalized Huber function
+initMagUpMap		- Initialize the magnitude update map from binary file 
+
+Example - 
 

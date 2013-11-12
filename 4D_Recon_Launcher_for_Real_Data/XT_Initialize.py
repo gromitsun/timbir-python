@@ -110,7 +110,7 @@ def recon_init (proj, recon):
 	recon['c_s'] = [10**-6]
 	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [200*(10**4)]
+	recon['sigma_s'] = [100*(10**4)]
 	recon['sigma_t'] = [2*(10**4)]
 	
 	recon['ZingerT'] = [5]
