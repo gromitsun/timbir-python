@@ -1,9 +1,44 @@
+/* ============================================================================
+ * Copyright (c) 2013 K. Aditya Mohan (Purdue University)
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice, this
+ * list of conditions and the following disclaimer in the documentation and/or
+ * other materials provided with the distribution.
+ *
+ * Neither the name of K. Aditya Mohan, Purdue
+ * University, nor the names of its contributors may be used
+ * to endorse or promote products derived from this software without specific
+ * prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+
 #include <stdio.h>
 #include "XT_Constants.h"
 #include "tiff.h"
 #include "allocate.h"
 #include "XT_Structures.h"
 
+/*Converts values from HU to um^-1*/
 Real_t convert_HU2um (Real_t val)
 {
        Real_t slope_HU=(HOUNSFIELD_WATER_MAP-HOUNSFIELD_AIR_MAP)/(WATER_MASS_ATT_COEFF*WATER_DENSITY-AIR_MASS_ATT_COEFF*AIR_DENSITY)/HFIELD_UNIT_CONV_CONST;
@@ -12,6 +47,7 @@ Real_t convert_HU2um (Real_t val)
        return((val-c_HU)/slope_HU);
 }
 
+/*Appends values in 'img' to a binary file with name filename. dimensions of img are specified by dim1, dim2, dim3 and dim4*/
 void Append2Bin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t* img, FILE *debug_file_ptr)
 {
   FILE *fp;
@@ -23,6 +59,7 @@ void Append2Bin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t*
   fclose(fp);
 }
 
+/*Writes values in 'img' to a binary file with name filename. dimensions of img are specified by dim1, dim2, dim3 and dim4*/
 void Write2Bin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t* img, FILE *debug_file_ptr)
 {
   FILE *fp;
@@ -34,6 +71,7 @@ void Write2Bin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t* 
   fclose(fp);
 }
 
+/*Reads values in 'img' to a binary file with name filename. dimensions of img are specified by dim1, dim2, dim3 and dim4*/
 void Read4mBin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t* img, FILE *debug_file_ptr)
 {
   	char file[100];
@@ -50,6 +88,8 @@ void Read4mBin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t* 
 	fclose(fp);
 }
 
+/*Writes values in 'img' to tiff files. dimensions of img are specified by height and width.
+hounsfield_flag if set, converts all values to HU and scales appropriately before writing to tiff file*/
 void Write2Tiff(char* filename, int height, int width, Real_t** img, int hounsfield_flag, FILE *debug_file_ptr)
 {
 	struct TIFF_img out_img;
@@ -81,7 +121,7 @@ void Write2Tiff(char* filename, int height, int width, Real_t** img, int hounsfi
 		avgpix+=img[i][j];	
 	}
 	avgpix/=(height*width);
-/*	fprintf(debug_file_ptr, "Write2Tiff:file=%s,maxpix=%f,minpix=%f,avgpix=%f,height=%d,width=%d\n",filename,maxpix,minpix,avgpix,height,width);*/
+	fprintf(debug_file_ptr, "Write2Tiff:file=%s,maxpix=%f,minpix=%f,avgpix=%f,height=%d,width=%d\n",filename,maxpix,minpix,avgpix,height,width);
 
 	if(hounsfield_flag==1){
 		maxpix=HOUNSFIELD_MAX;
@@ -115,6 +155,7 @@ void Write2Tiff(char* filename, int height, int width, Real_t** img, int hounsfi
   fclose ( fp );
 }
 
+/*Writes to tiff files from a int32 array*/
 void WriteInt32Tiff(char* filename, int height, int width, int32_t** imgin, int hounsfield_flag, FILE *debug_file_ptr)
 {
 	Real_t** img;
@@ -128,7 +169,9 @@ void WriteInt32Tiff(char* filename, int height, int width, int32_t** imgin, int 
 	multifree(img,2);
 }
 
-
+/*Writes a multi-dimension array in 'img' to tiff files with dimension given in dim[4].
+dim2loop_1 and dim2loop_2 specifies the dimension over which we loop and write the tiff files.
+dim2write_1 and dim2write_2 specifies the dimensions which are written to tiff files.*/
 void WriteMultiDimArray2Tiff (char *filename, int dim[4], int dim2loop_1, int dim2loop_2, int dim2write_1, int dim2write_2, Real_t* img, int hounsfield_flag, FILE* debug_file_ptr)
 {
 	char file[100];
@@ -185,6 +228,7 @@ void write_ObjectProjOff2TiffBinPerIter (Sinogram* SinogramPtr, ScannedObject* S
 		dim[0] = 1; dim[1] = ScannedObjectPtr->N_z; dim[2] = ScannedObjectPtr->N_y; dim[3] = ScannedObjectPtr->N_x;
 		if (TomoInputsPtr->Write2Tiff == 1)
 			WriteMultiDimArray2Tiff (object_file, dim, 0, 1, 2, 3, &(ScannedObjectPtr->Object[i][1][0][0]), 1, TomoInputsPtr->debug_file_ptr);
+			/*Changed above line so that output image is scaled from min to max*/
 	}
 	dim[0] = 1; dim[1] = 1; dim[2] = SinogramPtr->N_r; dim[3] = SinogramPtr->N_t;
 	Write2Bin (projOffset_file, 1, 1, SinogramPtr->N_r, SinogramPtr->N_t, &(SinogramPtr->ProjOffset[0][0]), TomoInputsPtr->debug_file_ptr);
@@ -193,6 +237,7 @@ void write_ObjectProjOff2TiffBinPerIter (Sinogram* SinogramPtr, ScannedObject* S
 
 }
 
+/*Writes boolean array to tif files*/
 void WriteBoolArray2Tiff (char *filename, int dim[4], int dim2loop_1, int dim2loop_2, int dim2write_1, int dim2write_2, bool* imgin, int hounsfield_flag, FILE* debug_file_ptr)
 {
 	Real_t* img;

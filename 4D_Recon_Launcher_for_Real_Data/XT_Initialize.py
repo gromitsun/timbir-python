@@ -27,33 +27,34 @@ from XT_IOMisc import error_by_flag
 def proj_init (files):
 	proj = {}
 
-#	proj['Path2Dataset'] = files['scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
-#	proj['Path2WhiteDark'] = files['scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
-	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
-	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
+	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
+	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
+#	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
+#	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
 
 	proj['recon_N_r'] = 2048
 	proj['slice_t_start'] = 500
 	proj['N_t'] = 8
 	proj['recon_N_t'] = 8
-	proj['rotation_center_r'] = 265.0*4 + 1.0/4
-#	proj['proj_start'] = 998
-#	proj['proj_num'] = 7969 - 998
-	proj['proj_start'] = 1969
-	proj['proj_num'] = 7873 - 1969
-	proj['N_p'] = 1984*4
-#	proj['N_p'] = 2000*4
-	proj['K'] = 32
-#	proj['N_theta'] = 2000
-	proj['N_theta'] = 1984
+	proj['rotation_center_r'] = 264.75*4
+	proj['proj_start'] = 998
+	proj['proj_num'] = 1991
+#	proj['proj_start'] = 1969
+#	proj['proj_num'] = 1984
+#	proj['proj_num'] = 7873 - 1969
+#	proj['N_p'] = 1984*4
+	proj['N_p'] = 2000*4
+	proj['K'] = 16
+	proj['N_theta'] = 2000
+#	proj['N_theta'] = 1984
 
 	proj['N_r'] = 2080
 	proj['length_r'] = 0.65*proj['N_r']	
 	proj['length_t'] = 0.65*proj['N_t']	
 	proj['L'] = proj['N_theta']/proj['K']
 	
-	min_time_btw_views = 0.028391
-#	min_time_btw_views = 0.014039
+#	min_time_btw_views = 0.028391
+	min_time_btw_views = 0.014039
 	rotation_speed = 100
 
 	fps_of_camera = proj['L']/(180.0/rotation_speed)
@@ -105,14 +106,16 @@ def proj_init (files):
 def recon_init (proj, recon):
 	recon['recon_type'] = 'MBIR'
 	
-	recon['r'] = [32]
+	recon['r'] = [16]
 	recon['c_s'] = [10**-6]
 	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [25*(10**4)]
-	recon['sigma_t'] = [8*(10**2)]
+	recon['sigma_s'] = [800*(10**5)]
+	recon['sigma_t'] = [4*(10**3)]
+	#recon['sigma_s'] = [4*(10**5)]
+	#recon['sigma_t'] = [4*(10**2)]
 	
-	recon['ZingerT'] = [40]
+	recon['ZingerT'] = [8]
 	recon['ZingerDel'] = [0.1]
 
 	recon['init_object4mHDF'] = 0
@@ -143,12 +146,15 @@ def recon_init (proj, recon):
         recon['initICD'] = [0, 2, 2, 2, 2, 2]
         recon['sinobin'] = 1 
         recon['writeTiff'] = [1, 1, 1, 1, 1, 1]
-        recon['WritePerIter'] = [0, 0, 0, 0, 1, 1]
+        recon['WritePerIter'] = [0, 0, 0, 0, 0, 1]
         recon['updateProjOffset'] = [0, 2, 3, 3, 3, 3]
-        recon['iterations'] = [300, 200, 100, 50, 20, 10]
+        recon['iterations'] = [300, 200, 100, 50, 40, 30]
         recon['only_Edge_Updates'] = [0, 0, 0, 0, 0, 0]
         recon['initMagUpMap'] = [0, 1, 1, 1, 1, 1]
-	
+	recon['readSino4mHDF'] = [1, 0, 0, 0, 0, 0]	
+	recon['do_VarEstimate'] = [1]*len(recon['voxel_thresh'])
+
+	recon['Estimate_of_Var'] = 1;	
 	recon['init_with_FBP'] = 0
 	#recon['num_threads'] = 1
 	recon['positivity_constraint'] = 0;
@@ -184,7 +190,7 @@ def recon_init (proj, recon):
 		error_by_flag (1, 'ERROR: recon_init: Lengths of r, c_t, c_s, sigma_s, sigma_t does not match')
 
 	if (len(recon['delta_xy']) != len(recon['voxel_thresh']) or len(recon['delta_xy']) != len(recon['cost_thresh']) or len(recon['delta_xy']) != len(recon['initICD']) or len(recon['delta_xy']) != len(recon['writeTiff']) or len(recon['delta_xy']) != len(recon['delta_z'])):
-		error_by_flag (1, 'ERROR: recon_init: Lengths of delta_xy, voxel_thresh, cost_thresh, initICD, writeTiff, sigma_t does not match')
+		error_by_flag (1, 'ERROR: recon_init: Lengths of delta_xy, voxel_thresh, cost_thresh, initICD, writeTiff does not match')
 	
 	return recon
 
@@ -197,9 +203,9 @@ def recon_init (proj, recon):
 
 def files_init (files):
 	files['C_Source_Folder'] = "../Source_Code_4D/"
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_32/XT_Result_Repository/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_16/XT_Result_Repository/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_32/XT_run/"
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_16/XT_run/"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 

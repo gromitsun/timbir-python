@@ -88,9 +88,10 @@ def main():
         parser.add_argument("--create_objectHDFtiffonly", help="specify whether you want to create HDF and tiff output files only", action="store_true")
 	parser.add_argument("--setup_launch_folder", help="Specify whether you want to setup the launch folder", action="store_true")
 	parser.add_argument("--run_reconstruction", help="Run reconstruction code", action="store_true")
-	parser.add_argument("--NERSC", help="Use NERSC when running on NERSC systems", action="store_true")
+	parser.add_argument("--Edison", help="Use Edison when running on Edison", action="store_true")
 	parser.add_argument("--Purdue", help="Use Purdue when running on Conte or Carter", action="store_true")
         parser.add_argument("--Carver", help="Used to indicate HPC", action="store_true")
+        parser.add_argument("--PC", help="Used to indicate code run is on a PC", action="store_true")
 
         args = parser.parse_args()
         
@@ -159,15 +160,15 @@ def main():
 		files['scratch'] = os.environ['RCAC_SCRATCH']
 		files['data_scratch'] = os.environ['RCAC_SCRATCH']
 		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) + ' -machinefile nodefile '
-		recon['compile_command'] = 'mpicc '
+		recon['compile_command'] = 'mpicc -openmp '
 		recon['HPC'] = 'Purdue' 
 		recon['rank'] = 0
-	elif (args.NERSC):
+	elif (args.Edison):
 		recon['num_threads'] = inputs['num_threads']
 		files['scratch'] = os.environ['SCRATCH']
 		files['data_scratch'] = os.environ['GSCRATCH']
 		recon['run_command'] = 'aprun -j 2 -n ' + str(recon['node_num']) + ' -N 1 -d ' + str(recon['num_threads']) + ' -cc none '
-		recon['compile_command'] = 'cc '
+		recon['compile_command'] = 'cc -openmp '
 		recon['HPC'] = 'NERSC'
 		recon['rank'] = 0		
 	elif (args.Carver):
@@ -175,8 +176,16 @@ def main():
 		files['scratch'] = os.environ['SCRATCH']
 		files['data_scratch'] = os.environ['GSCRATCH']
 		recon['run_command'] = 'mpirun -np ' + str(recon['node_num']) + ' -bynode '
-		recon['compile_command'] = 'mpicc '
+		recon['compile_command'] = 'mpicc -openmp '
 		recon['HPC'] = 'NERSC'
+		recon['rank'] = 0
+	elif (args.PC):
+		recon['num_threads'] = inputs['num_threads']
+		files['scratch'] = '../XT_run/'
+		files['data_scratch'] = '../XT_run/'
+		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) 
+		recon['compile_command'] = 'mpicc -fopenmp '
+		recon['HPC'] = 'PC'
 		recon['rank'] = 0
 	else:
 		error_by_flag(1, 'HPC system not recognized')

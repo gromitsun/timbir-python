@@ -1,3 +1,37 @@
+/* ============================================================================
+ * Copyright (c) 2013 K. Aditya Mohan (Purdue University)
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice, this
+ * list of conditions and the following disclaimer in the documentation and/or
+ * other materials provided with the distribution.
+ *
+ * Neither the name of K. Aditya Mohan, Purdue
+ * University, nor the names of its contributors may be used
+ * to endorse or promote products derived from this software without specific
+ * prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+
 
 
 
@@ -15,8 +49,6 @@
 #include "XT_Profile.h"
 #include "randlib.h"
 
-/*function read16bitTiff() is defined in TiffUtilities.cpp*/
-unsigned short* read16bitTiff(char* file);
 
 /*'gen_projection_filename' generates the name of the projection files given to us complete with the folder heirarchy.*/
 void gen_projection_filename (char *file, int time_step, int slice_num)
@@ -41,7 +73,7 @@ void gen_projection_filename (char *file, int time_step, int slice_num)
 	/*fprintf(TomoInputsPtr->debug_file_ptr, "\n%s,%s,%d\n",REPEAT_DIGITS,file,TIME_DIGITS-time_step/10-1);		*/
 }
 
-
+/*initializes structures used when generating projection data from phantom*/
 void initPhantomStructures(Sinogram* Sino, ScannedObject* ScanObj, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	*Sino = *SinogramPtr;
@@ -58,6 +90,7 @@ void initPhantomStructures(Sinogram* Sino, ScannedObject* ScanObj, Sinogram* Sin
 	Sino->OffsetT = ((ScanObj->delta_z/2) + Sino->delta_t/2)/DETECTOR_RESPONSE_BINS;
 }
 
+/*generates projection data from phantom*/
 void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	FILE *fp;
@@ -213,6 +246,7 @@ int genSinogram_fromBin(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, 
 	return(0);	
 }
 
+/*Computes projection data from weight binary file and bright field counts binary file.*/
 int genSinogram_subsampleCounts(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	FILE *fp;

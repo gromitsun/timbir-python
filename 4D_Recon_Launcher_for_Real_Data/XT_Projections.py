@@ -65,7 +65,7 @@ def generate_projections (proj, recon, files, path2launch):
 	max0idx = white_ptr.shape[0]
 	white = white_ptr[1:max0idx-1, index_t_start:index_t_end, index_r].astype(np.uint16)
 	white = np.mean(white.astype(np.float64), axis=0)
-	dark = dark_ptr[1:max0idx-1:, index_t_start:index_t_end, index_r].astype(np.uint16)
+	dark = dark_ptr[1:max0idx-1, index_t_start:index_t_end, index_r].astype(np.uint16)
 	dark = np.mean(dark.astype(np.float64), axis=0)
 	count_expected = decimate_count_data_in_r((np.abs(white - dark)).astype(np.float64), true_length_r, proj['recon_N_r'])
 	count_expected = decimate_count_data_in_t(count_expected, proj['N_t']/recon['node_num'], proj['recon_N_t']/recon['node_num'])

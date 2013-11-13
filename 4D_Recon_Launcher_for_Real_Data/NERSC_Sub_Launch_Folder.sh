@@ -3,14 +3,14 @@
 #Sets up Launch folder : Creates data; binaries; splits into mpi tasks, copies into launch folder
 
 #PBS -q regular
-#PBS -l mppwidth=1
-#PBS -l walltime=01:00:00
+#PBS -l mppwidth=24
+#PBS -l walltime=48:00:00
 #PBS -N fullvolres
 #PBS -e my_job.$PBS_JOBID.err
 #PBS -o my_job.$PBS_JOBID.out
 #PBS -V
 
-set mpi_tasks=2 #Total tasks for C-Code 
+set mpi_tasks=250 #Total tasks for C-Code 
 cd $PBS_O_WORKDIR
 setenv CRAY_ROOTFS DSL
 

@@ -44,17 +44,23 @@ def do_MBIR_reconstruction(proj, recon, files):
 				print ('do_reconstruction: Copying projection.bin and weight.bin')
 				flag = system('cp ' + path2source + 'bright*.bin ' + path2source + 'projection*.bin ' + path2source + 'weight*.bin ' + path2launch + '.')
 				error_by_flag(flag, 'ERROR: cannot copy projection.bin/weight.bin')
-			else:
+			elif (recon['readSino4mHDF'][0] == 0):
 				if (recon['HPC'] == 'NERSC'):
 					for j in range(recon['node_num']):
 						recon['rank'] = j
-						generate_projections (proj, recon, files, path2launch)
+						generate_projections(proj, recon, files, path2launch)
 					recon['rank'] = 0
 				else:
 					generate_projections (proj, recon, files, path2launch)
 					
 
-			macros = ' -openmp -DBH_QUAD_COEF="' + str(recon['BH_Quad_Coef']) + '" -DHOUNSFIELD_MAX="' + str(recon['maxHU']) + '" -DHOUNSFIELD_MIN="' + str(recon['minHU']) + '"' 
+			macros = ' -DBH_QUAD_COEF="' + str(recon['BH_Quad_Coef']) + '" -DHOUNSFIELD_MAX="' + str(recon['maxHU']) + '" -DHOUNSFIELD_MIN="' + str(recon['minHU']) + '"' 
+			#macros = ' -DBH_QUAD_COEF="' + str(recon['BH_Quad_Coef']) + '" -DHOUNSFIELD_MAX="' + str(recon['maxHU']) + '" -DHOUNSFIELD_MIN="' + str(recon['minHU']) + '"' 
+	
+			macros = macros + ' -DDATA_HDF_FILENAME="\\"' + proj['Path2Dataset'] + '\\""'
+			macros = macros + ' -DWHITEDARK_HDF_FILENAME="\\"' + proj['Path2WhiteDark'] + '\\""'
+			macros = macros + ' -DPROJECTION_HDF_START="' + str(proj['proj_start']) + '"'
+
 			if (recon['calculate_cost'] == 0):
 				macros = macros + ' -DNO_COST_CALCULATE'
 
@@ -64,11 +70,15 @@ def do_MBIR_reconstruction(proj, recon, files):
 			if (recon['positivity_constraint'] == 1):
 				macros = macros + ' -DPOSITIVITY_CONSTRAINT'
 
+			if (any(recon['readSino4mHDF'])):
+				macros = macros + ' -DREAD_PROJECTION_DATA_4M_HDF'
+
 			if (recon['rank'] == 0 and files['copy_executables'] == 0):
 				print('do_reconstruction: Compiling C code')
 #        		if (engine.use_tifflibrary == 1)
 #            			flag = system(['cd ',path2launch,';g++ -Wall -ansi', macros, ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c allocate.c TiffUtilities.cpp randlib.c tiff.c XT_IOMisc.c -lm -L/usr/local/tiff/lib -I/usr/local/tiff/include -ltiff '],'-echo');
-				flag = system('cd ' + path2launch + ';' + recon['compile_command'] + ' -Wall -ansi' + macros + ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c XT_NHICD.c allocate.c randlib.c tiff.c XT_IOMisc.c XT_ImageProc.c XT_MPI.c -lm ')
+				print 'cd ' + path2launch + ';' + recon['compile_command'] + macros + ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c XT_NHICD.c allocate.c randlib.c tiff.c XT_IOMisc.c XT_ImageProc.c XT_MPI.c XT_HDFIO.c -lm '
+				flag = system('cd ' + path2launch + ';' + recon['compile_command'] + macros + ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c XT_NHICD.c allocate.c randlib.c tiff.c XT_IOMisc.c XT_ImageProc.c XT_MPI.c XT_HDFIO.c -lm ')
 				error_by_flag(flag, 'ERROR: Not able to compile')
 				print 'do_reconstruction: Compile successful!'			
 			if (recon['rank'] == 0):
@@ -85,7 +95,7 @@ def do_MBIR_reconstruction(proj, recon, files):
 				ZingerT = recon['ZingerT'][i]
 				if (recon['ZingerDel'][i] == 0 and multidx == 0):
 					ZingerT = 100000 
-				command = recon['run_command'] + ' ./XT_Engine --p ' + str(recon['p']) + ' --sigma_s ' + str(recon['sigma_s'][i]) + ' --sigma_t ' + str(recon['sigma_t'][i]) + ' --c_s ' + str(recon['c_s'][i]) + ' --c_t ' + str(recon['c_t'][i]) + ' --delta_xy ' + str(recon['delta_xy'][multidx]) + ' --delta_z ' + str(recon['delta_z'][multidx]) + ' --length_r ' + str(proj['length_r']) + ' --length_t ' + str(proj['length_t']) + ' --voxel_thresh ' + str(recon['voxel_thresh'][multidx]) + ' --cost_thresh ' + str(recon['cost_thresh'][multidx]) + ' --iter ' + str(recon['iterations'][multidx]) + ' --rotation_center ' + str(proj['rotation_center_r']) + ' --alpha ' + str(recon['alpha']) + ' --sinobin ' + str(recon['sinobin']) + ' --initICD ' + str(recon['initICD'][multidx]) + ' --Rtime0 ' + str(recon['Rtime0']) + ' --Rtime_delta ' + str(recon['Rtime_delta'][i]) + ' --Rtime_num ' + str(recon['Rtime_num'][i]) + ' --num_projections ' + str(proj['recon_N_p']) + ' --N_r ' + str(proj['recon_N_r']) + ' --N_t ' + str(proj['recon_N_t']) + ' --detector_slice_begin ' + '0' + ' --detector_slice_end ' + str(proj['recon_N_t']-1) + ' --num_threads ' + str(recon['num_threads']) + ' --radius_obj ' + str(recon['radius_obj']) + ' --updateProjOffset ' + str(recon['updateProjOffset'][multidx]) + ' --writeTiff ' + str(recon['writeTiff'][multidx]) + ' --zingerT ' + str(ZingerT) + ' --zingerDel ' + str(recon['ZingerDel'][i])
+				command = recon['run_command'] + ' ./XT_Engine --p ' + str(recon['p']) + ' --sigma_s ' + str(recon['sigma_s'][i]) + ' --sigma_t ' + str(recon['sigma_t'][i]) + ' --c_s ' + str(recon['c_s'][i]) + ' --c_t ' + str(recon['c_t'][i]) + ' --delta_xy ' + str(recon['delta_xy'][multidx]) + ' --delta_z ' + str(recon['delta_z'][multidx]) + ' --length_r ' + str(proj['length_r']) + ' --length_t ' + str(proj['length_t']) + ' --voxel_thresh ' + str(recon['voxel_thresh'][multidx]) + ' --cost_thresh ' + str(recon['cost_thresh'][multidx]) + ' --iter ' + str(recon['iterations'][multidx]) + ' --rotation_center ' + str(proj['rotation_center_r']) + ' --alpha ' + str(recon['alpha']) + ' --sinobin ' + str(recon['sinobin']) + ' --initICD ' + str(recon['initICD'][multidx]) + ' --Rtime0 ' + str(recon['Rtime0']) + ' --Rtime_delta ' + str(recon['Rtime_delta'][i]) + ' --Rtime_num ' + str(recon['Rtime_num'][i]) + ' --num_projections ' + str(proj['recon_N_p']) + ' --N_r ' + str(proj['recon_N_r']) + ' --N_t ' + str(proj['recon_N_t']) + ' --detector_slice_begin ' + str(proj['slice_t_start']) + ' --detector_slice_num ' + str(proj['N_t']) + ' --num_threads ' + str(recon['num_threads']) + ' --radius_obj ' + str(recon['radius_obj']) + ' --updateProjOffset ' + str(recon['updateProjOffset'][multidx]) + ' --writeTiff ' + str(recon['writeTiff'][multidx]) + ' --zingerT ' + str(ZingerT) + ' --zingerDel ' + str(recon['ZingerDel'][i]) + ' --Est_of_Var ' + str(recon['Estimate_of_Var'])
 			
 				if (recon['time_reg'] == 1):
 					command = command + ' --time_reg'
@@ -93,9 +103,6 @@ def do_MBIR_reconstruction(proj, recon, files):
 				if (recon['WritePerIter'][multidx] == 1):
 					command = command + ' --WritePerIter'
 				
-				if (recon['reconstruct'] == 0):
-					command = command + ' --dont_reconstruct'
-			
 				if (recon['NHICD'] == 0):
 					command = command + ' --no_NHICD'		
 			
@@ -105,6 +112,16 @@ def do_MBIR_reconstruction(proj, recon, files):
 				if (recon['initMagUpMap'][multidx] == 1):
 					command = command + ' --initMagUpMap'
 				
+				if (recon['do_VarEstimate'][multidx] == 1):
+					command = command + ' --do_VarEst '
+	
+				if (recon['readSino4mHDF'][multidx] == 1):
+					print 'Generating projection, weight, bright field data from HDF file'
+					flag = system('cd ' + path2launch + ';' + command + ' --dont_reconstruct --readSino4mHDF')
+					error_by_flag(flag, 'ERROR: Was not able to run - ' + command + ' --dont_reconstruct --readSino4mHDF')
+				
+				if (recon['reconstruct'] == 0):
+					command = command + ' --dont_reconstruct'
 				print 'Will run reconstruction code for delta_xy = ' + str(recon['delta_xy'][multidx]) + ' and delta_z = ' + str(recon['delta_z'][multidx])
 				flag = system('cd ' + path2launch + ';' + command)
 				error_by_flag(flag, 'ERROR: Was not able to run - ' + command)
