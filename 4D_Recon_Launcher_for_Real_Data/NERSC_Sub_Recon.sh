@@ -1,8 +1,8 @@
 #!/bin/tcsh
 
-#PBS -q debug
+#PBS -q regular
 #PBS -l mppwidth=48
-#PBS -l walltime=00:30:00
+#PBS -l walltime=06:00:00
 #PBS -N mpi_test
 #PBS -e my_job.$PBS_JOBID.err
 #PBS -o my_job.$PBS_JOBID.out
@@ -24,4 +24,4 @@ module load mpi4py
 # (note: use "-cc none" instead for other number of threads)
 # aprun -j 2 -n 128 -N 2 -S 1 -d 24 -cc numa_node ./my_executable      
 # for Cray or GNU compiled programs
-python XT_Main.py --setup_launch_folder --run_reconstruction --node_num $mpi_tasks --NERSC
+python XT_Main.py --setup_launch_folder --run_reconstruction --node_num $mpi_tasks --Edison

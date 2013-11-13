@@ -54,7 +54,8 @@ def do_MBIR_reconstruction(proj, recon, files):
 					generate_projections (proj, recon, files, path2launch)
 					
 
-			macros = ' -openmp -DBH_QUAD_COEF="' + str(recon['BH_Quad_Coef']) + '" -DHOUNSFIELD_MAX="' + str(recon['maxHU']) + '" -DHOUNSFIELD_MIN="' + str(recon['minHU']) + '"' 
+			macros = ' -DBH_QUAD_COEF="' + str(recon['BH_Quad_Coef']) + '" -DHOUNSFIELD_MAX="' + str(recon['maxHU']) + '" -DHOUNSFIELD_MIN="' + str(recon['minHU']) + '"' 
+			#macros = ' -DBH_QUAD_COEF="' + str(recon['BH_Quad_Coef']) + '" -DHOUNSFIELD_MAX="' + str(recon['maxHU']) + '" -DHOUNSFIELD_MIN="' + str(recon['minHU']) + '"' 
 	
 			macros = macros + ' -DDATA_HDF_FILENAME="\\"' + proj['Path2Dataset'] + '\\""'
 			macros = macros + ' -DWHITEDARK_HDF_FILENAME="\\"' + proj['Path2WhiteDark'] + '\\""'
@@ -117,7 +118,7 @@ def do_MBIR_reconstruction(proj, recon, files):
 				if (recon['readSino4mHDF'][multidx] == 1):
 					print 'Generating projection, weight, bright field data from HDF file'
 					flag = system('cd ' + path2launch + ';' + command + ' --dont_reconstruct --readSino4mHDF')
-					error_by_flag(flag, 'ERROR: Was not able to run - ' + command)
+					error_by_flag(flag, 'ERROR: Was not able to run - ' + command + ' --dont_reconstruct --readSino4mHDF')
 				
 				if (recon['reconstruct'] == 0):
 					command = command + ' --dont_reconstruct'

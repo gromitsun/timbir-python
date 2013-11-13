@@ -70,6 +70,8 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 
         extras_r = dims_wd[2] % SinogramPtr->N_r;
         true_length_r = dims_wd[2] - extras_r;
+	SinogramPtr->Length_R = SinogramPtr->Length_R*true_length_r/dims_wd[2];	
+	TomoInputsPtr->radius_obj = TomoInputsPtr->radius_obj*true_length_r/dims_wd[2];	
  
 	wd_offset[0] = 1;
 	wd_offset[1] = SinogramPtr->slice_begin + TomoInputsPtr->node_rank*SinogramPtr->slice_num/TomoInputsPtr->node_num;
@@ -153,7 +155,7 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 		Projection[i][j][k] = BH_QUAD_COEF*temp*temp + temp;
 	}
 
-	fprintf(TomoInputsPtr->debug_file_ptr,"gen_projection_4m_HDF: Generated projections and weight data\n");
+	fprintf(TomoInputsPtr->debug_file_ptr,"gen_projection_4m_HDF: Generated projections and weight data with beamhardening coefficient of %f\n", (float)BH_QUAD_COEF);
 	Write2Bin (proj_filename, 1, SinogramPtr->N_p, SinogramPtr->N_r, total_t_slices, &(Projection[0][0][0]), TomoInputsPtr->debug_file_ptr);
 	Write2Bin (weight_filename, 1, SinogramPtr->N_p, SinogramPtr->N_r, total_t_slices, &(Weight[0][0][0]), TomoInputsPtr->debug_file_ptr);
 	Write2Bin (wd_filename, 1, 1, SinogramPtr->N_r, total_t_slices, &(wd_dwnsmpl_img[0][0]), TomoInputsPtr->debug_file_ptr);

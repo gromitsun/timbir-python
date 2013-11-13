@@ -21,7 +21,8 @@ def main():
 	parser.add_argument("--create_objectHDFtiffonly", help="specify whether you want to create HDF and tiff output files only", action="store_true")
 	parser.add_argument("--setup_launch_folder", help="Specify whether you want to setup the launch folder", action="store_true")
 	parser.add_argument("--run_reconstruction", help="Run reconstruction code", action="store_true")
-	parser.add_argument("--NERSC", help="Use NERSC when running on NERSC systems", action="store_true")
+	parser.add_argument("--Edison", help="Use Edison when running on Edison", action="store_true")
+	parser.add_argument("--Hopper", help="Use Hopper when running on Hopper", action="store_true")
 	parser.add_argument("--Purdue", help="Use Purdue when running on Conte or Carter", action="store_true")
 	parser.add_argument("-n", "--node_num", type=int, help="Specifies number of nodes")
 	args = parser.parse_args()
@@ -34,15 +35,22 @@ def main():
 		files['scratch'] = os.environ['RCAC_SCRATCH']
 		files['data_scratch'] = os.environ['RCAC_SCRATCH']
 		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) + ' -machinefile nodefile '
-		recon['compile_command'] = 'mpicc -ansi -Wall '
+		recon['compile_command'] = 'mpicc -ansi -Wall -openmp '
 		recon['HPC'] = 'Purdue' 
 		recon['rank'] = MPI.COMM_WORLD.rank
-	elif (args.NERSC):
-		recon['num_threads'] = 32
+	elif (args.Edison or args.Hopper):
 		files['scratch'] = os.environ['SCRATCH']
 		files['data_scratch'] = os.environ['GSCRATCH']
-		recon['run_command'] = 'aprun -j 2 -n ' + str(recon['node_num']) + ' -N 1 -d ' + str(recon['num_threads']) + ' -cc none '
-		recon['compile_command'] = 'cc -ansi -Wall '
+		if (args.Edison):
+			recon['num_threads'] = 32
+			recon['run_command'] = 'aprun -j 2 -n ' + str(recon['node_num']) + ' -N 1 -d ' + str(recon['num_threads']) + ' -cc none '
+			recon['compile_command'] = 'cc -Wall -ansi -openmp '
+		else:
+			recon['num_threads'] = 16
+			#recon['run_command'] = 'aprun -n ' + str(recon['node_num']) + ' -N 1 -d ' + str(recon['num_threads']) + ' -cc none valgrind --leak-check=yes --num-callers=500 --track-origins=yes '
+			recon['run_command'] = 'aprun -n ' + str(recon['node_num']) + ' -N 1 -d ' + str(recon['num_threads']) + ' -cc none '
+			#recon['compile_command'] = 'cc -g -O0 -openmp '
+			recon['compile_command'] = 'cc -fopenmp '
 		recon['HPC'] = 'NERSC'
 		recon['rank'] = 0		
 	else:

@@ -1223,6 +1223,10 @@ int ICD_BackProject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
 	uint8_t  ****Mask, AvgNumZElements;
 	AMatrixCol *VoxelLineResponse;
 
+#ifdef POSITIVITY_CONSTRAINT
+	fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Enforcing positivity constraint\n");
+#endif
+
 	sprintf(MagUpdateMapFile, "%s_n%d", MagUpdateMapFile, TomoInputsPtr->node_rank);
 	sprintf(scaled_error_file, "%s_n%d", scaled_error_file, TomoInputsPtr->node_rank);
 	sprintf(detect_file, "%s_n%d", detect_file, TomoInputsPtr->node_rank);
