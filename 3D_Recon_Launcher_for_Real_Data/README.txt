@@ -14,7 +14,10 @@ Mandatory inputs:
 
 --setup_launch_folder : a flag to tell the code to create the necessary folder to copy the code into - always keep this
 --run_reconstruction  : A flag to tell the code to reconstruct. Always keep this ON.  
---NERSC : This is to set HPC specific parameters 
+--Edison : This is to set Edison (A HPC system at NERSC) specific parameters 
+--Carver : This is to set Carver (A HPC system at NERSC) specific parameters 
+--Purdue : Use this when running on HPC systems at Purdue (Conte or Carter)
+--PC     : Use this option when running on desktop.
 --input_hdf5 : FULL path of data h5 file. Assume the h5 is in the format given to us by Dula
 --code_launch_folder : FULL path of a folder where the code is going to be copied and called from. Ideally this is in scratch
 --output_hdf5 : Full path of a FOLDER where the outputs are going to be written. In a later version this will just be the output H5 file but for now its a folder. 
