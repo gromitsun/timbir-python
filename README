@@ -1,0 +1,23 @@
+************** Purpose of Software ****************
+This software package is used to 3D tomographic reconstructions,
+with ring artifact and zinger correction
+**************************************************
+
+************** Software Requirements ***************
+1. MPI compiler (either intel MPI or openmpi)
+2. Python with the following libraries
+   a. numpy
+   b. h5py
+   c. mpi4py (optional)
+   d. PIL
+*****************************************************
+
+************** Folder Descriptions **************************
+Source_Code_4D                  - Contains C source code which does the reconstruction.
+3D_Recon_Launcher_for_Real_Data - Python script which reads data from HDF files, runs
+				  the reconstruction code (in Source_Code_4D) and generates results.
+
+************* Running the software ****************
+All reconstructions must be launched using the python script XT_Main.py with the correct input arguments 
+as described in README inside the folder '3D_Recon_Launcher_for_Real_Data'.
+ 
