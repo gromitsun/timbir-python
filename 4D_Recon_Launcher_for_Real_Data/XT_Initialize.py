@@ -110,12 +110,13 @@ def recon_init (proj, recon):
 	recon['c_s'] = [10**-6]
 	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [800*(10**5)]
-	recon['sigma_t'] = [4*(10**3)]
+	recon['sigma_s'] = [(10**6)]
+	recon['sigma_t'] = [2*(10**3)]
 	#recon['sigma_s'] = [4*(10**5)]
 	#recon['sigma_t'] = [4*(10**2)]
 	
-	recon['ZingerT'] = [8]
+	recon['ZingerT'] = [4]
+
 	recon['ZingerDel'] = [0.1]
 
 	recon['init_object4mHDF'] = 0
@@ -139,19 +140,19 @@ def recon_init (proj, recon):
         #recon['only_Edge_Updates'] = [0]
         #recon['initMagUpMap'] = [1]
 	
-	recon['voxel_thresh'] = [5, 5, 5, 10, 10, 10]
+	recon['voxel_thresh'] = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
         recon['cost_thresh'] = [10, 10, 10, 10, 10, 10]
         recon['delta_xy'] = [32, 16, 8, 4, 2, 1]
         recon['delta_z'] = [1, 1, 1, 1, 1, 1]
         recon['initICD'] = [0, 2, 2, 2, 2, 2]
         recon['sinobin'] = 1 
         recon['writeTiff'] = [1, 1, 1, 1, 1, 1]
-        recon['WritePerIter'] = [0, 0, 0, 0, 0, 1]
+        recon['WritePerIter'] = [0, 0, 0, 0, 0, 0]
         recon['updateProjOffset'] = [0, 2, 3, 3, 3, 3]
         recon['iterations'] = [300, 200, 100, 50, 40, 30]
         recon['only_Edge_Updates'] = [0, 0, 0, 0, 0, 0]
         recon['initMagUpMap'] = [0, 1, 1, 1, 1, 1]
-	recon['readSino4mHDF'] = [1, 0, 0, 0, 0, 0]	
+	recon['readSino4mHDF'] = [0, 0, 0, 0, 0, 0]	
 	recon['do_VarEstimate'] = [1]*len(recon['voxel_thresh'])
 
 	recon['Estimate_of_Var'] = 1;	
@@ -203,9 +204,9 @@ def recon_init (proj, recon):
 
 def files_init (files):
 	files['C_Source_Folder'] = "../Source_Code_4D/"
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_16/XT_Result_Repository/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Var_Est_Recon_MPI_K_16/XT_Result_Repository/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_16/XT_run/"
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Var_Est_Recon_MPI_K_16/XT_run/"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 

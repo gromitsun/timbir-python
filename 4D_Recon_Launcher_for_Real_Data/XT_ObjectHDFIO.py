@@ -1,6 +1,6 @@
 import numpy as np
 import h5py
-#from mpi4py import MPI
+from mpi4py import MPI
 from XT_IOMisc import convert_um2HU
 from XT_IOMisc import write_array2tif
 from XT_IOMisc import convert_HU2uint8

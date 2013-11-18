@@ -2,7 +2,7 @@
 from XT_IOMisc import error_by_flag
 import numpy as np
 import h5py
-#from mpi4py import MPI
+from mpi4py import MPI
 
 def decimate_count_data_in_r (data, true_length, reduced_length):
 	ratio = true_length/reduced_length
