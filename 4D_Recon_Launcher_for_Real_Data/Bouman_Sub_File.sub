@@ -5,7 +5,7 @@
 #PBS -q bouman
 #PBS -l nodes=2:ppn=16
 #PBS -l walltime=48:00:00
-#PBS -N with_rings
+#PBS -N fullvolume
 
 # start top in batch mode, 30 sec interval between reports, in background
 

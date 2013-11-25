@@ -941,7 +941,7 @@ void update_variance_parameter (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr
 	}
  
 	MPI_Allreduce(&temp_acc, &temp, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-	TomoInputsPtr->var_est = temp/(TomoInputsPtr->node_num*SinogramPtr->N_p*SinogramPtr->N_r*SinogramPtr->N_t);
+	TomoInputsPtr->var_est = temp/((Real_t)TomoInputsPtr->node_num*(Real_t)SinogramPtr->N_p*(Real_t)SinogramPtr->N_r*(Real_t)SinogramPtr->N_t);
 
   	#pragma omp parallel for private(i, j)
 	for (k = 0; k < SinogramPtr->N_p; k++)
