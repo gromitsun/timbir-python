@@ -27,18 +27,18 @@ from XT_IOMisc import error_by_flag
 def proj_init (files):
 	proj = {}
 
-	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
+	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_23.hdf"
 	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
 #	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
 #	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
 
-	proj['recon_N_r'] = 2048
-	proj['slice_t_start'] = 0
-	proj['N_t'] = 1000
-	proj['recon_N_t'] = 1000
-	proj['rotation_center_r'] = 264.75*4
-	proj['proj_start'] = 998
-	proj['proj_num'] = 7969 - 998
+	proj['recon_N_r'] = 1024
+	proj['slice_t_start'] = 600
+	proj['N_t'] = 2
+	proj['recon_N_t'] = 1
+	proj['rotation_center_r'] = 264*2+1
+	proj['proj_start'] = 0
+	proj['proj_num'] = 7969
 #	proj['proj_start'] = 1969
 #	proj['proj_num'] = 1984
 #	proj['proj_num'] = 7873 - 1969
@@ -104,13 +104,13 @@ def proj_init (files):
 """ r, c_s, c_t, sigma_s, sigma_t are lists. Each corresponding item in the lists will be used to run a instance of reconstruction. """
 
 def recon_init (proj, recon):
-	recon['recon_type'] = 'MBIR'
+	recon['recon_type'] = 'FBP'
 	
 	recon['r'] = [16]
 	recon['c_s'] = [10**-6]
 	recon['c_t'] = [10**-4]
 
-	recon['sigma_s'] = [100*(10**4)]
+	recon['sigma_s'] = [200*(10**4)]
 	recon['sigma_t'] = [2*(10**3)]
 	#recon['sigma_s'] = [4*(10**5)]
 	#recon['sigma_t'] = [4*(10**2)]
@@ -204,9 +204,9 @@ def recon_init (proj, recon):
 
 def files_init (files):
 	files['C_Source_Folder'] = "../Source_Code_4D/"
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Big_Job_Recon_MPI_K_16/XT_Result_Repository/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_16/XT_Result_Repository/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Big_Job_Recon_MPI_K_16/XT_run/"
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_K_16/XT_run/"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 

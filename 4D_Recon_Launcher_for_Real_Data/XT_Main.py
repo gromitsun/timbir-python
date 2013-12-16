@@ -3,7 +3,7 @@
 from XT_Initialize import proj_init, recon_init, files_init 
 #from XT_Projections import generate_projections
 from XT_MBIR_Reconstruction import do_MBIR_reconstruction
-#from XT_FBP_Reconstruction import do_FBP_reconstruction
+from XT_FBP_Reconstruction import do_FBP_reconstruction
 from XT_IOMisc import error_by_flag
 from XT_IOMisc import write_object2HDF
 from XT_ObjectHDFIO import writepar_object2HDF
@@ -12,7 +12,7 @@ from XT_IOMisc import write_tiff_from_object_bin_file
 import argparse
 import time
 import os
-from mpi4py import MPI
+#from mpi4py import MPI
 
 def main():
 	start_time = time.time()
@@ -24,13 +24,22 @@ def main():
 	parser.add_argument("--Edison", help="Use Edison when running on Edison", action="store_true")
 	parser.add_argument("--Hopper", help="Use Hopper when running on Hopper", action="store_true")
 	parser.add_argument("--Purdue", help="Use Purdue when running on Conte or Carter", action="store_true")
+	parser.add_argument("--PC", help="Use PC when running on a personal computer like a iMac", action="store_true")
 	parser.add_argument("-n", "--node_num", type=int, help="Specifies number of nodes")
 	args = parser.parse_args()
 
 	recon = {}
 	files = {}
 	recon['node_num'] = args.node_num
-	if (args.Purdue):
+	if (args.PC):
+		recon['num_threads'] = 32
+		files['scratch'] = '../../'
+		files['data_scratch'] = '/Volumes/Stack-1/APS_Datasets/Solidification_Large_Datasets/'
+		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num'])
+		recon['compile_command'] = 'mpicc -fopenmp '
+		recon['HPC'] = 'PC' 
+		recon['rank'] = 0
+	elif (args.Purdue):
 		recon['num_threads'] = 32
 		files['scratch'] = os.environ['RCAC_SCRATCH']
 		files['data_scratch'] = os.environ['RCAC_SCRATCH']
@@ -83,7 +92,7 @@ def main():
 			writepar_object2HDF (proj, recon, files)
 			writepar_tiff_from_object_bin_file (proj, recon, files)
 		else:
-		#	write_tiff_from_object_bin_file (proj, recon, files)
+			write_tiff_from_object_bin_file (proj, recon, files)
 			write_object2HDF (proj, recon, files)
 	
 	print 'main: Done!'
