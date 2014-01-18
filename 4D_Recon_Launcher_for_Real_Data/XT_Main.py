@@ -34,7 +34,7 @@ def main():
 	if (args.PC):
 		recon['num_threads'] = 32
 		files['scratch'] = '../../'
-		files['data_scratch'] = '/Volumes/Stack-1/APS_Datasets/Solidification_Large_Datasets/'
+		files['data_scratch'] = '/Volumes/Stack-1/APS_Datasets'
 		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num'])
 		recon['compile_command'] = 'mpicc -fopenmp '
 		recon['HPC'] = 'PC' 
