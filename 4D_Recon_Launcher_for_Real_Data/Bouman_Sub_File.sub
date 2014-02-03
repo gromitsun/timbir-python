@@ -5,14 +5,14 @@
 #PBS -q bouman
 #PBS -l nodes=2:ppn=16
 #PBS -l walltime=48:00:00
-#PBS -N with_rings
+#PBS -N fullvolume
 
 # start top in batch mode, 30 sec interval between reports, in background
 
 #top -b -d 30 -u mohank >& $HOME/top.out &
 #tpid=$!          # Save top's process ID
 
-module load intel
+#module load intel
 module load python
 module load openmpi
 

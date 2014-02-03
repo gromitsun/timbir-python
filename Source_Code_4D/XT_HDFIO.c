@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include "XT_IOMisc.h"
 #include <math.h>
-#include "hdf5.h"
 #include "XT_Constants.h"
 #include "XT_Structures.h"
 #include <stdlib.h>
 #include "allocate.h"
 
+
+#ifdef READ_PROJECTION_DATA_4M_HDF
+#include "hdf5.h"
 /*Instead of reading projection and weight data from binary files, use the function below to read those directly from
 HDF files.*/
 void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
@@ -193,5 +195,5 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 	H5Fclose(data_file_id);
 } 
 
-
+#endif
 
