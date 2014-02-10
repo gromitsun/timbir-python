@@ -9,10 +9,11 @@ from XT_IOMisc import write_object2HDF
 from XT_ObjectHDFIO import writepar_object2HDF
 from XT_ObjectHDFIO import writepar_tiff_from_object_bin_file
 from XT_IOMisc import write_tiff_from_object_bin_file
+from XT_Interpolate import compute_RMSE_of_recon
 import argparse
 import time
 import os
-from mpi4py import MPI
+#from mpi4py import MPI
 
 def main():
 	start_time = time.time()
@@ -21,6 +22,7 @@ def main():
 	parser.add_argument("--create_objectHDFtiffonly", help="specify whether you want to create HDF and tiff output files only", action="store_true")
 	parser.add_argument("--setup_launch_folder", help="Specify whether you want to setup the launch folder", action="store_true")
 	parser.add_argument("--run_reconstruction", help="Run reconstruction code", action="store_true")
+	parser.add_argument("--compute_RMSE", help="Compute RMSE of reconstruction", action="store_true")
 	parser.add_argument("--Edison", help="Use Edison when running on Edison", action="store_true")
 	parser.add_argument("--Hopper", help="Use Hopper when running on Hopper", action="store_true")
 	parser.add_argument("--Purdue", help="Use Purdue when running on Conte or Carter", action="store_true")
@@ -34,10 +36,14 @@ def main():
 		recon['num_threads'] = 32
 		files['scratch'] = os.environ['RCAC_SCRATCH']
 		files['data_scratch'] = os.environ['RCAC_SCRATCH']
-		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) + ' -machinefile nodefile '
-		recon['compile_command'] = 'mpicc -ansi -Wall -openmp '
+		if (recon['node_num'] > 1):
+			recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) + ' -machinefile nodefile '
+		else:
+			recon['run_command'] = 'mpiexec -n ' + str(recon['node_num'])
+		recon['compile_command'] = 'mpicc -ansi -Wall -openmp -lhdf5 '
 		recon['HPC'] = 'Purdue' 
-		recon['rank'] = MPI.COMM_WORLD.rank
+		#recon['rank'] = MPI.COMM_WORLD.rank
+		recon['rank'] = 0
 	elif (args.Edison or args.Hopper):
 		files['scratch'] = os.environ['SCRATCH']
 		files['data_scratch'] = os.environ['GSCRATCH']
@@ -77,6 +83,9 @@ def main():
 	else:
 		print 'ERROR: main: Reconstruction type not recognized'
 
+	if (args.compute_RMSE == 1):
+		compute_RMSE_of_recon (proj, recon, files)
+			
 	if (args.create_objectHDFtiffonly):
 		if (recon['HPC'] == 'Purdue'):
 			recon['size'] = MPI.COMM_WORLD.size

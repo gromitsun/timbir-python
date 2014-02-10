@@ -3,6 +3,7 @@ from PIL import Image
 from os import system
 import numpy as np
 import h5py
+import subprocess as sp
 
 def error_by_flag (flag, message):
 	if (flag != 0):
@@ -95,3 +96,24 @@ def write_object2HDF (proj, recon, files):
                         dset[j,:,:,:] = Object.astype(np.float32)
                 file.close
 
+def write_Video4mArray(filename, rows, cols, fps, array):
+	sz = array.shape
+	pipe = sp.Popen(['ffmpeg',
+        '-y', # (optional) overwrite the output file if it already exists
+        '-f', 'rawvideo',
+        '-vcodec','rawvideo',
+        '-s', str(sz[1]) + 'x' + str(sz[2]), # size of one frame
+        '-pix_fmt', 'rgb24',
+        '-r', str(fps), # frames per second
+        '-i', '-', # The input comes from a pipe
+        '-an', # Tells FFMPEG not to expect any audio
+        '-vcodec', 'mpeg',
+        filename ],
+        stdin=sp.PIPE,stdout=sp.PIPE, stderr=sp.PIPE)
+
+	rgb_array[...,0] = array
+	rgb_array[...,1] = array
+	rgb_array[...,2] = array
+	rgb_array.tofile(pipe.proc.stdin)
+
+		

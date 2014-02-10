@@ -188,6 +188,10 @@ typedef struct
     uint8_t initMagUpMap; /*if set, initializes the magnitude update map*/
     uint8_t readSino4mHDF; /*If set, directly reads data from HDF file*/
     FILE *debug_file_ptr; /*ptr to debug.log file*/
+
+    Real_t ErrorSino_Cost;
+    Real_t Forward_Cost;
+    Real_t Prior_Cost;
   } TomoInputs;
 
 #endif /*#define XT_STRUCTURES_H*/
