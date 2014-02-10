@@ -331,11 +331,19 @@ Real_t computeCost(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoI
 
  if (TomoInputsPtr->node_rank == 0)
  {
- 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: forward cost=%f\n",cost);
- 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: prior cost =%f\n",temp);
- 	cost = forward + prior + TomoInputsPtr->node_num*SinogramPtr->N_p*SinogramPtr->N_r*SinogramPtr->N_t*log(TomoInputsPtr->var_est)/2;
+ 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: scaled error sino cost=%f\n",forward);
+ 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: decrease in scaled error sino cost=%e\n",TomoInputsPtr->ErrorSino_Cost-forward);
+	TomoInputsPtr->ErrorSino_Cost = forward;
+ 	forward += (Real_t)TomoInputsPtr->node_num*(Real_t)SinogramPtr->N_p*(Real_t)SinogramPtr->N_r*(Real_t)SinogramPtr->N_t*log(TomoInputsPtr->var_est)/2;
+ 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: forward cost=%f\n",forward);
+ 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: prior cost =%f\n",prior);
+ 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: variance parameter estimate =%f\n",TomoInputsPtr->var_est);
+	TomoInputsPtr->Forward_Cost = forward;
+	TomoInputsPtr->Prior_Cost = prior;
+ 	cost = forward + prior;
  }
- /*Broadcase the value of cost to all nodes*/
+ 
+/*Broadcase the value of cost to all nodes*/
  MPI_Bcast(&cost, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
   return cost;

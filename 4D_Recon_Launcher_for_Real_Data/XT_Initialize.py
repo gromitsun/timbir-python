@@ -4,6 +4,7 @@ import numpy as np
 from XT_Interlaced_Angles import gen_interlaced_views_0_to_Inf,clip_list_of_views
 from math import ceil
 from XT_IOMisc import error_by_flag
+import os
 
 """The variable 'proj' is a dictionary datatype containing information about the projections and the detector.
 ------- Dictionary Key - Explantion -----------------
@@ -27,36 +28,36 @@ from XT_IOMisc import error_by_flag
 def proj_init (files):
 	proj = {}
 
-	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_23.hdf"
+	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
 	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
 #	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
 #	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
-#	proj['Path2Phantom'] = files['data_scratch'] + "/Phantoms/CH_Phantom_4D.bin"
-	proj['Path2Phantom'] = "/Users/aditya/Academics/Graduate_Courses/ECE699/Time_Varying_XRay_Tomography/C_Code/Workspace_Argonne/Matlab/Cahn_Hilliard_4D/CH_Phantom_Upsmpl_4D_new.bin"
+	proj['Path2Phantom'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard.bin"
+	
+	proj['Expected_Counts'] = 29473 
+	proj['phantom_N_xy'] = 1024
+	proj['phantom_N_z'] = 4
+	proj['voxel_size'] = 0.65*4
 
-	proj['Expected_Counts'] = 9600 
-	proj['phantom_N_xy'] = 512
-	proj['phantom_N_z'] = 64
-
-	proj['recon_N_r'] = 256
+	proj['recon_N_r'] = 512
 	proj['slice_t_start'] = 0
-	proj['N_t'] = 32
-	proj['recon_N_t'] = 32
-	proj['rotation_center_r'] = 128
+	proj['N_t'] = 4
+	proj['recon_N_t'] = 4
+	proj['rotation_center_r'] = 128*2
 	proj['proj_start'] = 0
 	proj['proj_num'] = 256
 #	proj['proj_start'] = 1969
 #	proj['proj_num'] = 1984
 #	proj['proj_num'] = 7873 - 1969
 #	proj['N_p'] = 1984*4
-	proj['N_p'] = 256
+	proj['N_p'] = 512
 	proj['K'] = 16
-	proj['N_theta'] = 256
+	proj['N_theta'] = 512
 #	proj['N_theta'] = 1984
 
-	proj['N_r'] = 2080
-	proj['length_r'] = 0.65*proj['N_r']	
-	proj['length_t'] = 0.65*proj['N_t']	
+	proj['N_r'] = 1024
+	proj['length_r'] = proj['voxel_size']*proj['N_r']	
+	proj['length_t'] = proj['voxel_size']*proj['N_t']	
 	proj['L'] = proj['N_theta']/proj['K']
 	
 #	min_time_btw_views = 0.028391
@@ -79,7 +80,7 @@ def proj_init (files):
 
 """ Variable 'recon' is a dictionary datatype containing information about the object (or sample) and the reconstruction algorithm.
 	Dictionary Key - Explanation.
-	recon_type - MBIR_SIM or MBIR or FBP
+	recon_type - MBIR or FBP
 	num_threads - Number of threads to be used the reconstruction code (its a C code using OpenMP).
 	voxel_thresh, cost_thresh, delta_xy, initICD, writeTiff are lists, each element of which corresponds to one stage in multiresolution reconstruction.
 	voxel_thresh - Threshold in units of HU at which the algorithm converges. The average value of absolute change in voxel value is compared to threshold.
@@ -112,26 +113,44 @@ def proj_init (files):
 def recon_init (proj, recon):
 	recon['recon_type'] = 'MBIR'
 	
-	recon['r'] = [16]
-	recon['c_s'] = [10**-6]
-	recon['c_t'] = [10**-4]
+	#sigma_s = [5*(10**5), 10**6, 2*(10**6)]
+	#sigma_t = [5*(10**4), (10**5), 2*(10**5)]
+	sigma_s = [25*(10**5)]
+	sigma_t = [45*(10**4)]
+	recon['sigma_s'],recon['sigma_t'] = np.meshgrid(sigma_s, sigma_t)
 
-	recon['sigma_s'] = [5*(10**6)]
-	recon['sigma_t'] = [5*(10**4)]
-	#recon['sigma_s'] = [4*(10**5)]
-	#recon['sigma_t'] = [4*(10**2)]
+	recon['sigma_s'] = recon['sigma_s'].flatten()
+	recon['sigma_t'] = recon['sigma_t'].flatten()
+	recon['r'] = [16]*len(recon['sigma_s'])
+	recon['c_s'] = [10**-6]*len(recon['r'])
+	recon['c_t'] = [10**-6]*len(recon['r'])
+	recon['ZingerT'] = [100000]*len(recon['r'])
+	recon['ZingerDel'] = [0.1]*len(recon['r'])
 	
-	recon['ZingerT'] = [10000]
-
-	recon['ZingerDel'] = [0.1]
+	param_idx = int(os.environ['PARAM_INDEX'])
+	if (param_idx > 0):
+		recon['r'] = [recon['r'][param_idx-1]]
+		recon['c_s'] = [recon['c_s'][param_idx-1]]
+		recon['c_t'] = [recon['c_t'][param_idx-1]]
+		recon['sigma_s'] = [recon['sigma_s'][param_idx-1]]
+		recon['sigma_t'] = [recon['sigma_t'][param_idx-1]]
+		recon['ZingerT'] = [recon['ZingerT'][param_idx-1]]
+		recon['ZingerDel'] = [recon['ZingerDel'][param_idx-1]]
+	
+	if (proj['recon_N_p']/proj['N_theta'] > 1):
+		recon['Proj0RMSE'] = proj['N_theta']
+		recon['ProjNumRMSE'] = proj['N_theta']
+	else:
+		recon['Proj0RMSE'] = proj['N_theta']/proj['K'] 
+		recon['ProjNumRMSE'] = proj['N_theta'] - 2*proj['N_theta']/proj['K']
 
 	recon['init_object4mHDF'] = 0
 	
-	recon['maxHU'] = 60000
-	recon['minHU'] = 10000
+	recon['maxHU'] = 43000
+	recon['minHU'] = 5000
 	
-	recon['radius_obj'] = 0.65*proj['N_r']/2
-	recon['BH_Quad_Coef'] = 0.5;
+	recon['radius_obj'] = proj['voxel_size']*proj['N_r']
+	recon['BH_Quad_Coef'] = 0;
 	
 	#recon['voxel_thresh'] = [10]
         #recon['cost_thresh'] = [10]
@@ -146,22 +165,22 @@ def recon_init (proj, recon):
         #recon['only_Edge_Updates'] = [0]
         #recon['initMagUpMap'] = [1]
 	
-	recon['voxel_thresh'] = [0.2, 0.2, 0.2, 0.2]
+	recon['voxel_thresh'] = [0.5, 0.5, 0.5, 0.5]
         recon['cost_thresh'] = [10, 10, 10, 10]
         recon['delta_xy'] = [8, 4, 2, 1]
-        recon['delta_z'] = [8, 4, 2, 1]
-        recon['initICD'] = [0, 3, 3, 3]
+        recon['delta_z'] = [1, 1, 1, 1]
+        recon['initICD'] = [0, 2, 2, 2]
         recon['sinobin'] = 2
         recon['writeTiff'] = [1, 1, 1, 1]
-        recon['WritePerIter'] = [0, 0, 0, 0]
-        recon['updateProjOffset'] = [0, 2, 2, 3]
-        recon['iterations'] = [400, 300, 100, 50]
+        recon['WritePerIter'] = [0, 0, 0, 1]
+        recon['updateProjOffset'] = [0, 2, 3, 3]
+        recon['iterations'] = [500, 400, 400, 400]
         recon['only_Edge_Updates'] = [0, 0, 0, 0]
         recon['initMagUpMap'] = [0, 1, 1, 1]
 	recon['readSino4mHDF'] = [0, 0, 0, 0]	
 	recon['do_VarEstimate'] = [1]*len(recon['voxel_thresh'])
 
-	recon['Estimate_of_Var'] = 1;	
+	recon['Estimate_of_Var'] = 0.124;	
 	recon['init_with_FBP'] = 0
 	#recon['num_threads'] = 1
 	recon['positivity_constraint'] = 0;
@@ -179,6 +198,7 @@ def recon_init (proj, recon):
 	recon['multi_res_stages'] = len(recon['delta_xy'])
 	recon['N_xy'] = proj['recon_N_r']/recon['delta_xy'][-1]
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
+	recon['zSlice4RMSE'] = recon['N_z']/2
 	
 	recon['calculate_cost'] = 1
 	recon['set_up_launch_folder'] = 0
@@ -198,7 +218,6 @@ def recon_init (proj, recon):
 
 	if (len(recon['delta_xy']) != len(recon['voxel_thresh']) or len(recon['delta_xy']) != len(recon['cost_thresh']) or len(recon['delta_xy']) != len(recon['initICD']) or len(recon['delta_xy']) != len(recon['writeTiff']) or len(recon['delta_xy']) != len(recon['delta_z'])):
 		error_by_flag (1, 'ERROR: recon_init: Lengths of delta_xy, voxel_thresh, cost_thresh, initICD, writeTiff does not match')
-
 	
 	return recon
 
@@ -211,9 +230,9 @@ def recon_init (proj, recon):
 
 def files_init (files):
 	files['C_Source_Folder'] = "../Source_Code_4D/"
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_Sim/XT_Result_Repository/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_New_Sim_Data/XT_Result_Repository/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_MPI_Sim/XT_run/"
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_New_Sim_Data/XT_run/"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 

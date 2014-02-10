@@ -1,10 +1,7 @@
 import numpy as np
-from os import system
 from XT_IOMisc import create_folder, convert_um2HU, convert_HU2uint8, write_array2tif
-from XT_Projections import generate_projections
 from skimage.transform import iradon
 from math import floor
-from XT_IOMisc import error_by_flag
 
 def gen_centered_projections (projections, rotation_center):
 	centered_proj_sz = 2*rotation_center+1
@@ -16,22 +13,9 @@ def do_FBP_reconstruction (proj, recon, files):
 
 ########################### CHANGE RESULT FOLDER BELOW #########################
 	result_folder = files['Result_Folder']
-	path2source = files['C_Source_Folder']
-	if (recon['node_num'] != 1):
-		error_by_flag(1,'ERROR: Distributed parallelization is not enabled for FBP reconstruction')
 ################################################################################
-	if (files['copy_projections'] == 0): 
-		generate_projections (proj, recon, files, result_folder)
-	else:
-		if (recon['sinobin'] == 3):
-			flag = system('cp ' + path2source + 'bright*.bin ' + path2source + 'weight*.bin ' + result_folder + '.')
-		elif (recon['sinobin'] == 1):
-			flag = system('cp ' + path2source + 'projection*.bin ' + path2source + 'weight*.bin ' + result_folder + '.')
-		error_by_flag(flag, 'ERROR: cannot copy bright*.bin/projection*.bin/weight*.bin')
-		
-	projections = np.fromfile(result_folder + 'projection_n0.bin', dtype = np.float64, count = -1).reshape((proj['recon_N_p'], proj['recon_N_r'], proj['recon_N_t']), order = 'C')
 
-	centered_projections = gen_centered_projections(projections,floor(proj['rotation_center_r']))
+	centered_projections = gen_centered_projections(proj['projections'],floor(proj['rotation_center_r']))
 
 	for k in range(len(recon['Rtime_num'])):		
 		path2results = result_folder + 'FBP_' + 'r_' + str(recon['r'][k]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '/'

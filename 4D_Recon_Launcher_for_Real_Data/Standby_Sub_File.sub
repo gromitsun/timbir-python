@@ -3,7 +3,7 @@
 
 #PBS -V
 #PBS -q standby
-#PBS -l nodes=50:ppn=16
+#PBS -l nodes=126:ppn=16
 #PBS -l walltime=4:00:00
 #PBS -N fullvolres
 
@@ -12,7 +12,7 @@
 #top -b -d 30 -u mohank >& $HOME/top.out &
 #tpid=$!          # Save top's process ID
 
-#module load intel
+module load intel
 module load python
 module load openmpi
 
@@ -21,9 +21,9 @@ export PARALLEL=1
 export OMP_NUM_THREADS=32
 uniq < $PBS_NODEFILE > nodefile
 
-mpiexec -n 50 -machinefile nodefile python XT_Main.py --setup_launch_folder --node_num 50 --Purdue
-python XT_Main.py --run_reconstruction --node_num 50 --Purdue
-mpiexec -n 28 -machinefile nodefile python XT_Main.py --node_num 50 --create_objectHDFtiffonly --Purdue
+#mpiexec -n 126 -machinefile nodefile python XT_Main.py --setup_launch_folder --node_num 126 --Purdue
+python XT_Main.py --run_reconstruction --node_num 126 --Purdue
+mpiexec -n 56 -machinefile nodefile python XT_Main.py --node_num 126 --create_objectHDFtiffonly --Purdue
 
 checkjob -v $PBS_JOBID
 

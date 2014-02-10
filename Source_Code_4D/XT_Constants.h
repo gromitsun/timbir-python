@@ -69,10 +69,6 @@
 #define OBJECT_FILENAME "object"
 #define PROJ_OFFSET_FILENAME "proj_offset"
 
-#ifndef PATH_TO_PHANTOM
-	#define PATH_TO_PHANTOM "phantom_23"
-#endif
-
 #ifndef SPARSE_ANGLES_LIST_FILE
 	#define SPARSE_ANGLES_LIST_FILE "view_info.txt"
 #endif

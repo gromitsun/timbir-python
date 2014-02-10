@@ -161,7 +161,7 @@ typedef struct
     If 2 object is interpolated by a factor of 2 in x-y plane and then initialized.
     If 3 object is interpolated by a factor of 2 in x-y-z space and then initialized*/
     uint8_t Write2Tiff; /*If set, tiff files are written*/
-    uint8_t Projection_Noise; /*If 0 no noise is added to projections when using phantom data*/ 
+    uint8_t No_Projection_Noise; /*If 0 no noise is added to projections when using phantom data*/ 
     uint8_t reconstruct; /*If 0, no reconstruction is done*/ 
     int32_t num_threads; /*Number of threads to be used for shared mem parallelization*/
     uint8_t updateProjOffset; /*If set, updates the addivitive projection offset error 'd'*/
@@ -188,6 +188,10 @@ typedef struct
     uint8_t initMagUpMap; /*if set, initializes the magnitude update map*/
     uint8_t readSino4mHDF; /*If set, directly reads data from HDF file*/
     FILE *debug_file_ptr; /*ptr to debug.log file*/
+
+    Real_t ErrorSino_Cost;
+    Real_t Forward_Cost;
+    Real_t Prior_Cost;
   } TomoInputs;
 
 #endif /*#define XT_STRUCTURES_H*/
