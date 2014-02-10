@@ -14,17 +14,16 @@ Mandatory inputs:
 
 --setup_launch_folder : a flag to tell the code to create the necessary folder to copy the code into - always keep this
 --run_reconstruction  : A flag to tell the code to reconstruct. Always keep this ON.  
---Edison : This is to set Edison (A HPC system at NERSC) specific parameters 
---Carver : This is to set Carver (A HPC system at NERSC) specific parameters 
---Purdue : Use this when running on HPC systems at Purdue (Conte or Carter)
---PC     : Use this option when running on desktop.
+--NERSC : This is to set HPC specific parameters 
 --input_hdf5 : FULL path of data h5 file. Assume the h5 is in the format given to us by Dula
+--group_hdf5 : The tile folder to be reconstructed  
 --code_launch_folder : FULL path of a folder where the code is going to be copied and called from. Ideally this is in scratch
 --output_hdf5 : Full path of a FOLDER where the outputs are going to be written. In a later version this will just be the output H5 file but for now its a folder. 
 --pix_size : pixel size in micron 
 ----num_views : total number of views in the data. If the "0 degree projection"  is acquired two times just indicate the number of unique views. 
 --x_width : number of detector pixels in x direction 
---num_bright_dark : Number of bright and darks acquired in the data
+--num_bright : Number of brights acquired in the data
+--num_dark : Number of darks acquired in the data
 --z_start : the slice number along z in which to start the reconstruction
 --z_numElts : number of z slices to reconstruct. For the default case this should be at least 32. If you want to reconstruct less see the advanced parameters section (so that the 3-D multi-resolution works)
 --num_nodes : Number of nodes to be used
@@ -41,7 +40,7 @@ Optional parameters:
 
 --num_res : Total number of resolutions to be used in the multi -resolution optimization. Defaulted to 4. 
 
-----zinger_thresh : A threshold to remove zingers. A very large value means no zingers are corrected. A value like 20-30 may be used to remove zingers. Defaulted to 10000 (i.e. no zinger removal)
+----zinger_thresh : A threshold to remove zingers. A very large value means no zingers are corrected. A value like 2-3 may be used to remove zingers. Defaulted to 10000 (i.e. no zinger removal)
 
 ----stop_threshold : The stopping criteria - average change in voxel values in Hounsfeld Unit. Defaulted to 35. 
 
@@ -49,7 +48,7 @@ Optional parameters:
 
 --multires_2D : Set this flag if you wish to do milt-resolution only in 2-D. Can be used to do for example a 3-slice reconstruction quickly. DONOT use for large 3D volumes. 
 
-
+--Variance_Est : Variance scaling parameter. THis is defaulted to 1.
 See example of this file in NERSC_Sub_Recon.sh and Carver_Sub_Recon.sh
 
 
