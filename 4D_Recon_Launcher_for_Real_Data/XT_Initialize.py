@@ -25,48 +25,20 @@ import os
 	angles - Angles of projections used for reconstruction
 	times - Times at which these projections were acquired """
 
-def proj_init (files):
-	proj = {}
+def proj_init (proj, files):
 
 	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
 	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
 #	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
 #	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
-	proj['Path2Phantom'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard.bin"
 	
-	proj['Expected_Counts'] = 29473 
-	proj['phantom_N_xy'] = 1024
-	proj['phantom_N_z'] = 4
-	proj['voxel_size'] = 0.65*4
-
-	proj['recon_N_r'] = 512
-	proj['slice_t_start'] = 0
-	proj['N_t'] = 4
-	proj['recon_N_t'] = 4
-	proj['rotation_center_r'] = 128*2
-	proj['proj_start'] = 0
-	proj['proj_num'] = 256
-#	proj['proj_start'] = 1969
-#	proj['proj_num'] = 1984
-#	proj['proj_num'] = 7873 - 1969
-#	proj['N_p'] = 1984*4
-	proj['N_p'] = 512
-	proj['K'] = 16
-	proj['N_theta'] = 512
-#	proj['N_theta'] = 1984
-
-	proj['N_r'] = 1024
 	proj['length_r'] = proj['voxel_size']*proj['N_r']	
 	proj['length_t'] = proj['voxel_size']*proj['N_t']	
 	proj['L'] = proj['N_theta']/proj['K']
 	
-#	min_time_btw_views = 0.028391
-	min_time_btw_views = 0
-	rotation_speed = 100
-
-	fps_of_camera = proj['L']/(180.0/rotation_speed)
+	fps_of_camera = proj['L']/(180.0/proj['rotation_speed'])
 	angles, times = gen_interlaced_views_0_to_Inf(proj['K'], proj['N_theta'], proj['N_p'])
-	angles_clip, times_clip, angles_del, times_del = clip_list_of_views (angles, times, min_time_btw_views, rotation_speed)
+	angles_clip, times_clip, angles_del, times_del = clip_list_of_views (angles, times, proj['min_time_btw_views'], proj['rotation_speed'])
 	print 'clip_list_of_views: Number of views deleted are ', angles_del.size, '. Deleted views are ' + str(angles_del)
 	print 'clip_list_of_views: Deleted views\' times are ' + str(times_del)
 
@@ -111,23 +83,18 @@ def proj_init (files):
 """ r, c_s, c_t, sigma_s, sigma_t are lists. Each corresponding item in the lists will be used to run a instance of reconstruction. """
 
 def recon_init (proj, recon):
-	recon['recon_type'] = 'MBIR'
-	
-	#sigma_s = [5*(10**5), 10**6, 2*(10**6)]
-	#sigma_t = [5*(10**4), (10**5), 2*(10**5)]
-	sigma_s = [25*(10**5)]
-	sigma_t = [45*(10**4)]
-	recon['sigma_s'],recon['sigma_t'] = np.meshgrid(sigma_s, sigma_t)
+	recon['sigma_s'],recon['sigma_t'] = np.meshgrid(recon['sigma_s'], recon['sigma_t'])
 
 	recon['sigma_s'] = recon['sigma_s'].flatten()
 	recon['sigma_t'] = recon['sigma_t'].flatten()
-	recon['r'] = [16]*len(recon['sigma_s'])
-	recon['c_s'] = [10**-6]*len(recon['r'])
-	recon['c_t'] = [10**-6]*len(recon['r'])
-	recon['ZingerT'] = [100000]*len(recon['r'])
-	recon['ZingerDel'] = [0.1]*len(recon['r'])
+	recon['r'] = [recon['r']]*len(recon['sigma_s'])
+	recon['c_s'] = [recon['c_s']]*len(recon['r'])
+	recon['c_t'] = [recon['c_t']]*len(recon['r'])
+	recon['ZingerT'] = [recon['ZingerT']]*len(recon['r'])
+	recon['ZingerDel'] = [recon['ZingerDel']]*len(recon['r'])
 	
 	param_idx = int(os.environ['PARAM_INDEX'])
+	# if param_idx is 0, the one python process will run recon for all params
 	if (param_idx > 0):
 		recon['r'] = [recon['r'][param_idx-1]]
 		recon['c_s'] = [recon['c_s'][param_idx-1]]
@@ -137,7 +104,7 @@ def recon_init (proj, recon):
 		recon['ZingerT'] = [recon['ZingerT'][param_idx-1]]
 		recon['ZingerDel'] = [recon['ZingerDel'][param_idx-1]]
 	
-	if (proj['recon_N_p']/proj['N_theta'] > 1):
+	if (proj['recon_N_p']/proj['N_theta'] > 2):
 		recon['Proj0RMSE'] = proj['N_theta']
 		recon['ProjNumRMSE'] = proj['N_theta']
 	else:
@@ -146,11 +113,7 @@ def recon_init (proj, recon):
 
 	recon['init_object4mHDF'] = 0
 	
-	recon['maxHU'] = 43000
-	recon['minHU'] = 5000
-	
 	recon['radius_obj'] = proj['voxel_size']*proj['N_r']
-	recon['BH_Quad_Coef'] = 0;
 	
 	#recon['voxel_thresh'] = [10]
         #recon['cost_thresh'] = [10]
@@ -165,22 +128,6 @@ def recon_init (proj, recon):
         #recon['only_Edge_Updates'] = [0]
         #recon['initMagUpMap'] = [1]
 	
-	recon['voxel_thresh'] = [0.5, 0.5, 0.5, 0.5]
-        recon['cost_thresh'] = [10, 10, 10, 10]
-        recon['delta_xy'] = [8, 4, 2, 1]
-        recon['delta_z'] = [1, 1, 1, 1]
-        recon['initICD'] = [0, 2, 2, 2]
-        recon['sinobin'] = 2
-        recon['writeTiff'] = [1, 1, 1, 1]
-        recon['WritePerIter'] = [0, 0, 0, 1]
-        recon['updateProjOffset'] = [0, 2, 3, 3]
-        recon['iterations'] = [500, 400, 400, 400]
-        recon['only_Edge_Updates'] = [0, 0, 0, 0]
-        recon['initMagUpMap'] = [0, 1, 1, 1]
-	recon['readSino4mHDF'] = [0, 0, 0, 0]	
-	recon['do_VarEstimate'] = [1]*len(recon['voxel_thresh'])
-
-	recon['Estimate_of_Var'] = 0.124;	
 	recon['init_with_FBP'] = 0
 	#recon['num_threads'] = 1
 	recon['positivity_constraint'] = 0;
@@ -230,9 +177,7 @@ def recon_init (proj, recon):
 
 def files_init (files):
 	files['C_Source_Folder'] = "../Source_Code_4D/"
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_New_Sim_Data/XT_Result_Repository/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_New_Sim_Data/XT_run/"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 

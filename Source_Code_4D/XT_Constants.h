@@ -134,4 +134,6 @@
 	#define PHANTOM_FILENAME "phantom_shrinking_sphere"
 #endif
 
+#define PHANTOM_IN_HU
+
 #endif /*#ifndef XT_CONSTANTS_H*/

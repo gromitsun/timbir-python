@@ -166,7 +166,11 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
 		for (k=0; k<Phantom_ScanObj.N_x; k++){	
 	   	    	calcAMatrixColumnforAngle(&Phantom_Sino, &Phantom_ScanObj, H_r, AMatrixPtr, j, k, i); 
                 	for (slice=0; slice<Phantom_ScanObj.N_z; slice++){
+#ifdef PHANTOM_IN_HU
+			    	pixel = convert_HU2um((Real_t)object[slice][j][k]);
+#else
 			    	pixel = (Real_t)object[slice][j][k];
+#endif
 	     	          	for (m=0; m<AMatrixPtr->count; m++){
                             		idx=AMatrixPtr->index[m];
                             		val=AMatrixPtr->values[m];

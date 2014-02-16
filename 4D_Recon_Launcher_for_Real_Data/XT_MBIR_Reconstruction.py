@@ -45,13 +45,13 @@ def do_MBIR_reconstruction(proj, recon, files):
 				flag = system('cp ' + path2source + 'bright*.bin ' + path2source + 'projection*.bin ' + path2source + 'weight*.bin ' + path2launch + '.')
 				error_by_flag(flag, 'ERROR: cannot copy projection.bin/weight.bin')
 			elif (recon['readSino4mHDF'][0] == 0 and recon['sinobin'] != 2):
-				if (recon['HPC'] == 'NERSC'):
-					for j in range(recon['node_num']):
-						recon['rank'] = j
-						generate_projections(proj, recon, files, path2launch)
-					recon['rank'] = 0
-				else:
-					generate_projections (proj, recon, files, path2launch)
+				#if (recon['HPC'] == 'NERSC'):
+				for j in range(recon['node_num']):
+					recon['rank'] = j
+					generate_projections(proj, recon, files, path2launch)
+				recon['rank'] = 0
+				#else:
+				#	generate_projections (proj, recon, files, path2launch)
 					
 
 			macros = ' -DBH_QUAD_COEF="' + str(recon['BH_Quad_Coef']) + '" -DHOUNSFIELD_MAX="' + str(recon['maxHU']) + '" -DHOUNSFIELD_MIN="' + str(recon['minHU']) + '"' 

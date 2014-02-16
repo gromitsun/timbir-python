@@ -64,11 +64,7 @@ def compute_RMSE_of_recon (proj, recon, files):
 			offset = offset + proj['slice_t_start']*proj['phantom_N_xy']*proj['phantom_N_xy']*t_ratio*4
 			fid.seek(offset, 0)
 			data = fid.read(proj['phantom_N_xy']*proj['phantom_N_xy']*z_ratio*4)
-<<<<<<< HEAD
 		#	print j
-=======
-			print j
->>>>>>> 03840d0ba569248afb4bdd7426470f707bc7fd47
 			data = struct.unpack(str(proj['phantom_N_xy']*proj['phantom_N_xy']*z_ratio)+'f',data)
 		#	print np.mean(data)
 			data = np.reshape(data, (z_ratio, proj['phantom_N_xy'], proj['phantom_N_xy']), order='C')

@@ -12,57 +12,41 @@ from XT_IOMisc import write_tiff_from_object_bin_file
 from XT_Interpolate import compute_RMSE_of_recon
 import argparse
 import time
-import os
+from XT_Att_Tomo_Sim import attenuation_tomo_sim_init
+from XT_Att_Tomo_Real import attenuation_tomo_real_init
+from XT_CompSys_Init import CompSys_Init
 #from mpi4py import MPI
 
 def main():
 	start_time = time.time()
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--create_objectHDFtiffonly", help="specify whether you want to create HDF and tiff output files only", action="store_true")
+	parser.add_argument("--create_objectHDFtiff", help="specify whether you want to create HDF and tiff output files", action="store_true")
 	parser.add_argument("--setup_launch_folder", help="Specify whether you want to setup the launch folder", action="store_true")
 	parser.add_argument("--run_reconstruction", help="Run reconstruction code", action="store_true")
-	parser.add_argument("--compute_RMSE", help="Compute RMSE of reconstruction", action="store_true")
+	
+	parser.add_argument("--MBIR_ATT_REAL", help="Recon of attenuation modality from real data", action="store_true")
+	parser.add_argument("--MBIR_PHASE_REAL", help="Recon of phase constrast modality from real data", action="store_true")
+	parser.add_argument("--MBIR_ATT_SIM", help="Recon of attenuation modality from simulated phantom", action="store_true")
+
 	parser.add_argument("--Edison", help="Use Edison when running on Edison", action="store_true")
 	parser.add_argument("--Hopper", help="Use Hopper when running on Hopper", action="store_true")
 	parser.add_argument("--Purdue", help="Use Purdue when running on Conte or Carter", action="store_true")
-	parser.add_argument("-n", "--node_num", type=int, help="Specifies number of nodes")
+	parser.add_argument("-n", "--num_MPI_process", type=int, help="Specifies number of nodes")
 	args = parser.parse_args()
 
+	proj = {}
 	recon = {}
 	files = {}
-	recon['node_num'] = args.node_num
-	if (args.Purdue):
-		recon['num_threads'] = 32
-		files['scratch'] = os.environ['RCAC_SCRATCH']
-		files['data_scratch'] = os.environ['RCAC_SCRATCH']
-		if (recon['node_num'] > 1):
-			recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) + ' -machinefile nodefile '
-		else:
-			recon['run_command'] = 'mpiexec -n ' + str(recon['node_num'])
-		recon['compile_command'] = 'mpicc -ansi -Wall -openmp -lhdf5 '
-		recon['HPC'] = 'Purdue' 
-		#recon['rank'] = MPI.COMM_WORLD.rank
-		recon['rank'] = 0
-	elif (args.Edison or args.Hopper):
-		files['scratch'] = os.environ['SCRATCH']
-		files['data_scratch'] = os.environ['GSCRATCH']
-		if (args.Edison):
-			recon['num_threads'] = 32
-			recon['run_command'] = 'aprun -j 2 -n ' + str(recon['node_num']) + ' -N 1 -d ' + str(recon['num_threads']) + ' -cc none '
-			recon['compile_command'] = 'cc -Wall -ansi -openmp '
-		else:
-			recon['num_threads'] = 16
-			#recon['run_command'] = 'aprun -n ' + str(recon['node_num']) + ' -N 1 -d ' + str(recon['num_threads']) + ' -cc none valgrind --leak-check=yes --num-callers=500 --track-origins=yes '
-			recon['run_command'] = 'aprun -n ' + str(recon['node_num']) + ' -N 1 -d ' + str(recon['num_threads']) + ' -cc none '
-			#recon['compile_command'] = 'cc -g -O0 -openmp '
-			recon['compile_command'] = 'cc -fopenmp '
-		recon['HPC'] = 'NERSC'
-		recon['rank'] = 0		
-	else:
-		error_by_flag(1, 'HPC system not recognized')
+	recon['node_num'] = args.num_MPI_process
+	recon, files = CompSys_Init(args, recon, files)
 	
-	proj = proj_init(files)
+	if (args.MBIR_ATT_SIM):
+		proj, recon, files = attenuation_tomo_sim_init (proj, recon, files)
+	elif (args.MBIR_ATT_REAL):
+		proj, recon, files = attenuation_tomo_real_init (proj, recon, files)
+
+	proj = proj_init(proj, files)
 	recon = recon_init(proj, recon)
 	files = files_init(files)
 	
@@ -71,7 +55,7 @@ def main():
 		recon['set_up_launch_folder'] = 1
 
 	recon['reconstruct'] = 0
-	if (args.run_reconstruction and args.create_objectHDFtiffonly == False):
+	if (args.run_reconstruction):
 		recon['reconstruct'] = 1
 
 	if (recon['recon_type'] == 'MBIR'):
@@ -83,10 +67,10 @@ def main():
 	else:
 		print 'ERROR: main: Reconstruction type not recognized'
 
-	if (args.compute_RMSE == 1):
+	if (args.MBIR_ATT_SIM == 1):
 		compute_RMSE_of_recon (proj, recon, files)
 			
-	if (args.create_objectHDFtiffonly):
+	if (args.create_objectHDFtiff):
 		if (recon['HPC'] == 'Purdue'):
 			recon['size'] = MPI.COMM_WORLD.size
 			writepar_object2HDF (proj, recon, files)
