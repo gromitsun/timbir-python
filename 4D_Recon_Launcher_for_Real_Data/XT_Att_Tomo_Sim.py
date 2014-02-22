@@ -28,7 +28,7 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['K'] = 16
 	proj['N_theta'] = 512
 
-	recon['sigma_s'] = [10*(10**5)]
+	recon['sigma_s'] = [50*(10**5)]
 	recon['sigma_t'] = [45*(10**4)]
 	recon['r'] = 16
 	recon['c_s'] = 10**-6
@@ -48,8 +48,8 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	recon['do_VarEstimate'] = [1]*len(recon['voxel_thresh'])
 	recon['Estimate_of_Var'] = 0.124;	
 	
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_New_Sim_Data/XT_Result_Repository/"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_New_Sim_Data/XT_run/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Att_Sim/XT_Result_Repository/"
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Att_Sim/XT_run/"
 
 	proj['N_r'] = proj['phantom_N_xy']
 	proj['min_time_btw_views'] = 0

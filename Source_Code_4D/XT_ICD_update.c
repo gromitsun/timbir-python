@@ -50,6 +50,7 @@
 #include "XT_ImageProc.h"
 #include "XT_MPI.h"
 #include <mpi.h>
+#include "XT_VoxUpdate.h"
 
 /*computes the location of (i,j,k) th element in a 1D array*/
 int32_t array_loc_1D (int32_t i, int32_t j, int32_t k, int32_t N_j, int32_t N_k)
@@ -360,10 +361,8 @@ MagUpdateMap - contains the magnitude of each voxel update in the previous itera
 Mask - All voxels contained in the 'Mask' (contains true or false values for each voxel) are updated*/
 Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, int32_t slice_end, int32_t xy_begin, int32_t xy_end, int32_t* x_rand_select, int32_t* y_rand_select, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, Real_t** DetectorResponse_XY, AMatrixCol* VoxelLineResponse, int32_t Iter, long int *zero_count, Real_t** MagUpdateMap, uint8_t*** Mask)
 {
-  Real_t UpdatedVoxelValue, ProjectionEntry;
-  int32_t i_r, i_t;
   int32_t p,q,r,slice,i_new,j_new,k_new,idxr,idxq,idxp,index_xy;
-  Real_t V,THETA1,THETA2;
+  Real_t V;
   bool ZSFlag;
   int32_t sino_view;
   int32_t z_min, z_max;
@@ -376,7 +375,7 @@ Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, 
   if (TomoInputsPtr->node_rank == TomoInputsPtr->node_num - 1)
 	z_max = ScannedObjectPtr->N_z;
 
-    Real_t THETASelTemp, Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM]; 
+    Real_t Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM]; 
     Real_t Time_Nhood[NHOOD_TIME_MAXDIM-1]; 
     bool Spatial_BDFlag[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM];
     bool Time_BDFlag[NHOOD_TIME_MAXDIM-1];
@@ -506,59 +505,9 @@ Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, 
 #endif /*#ifdef ZERO_SKIPPING*/
 	if(ZSFlag == false)
 	{
-		THETA1 = 0.0;
-		THETA2 = 0.0;
-		for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++){
-		sino_view = ScannedObjectPtr->ProjIdxPtr[i_new][p];
-		for (q = 0; q < AMatrixPtr[p].count; q++)
-		{
-               	    	i_r = (AMatrixPtr[p].index[q]);
-        	    	ProjectionEntry = (AMatrixPtr[p].values[q]);
-			for (r = 0; r < VoxelLineResponse[slice].count; r++)
-			{ 
-				i_t = VoxelLineResponse[slice].index[r];
-				if (SinogramPtr->ProjSelect[sino_view][i_r][i_t] == true)
-				{
-	            			THETA2 += (VoxelLineResponse[slice].values[r]*VoxelLineResponse[slice].values[r]*ProjectionEntry*ProjectionEntry*TomoInputsPtr->Weight[sino_view][i_r][i_t]);
-               				THETA1 += -(ErrorSino[sino_view][i_r][i_t]*VoxelLineResponse[slice].values[r]*ProjectionEntry*TomoInputsPtr->Weight[sino_view][i_r][i_t]);
-            			}
-				else
-				{
-					THETASelTemp = TomoInputsPtr->ErrorSinoThresh*TomoInputsPtr->ErrorSinoDelta*sqrt(TomoInputsPtr->Weight[sino_view][i_r][i_t])/fabs(ErrorSino[sino_view][i_r][i_t]);
-	            			THETA2 += (VoxelLineResponse[slice].values[r]*VoxelLineResponse[slice].values[r]*ProjectionEntry*ProjectionEntry*THETASelTemp);
-            				THETA1 += -(ErrorSino[sino_view][i_r][i_t]*VoxelLineResponse[slice].values[r]*ProjectionEntry*THETASelTemp);
-				}
-            		}
-		}
-    }
-
-
-            /*Solve the 1-D optimization problem
-            TODO : What if theta1 = 0 ? Then this will give error*/
-
-            UpdatedVoxelValue = CE_FunctionalSubstitution(V, THETA1, THETA2, ScannedObjectPtr, TomoInputsPtr, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag);
-              
-            ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] = UpdatedVoxelValue;
-	
-	    for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++){
-		sino_view = ScannedObjectPtr->ProjIdxPtr[i_new][p];
-		for (q = 0; q < AMatrixPtr[p].count; q++)
-        	{
-               	    	i_r = (AMatrixPtr[p].index[q]);
-        	    	ProjectionEntry = (AMatrixPtr[p].values[q]);
-			for (r = 0; r < VoxelLineResponse[slice].count; r++)
-			{ 
-				i_t = VoxelLineResponse[slice].index[r];
-	        		ErrorSino[sino_view][i_r][i_t] -= (ProjectionEntry*VoxelLineResponse[slice].values[r]*(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] - V));
-	   			if (fabs(ErrorSino[sino_view][i_r][i_t]*sqrt(TomoInputsPtr->Weight[sino_view][i_r][i_t])) < TomoInputsPtr->ErrorSinoThresh)
-					SinogramPtr->ProjSelect[sino_view][i_r][i_t] = true;
-				else
-					SinogramPtr->ProjSelect[sino_view][i_r][i_t] = false;
-	   		}
-		}
-	    }
-	    MagUpdateMap[j_new][k_new] += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] - V);
-	    total_vox_mag += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new]);
+		compute_voxel_update_AMat1D (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, AMatrixPtr, VoxelLineResponse, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag, i_new, slice, j_new, k_new);
+	    	MagUpdateMap[j_new][k_new] += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] - V);
+	    	total_vox_mag += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new]);
  	}
 		else
 		    (*zero_count)++;

@@ -110,3 +110,43 @@ void calcAMatrixColumnforAngle (Sinogram* SinogramPtr, ScannedObject* ScannedObj
 }
 
 
+void compute_2DAMatrix_4m_1D(Real_t*** AMatrix2D, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, int32_t* r_ax_start, int32_t* r_ax_count, int32_t* t_ax_start, int32_t* t_ax_count)
+{
+	int32_t i, j, r_idx, t_idx;
+
+	if (VoxelLineResponse->count != 0)
+	{	
+		*t_ax_count = VoxelLineResponse->index[VoxelLineResponse->count-1] - VoxelLineResponse->index[0] + 1; 
+		*t_ax_start = VoxelLineResponse->index[0];
+	}
+	else
+	{
+		*t_ax_count = 0;
+		*t_ax_start = 0;
+	}
+
+	if (AMatrixPtr->count != 0)
+	{
+		*r_ax_count = AMatrixPtr->index[AMatrixPtr->count-1] - AMatrixPtr->index[0] + 1;
+		*r_ax_start = AMatrixPtr->index[0];
+	}
+	else
+	{
+		*r_ax_count = 0;
+		*r_ax_start = 0;
+	}
+
+	if (*t_ax_count != 0 && *r_ax_count != 0)
+	{
+		*AMatrix2D = (Real_t**)multialloc(sizeof(Real_t), 2, *r_ax_count, *t_ax_count);
+		memset(&((*AMatrix2D)[0][0]), 0, (*r_ax_count)*(*t_ax_count)*sizeof(Real_t));
+	}
+
+	for (i = 0; i < AMatrixPtr->count; i++)
+		for (j = 0; j < VoxelLineResponse->count; j++)
+		{
+			r_idx = AMatrixPtr->index[i];
+			t_idx = VoxelLineResponse->index[j];
+			(*AMatrix2D)[r_idx-*r_ax_start][t_idx-*t_ax_start] = AMatrixPtr->values[i]*VoxelLineResponse->values[j];	
+		}
+}

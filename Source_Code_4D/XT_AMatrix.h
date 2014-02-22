@@ -43,4 +43,5 @@
 void findAMatrix (Sinogram* SinogramPtr, ScannedObject *ScannedObjectPtr, AMatrixCol ***AMatrix);
 void AMatrix_free(AMatrixCol*** AMatrix, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr);
 void calcAMatrixColumnforAngle (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Real_t** DetectorResponse, AMatrixCol *Ai, int32_t row, int32_t col, int32_t proj_idx);
+void compute_2DAMatrix_4m_1D(Real_t*** AMatrix2D, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, int32_t* r_ax_start, int32_t* r_ax_count, int32_t* t_ax_start, int32_t* t_ax_count);
 #endif /*#define XT_MATRIX_H*/
