@@ -4,7 +4,15 @@ import os
 
 
 def CompSys_Init(args, recon, files):
-	if (args.Purdue):
+	if (args.PC):
+		recon['num_threads'] = 1
+		files['scratch'] = '../..'
+		files['data_scratch'] = '/Users/aditya/Academics/Graduate_Courses/ECE699/Time_Varying_XRay_Tomography/C_Code/Workspace_Argonne'
+		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num'])
+		recon['compile_command'] = 'mpicc -ansi -Wall -fopenmp '
+		recon['HPC'] = 'PC' 
+		recon['rank'] = 0
+	elif (args.Purdue):
 		recon['num_threads'] = 32
 		files['scratch'] = os.environ['RCAC_SCRATCH']
 		files['data_scratch'] = os.environ['RCAC_SCRATCH']

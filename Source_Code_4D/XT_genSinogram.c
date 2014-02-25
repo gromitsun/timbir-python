@@ -48,7 +48,7 @@
 #include "XT_AMatrix.h"
 #include "XT_Profile.h"
 #include "randlib.h"
-
+#include "XT_Filter.h"
 
 /*'gen_projection_filename' generates the name of the projection files given to us complete with the folder heirarchy.*/
 void gen_projection_filename (char *file, int time_step, int slice_num)
@@ -260,6 +260,7 @@ int genSinogram_fromBin(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, 
 	Read4mBin (weightfile, 1, SinogramPtr->N_p, SinogramPtr->N_r, SinogramPtr->N_t, &(TomoInputsPtr->Weight[0][0][0]), TomoInputsPtr->debug_file_ptr);
 
 	for (i=0; i<SinogramPtr->N_p; i++){
+		Laplacian_Filter (SinogramPtr->Lap_Kernel, SinogramPtr->Projection[i], SinogramPtr->N_r, SinogramPtr->N_t);
 		for (k=0; k<SinogramPtr->N_r; k++){
 			for (slice=0; slice<SinogramPtr->N_t; slice++){
 				sino_avg += SinogramPtr->Projection[i][k][slice];

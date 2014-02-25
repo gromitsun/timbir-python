@@ -86,9 +86,9 @@ recv_reqs - contains information on receive requests
 select - chooses whether to communicate the top x-y slice or the bottom in relation to odd and even time sllices*/
 void MPI_Wait_Z_Slices (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, MPI_Request* send_reqs, MPI_Request* recv_reqs, uint8_t select)
 {
-	int32_t i, num, N_z, off1, off2;
-	N_z = ScannedObjectPtr->N_z;
-	num = ScannedObjectPtr->N_y*ScannedObjectPtr->N_x;
+	int32_t i, off1, off2;
+	/*N_z = ScannedObjectPtr->N_z;
+	num = ScannedObjectPtr->N_y*ScannedObjectPtr->N_x;*/
 
 	if (select == 0)
 	{

@@ -41,7 +41,9 @@ def generate_projections (proj, recon, files, path2launch):
 	weight = np.zeros((proj['recon_N_p'], proj['recon_N_r'], proj['recon_N_t']/recon['node_num']), dtype = np.float64, order = 'C')
 #	proj['expected'] = np.zeros((proj['recon_N_p'], proj['recon_N_r']), dtype = np.float64, order = 'C')
 	
+	print proj['Path2Dataset']
 	FILE = h5py.File(proj['Path2Dataset'], 'r')
+	print proj['Path2WhiteDark']
 	FILE_wd = h5py.File(proj['Path2WhiteDark'], 'r')
 	dark_ptr = FILE_wd['/exchange/data_dark']
 	white_ptr = FILE_wd['/exchange/data_white']

@@ -41,8 +41,12 @@ def do_MBIR_reconstruction(proj, recon, files):
 					flag = system('cp ' + path2source + 'proj_offset*.bin ' + path2launch + '.')
 
 			if (files['copy_projections'] == 1 and recon['rank'] == 0):
-				print ('do_reconstruction: Copying projection.bin and weight.bin')
-				flag = system('cp ' + path2source + 'bright*.bin ' + path2source + 'projection*.bin ' + path2source + 'weight*.bin ' + path2launch + '.')
+				if (recon['sinobin'] == 1):
+					print ('do_reconstruction: Copying projection.bin and weight.bin')
+					flag = system('cp ' + path2source + 'projection*.bin ' + path2source + 'weight*.bin ' + path2launch + '.')
+				elif (recon['sinobin'] == 3):
+					print ('do_reconstruction: Copying bright.bin and weight.bin')
+					flag = system('cp ' + path2source + 'bright*.bin ' + path2source + 'weight*.bin ' + path2launch + '.')
 				error_by_flag(flag, 'ERROR: cannot copy projection.bin/weight.bin')
 			elif (recon['readSino4mHDF'][0] == 0 and recon['sinobin'] != 2):
 				#if (recon['HPC'] == 'NERSC'):
@@ -74,13 +78,15 @@ def do_MBIR_reconstruction(proj, recon, files):
 
 			if (any(recon['readSino4mHDF'])):
 				macros = macros + ' -DREAD_PROJECTION_DATA_4M_HDF'
+			if (recon['modality'] == 'PHCON'):
+				macros = macros + ' -DPHASE_CONTRAST_TOMOGRAPHY'
 
 			if (recon['rank'] == 0 and files['copy_executables'] == 0):
 				print('do_reconstruction: Compiling C code')
 #        		if (engine.use_tifflibrary == 1)
 #            			flag = system(['cd ',path2launch,';g++ -Wall -ansi', macros, ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c allocate.c TiffUtilities.cpp randlib.c tiff.c XT_IOMisc.c -lm -L/usr/local/tiff/lib -I/usr/local/tiff/include -ltiff '],'-echo');
-				print 'cd ' + path2launch + ';' + recon['compile_command'] + macros + ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c XT_NHICD.c allocate.c randlib.c tiff.c XT_IOMisc.c XT_ImageProc.c XT_MPI.c XT_HDFIO.c XT_VoxUpdate.c -lm '
-				flag = system('cd ' + path2launch + ';' + recon['compile_command'] + macros + ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c XT_NHICD.c allocate.c randlib.c tiff.c XT_IOMisc.c XT_ImageProc.c XT_MPI.c XT_HDFIO.c XT_VoxUpdate.c -lm ')
+				print 'cd ' + path2launch + ';' + recon['compile_command'] + macros + ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c XT_NHICD.c allocate.c randlib.c tiff.c XT_IOMisc.c XT_ImageProc.c XT_MPI.c XT_HDFIO.c XT_VoxUpdate.c XT_ForwardProject.c XT_Filter.c -lm '
+				flag = system('cd ' + path2launch + ';' + recon['compile_command'] + macros + ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c XT_NHICD.c allocate.c randlib.c tiff.c XT_IOMisc.c XT_ImageProc.c XT_MPI.c XT_HDFIO.c XT_VoxUpdate.c XT_ForwardProject.c XT_Filter.c -lm ')
 				error_by_flag(flag, 'ERROR: Not able to compile')
 				print 'do_reconstruction: Compile successful!'			
 			if (recon['rank'] == 0):

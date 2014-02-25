@@ -51,7 +51,7 @@
 #include "XT_MPI.h"
 #include <mpi.h>
 #include "XT_VoxUpdate.h"
-
+#include "XT_ForwardProject.h"
 /*computes the location of (i,j,k) th element in a 1D array*/
 int32_t array_loc_1D (int32_t i, int32_t j, int32_t k, int32_t N_j, int32_t N_k)
 {
@@ -505,7 +505,7 @@ Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, 
 #endif /*#ifdef ZERO_SKIPPING*/
 	if(ZSFlag == false)
 	{
-		compute_voxel_update_AMat1D (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, AMatrixPtr, VoxelLineResponse, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag, i_new, slice, j_new, k_new);
+		compute_voxel_update (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, AMatrixPtr, VoxelLineResponse, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag, i_new, slice, j_new, k_new);
 	    	MagUpdateMap[j_new][k_new] += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] - V);
 	    	total_vox_mag += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new]);
  	}
@@ -672,14 +672,14 @@ void initObject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInpu
 	char object_file[100];
 	int dimTiff[4];
 	int32_t i, j, k, l;
-	Real_t ***Init, ****UpMapInit, object_init_value;
+	Real_t ***Init, ****UpMapInit;
 	char initfile[100] = "ObjectInit";
 	char MagUpdateMapFile[100] = "mag_update_map";
 
 	sprintf (initfile, "%s_n%d", initfile, TomoInputsPtr->node_rank);
 	sprintf (MagUpdateMapFile, "%s_n%d", MagUpdateMapFile, TomoInputsPtr->node_rank);
 
-	object_init_value = convert_HU2um(OBJECT_INIT_VAL);
+	/*object_init_value = convert_HU2um(OBJECT_INIT_VAL);*/
 	for (i = 0; i < ScannedObjectPtr->N_time; i++)
 	for (j = 0; j < ScannedObjectPtr->N_z; j++)
 	for (k = 0; k < ScannedObjectPtr->N_y; k++)
@@ -770,8 +770,8 @@ void initObject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInpu
 /*'initErrorSinogram' is used to initialize the error sinogram before start of ICD. It computes e = y - Ax - d. Ax is computed by forward projecting the obkject x.*/
 void initErrorSinogam (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t** DetectorResponse, Real_t*** ErrorSino, AMatrixCol* VoxelLineResponse)
 {
-	Real_t pixel, val, avg=0;
-	int32_t dimTiff[4], i, j, k, p, m, n, sino_idx, idx, slice;
+	Real_t pixel, avg=0;
+	int32_t dimTiff[4], i, j, k, p, sino_idx, slice;
 	AMatrixCol* AMatrixPtr = (AMatrixCol*)get_spc(ScannedObjectPtr->N_time, sizeof(AMatrixCol));
   	uint8_t AvgNumXElements = (uint8_t)ceil(3*ScannedObjectPtr->delta_xy/SinogramPtr->delta_r);
 	char error_file[100] = "error_sinogram";	
@@ -784,8 +784,7 @@ void initErrorSinogam (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, T
 	}
 
 	memset(&(ErrorSino[0][0][0]), 0, SinogramPtr->N_p*SinogramPtr->N_t*SinogramPtr->N_r*sizeof(Real_t));	
-
-	#pragma omp parallel for private(j, k, p, sino_idx, slice, pixel, idx, val, m, n)
+	#pragma omp parallel for private(j, k, p, sino_idx, slice, pixel)
 	for (i=0; i<ScannedObjectPtr->N_time; i++)
 	{
 		for (j=0; j<ScannedObjectPtr->N_y; j++)
@@ -797,13 +796,7 @@ void initErrorSinogam (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, T
 	    				for (slice=0; slice<ScannedObjectPtr->N_z; slice++){
 /*		printf("count = %d, idx = %d, val = %f\n",  VoxelLineResponse[slice].count, VoxelLineResponse[slice].index[0], VoxelLineResponse[slice].values[0]);*/
 	    					pixel = ScannedObjectPtr->Object[i][slice+1][j][k]; /*slice+1 to account for extra z slices required for MPI*/	
-	    					for (m=0; m<AMatrixPtr[i].count; m++){
-							idx=AMatrixPtr[i].index[m];
-							val=AMatrixPtr[i].values[m];
-							for (n=0; n<VoxelLineResponse[slice].count; n++){
-								ErrorSino[sino_idx][idx][VoxelLineResponse[slice].index[n]] += pixel*val*VoxelLineResponse[slice].values[n];
-							}
-	        				}
+						forward_project_voxel (SinogramPtr, pixel, ErrorSino, &(AMatrixPtr[i]), &(VoxelLineResponse[slice]), sino_idx);
 	   				}	
 	   			}
 			}
@@ -1237,7 +1230,6 @@ int ICD_BackProject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
 	start=time(NULL);
 	initObject(SinogramPtr, ScannedObjectPtr, TomoInputsPtr, MagUpdateMap);
 	fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Time taken to read object = %fmins\n", difftime(time(NULL),start)/60.0);
-
 	if (TomoInputsPtr->only_Edge_Updates == 1)
 		select_edge_voxels (ScannedObjectPtr, TomoInputsPtr, MagUpdateMap, Mask);
 

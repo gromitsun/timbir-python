@@ -14,6 +14,7 @@ import argparse
 import time
 from XT_Att_Tomo_Sim import attenuation_tomo_sim_init
 from XT_Att_Tomo_Real import attenuation_tomo_real_init
+from XT_PhCon_Tomo_Real import phase_contrast_tomo_real_init
 from XT_CompSys_Init import CompSys_Init
 #from mpi4py import MPI
 
@@ -26,12 +27,13 @@ def main():
 	parser.add_argument("--run_reconstruction", help="Run reconstruction code", action="store_true")
 	
 	parser.add_argument("--MBIR_ATT_REAL", help="Recon of attenuation modality from real data", action="store_true")
-	parser.add_argument("--MBIR_PHASE_REAL", help="Recon of phase constrast modality from real data", action="store_true")
+	parser.add_argument("--MBIR_PHCON_REAL", help="Recon of phase constrast modality from real data", action="store_true")
 	parser.add_argument("--MBIR_ATT_SIM", help="Recon of attenuation modality from simulated phantom", action="store_true")
 
 	parser.add_argument("--Edison", help="Use Edison when running on Edison", action="store_true")
 	parser.add_argument("--Hopper", help="Use Hopper when running on Hopper", action="store_true")
 	parser.add_argument("--Purdue", help="Use Purdue when running on Conte or Carter", action="store_true")
+	parser.add_argument("--PC", help="Use PC when running on PC", action="store_true")
 	parser.add_argument("-n", "--num_MPI_process", type=int, help="Specifies number of nodes")
 	args = parser.parse_args()
 
@@ -42,9 +44,14 @@ def main():
 	recon, files = CompSys_Init(args, recon, files)
 	
 	if (args.MBIR_ATT_SIM):
+		recon['modality'] = 'ATT'
 		proj, recon, files = attenuation_tomo_sim_init (proj, recon, files)
 	elif (args.MBIR_ATT_REAL):
+		recon['modality'] = 'ATT'
 		proj, recon, files = attenuation_tomo_real_init (proj, recon, files)
+	elif (args.MBIR_PHCON_REAL):
+		recon['modality'] = 'PHCON'
+		proj, recon, files = phase_contrast_tomo_real_init (proj, recon, files)
 
 	proj = proj_init(proj, files)
 	recon = recon_init(proj, recon)

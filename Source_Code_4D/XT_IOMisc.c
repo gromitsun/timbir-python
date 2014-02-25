@@ -227,7 +227,7 @@ void write_ObjectProjOff2TiffBinPerIter (Sinogram* SinogramPtr, ScannedObject* S
 		Write2Bin (object_file, 1, ScannedObjectPtr->N_z, ScannedObjectPtr->N_y, ScannedObjectPtr->N_x, &(ScannedObjectPtr->Object[i][1][0][0]), TomoInputsPtr->debug_file_ptr);
 		dim[0] = 1; dim[1] = ScannedObjectPtr->N_z; dim[2] = ScannedObjectPtr->N_y; dim[3] = ScannedObjectPtr->N_x;
 		if (TomoInputsPtr->Write2Tiff == 1)
-			WriteMultiDimArray2Tiff (object_file, dim, 0, 1, 2, 3, &(ScannedObjectPtr->Object[i][1][0][0]), 1, TomoInputsPtr->debug_file_ptr);
+			WriteMultiDimArray2Tiff (object_file, dim, 0, 1, 2, 3, &(ScannedObjectPtr->Object[i][1][0][0]), 0, TomoInputsPtr->debug_file_ptr);
 			/*Changed above line so that output image is scaled from min to max*/
 	}
 	dim[0] = 1; dim[1] = 1; dim[2] = SinogramPtr->N_r; dim[3] = SinogramPtr->N_t;

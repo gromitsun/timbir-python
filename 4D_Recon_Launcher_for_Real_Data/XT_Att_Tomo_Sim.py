@@ -28,7 +28,7 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['K'] = 16
 	proj['N_theta'] = 512
 
-	recon['sigma_s'] = [50*(10**5)]
+	recon['sigma_s'] = [45*(10**5)]
 	recon['sigma_t'] = [45*(10**4)]
 	recon['r'] = 16
 	recon['c_s'] = 10**-6
@@ -55,7 +55,7 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['min_time_btw_views'] = 0
 	proj['rotation_speed'] = 100
 	recon['recon_type'] = 'MBIR'
-        recon['sinobin'] = 2
+        recon['sinobin'] = 1
         recon['initMagUpMap'] = [0, 1, 1, 1]
         recon['only_Edge_Updates'] = [0, 0, 0, 0]
 	recon['readSino4mHDF'] = [0, 0, 0, 0]	
