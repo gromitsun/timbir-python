@@ -50,12 +50,15 @@
 #include "XT_ImageProc.h"
 #include "XT_MPI.h"
 #include <mpi.h>
-
+#include "XT_VoxUpdate.h"
+#include "XT_ForwardProject.h"
+/*computes the location of (i,j,k) th element in a 1D array*/
 int32_t array_loc_1D (int32_t i, int32_t j, int32_t k, int32_t N_j, int32_t N_k)
 {
 	return (i*N_j*N_k + j*N_k + k);
 }
 
+/*finds the maximum in a array 'array_in' with number of elements being 'num'*/
 int32_t find_max(int32_t* array_in, int32_t num)
 {
 	int32_t i, maxnum;
@@ -67,6 +70,7 @@ int32_t find_max(int32_t* array_in, int32_t num)
 	return(maxnum);
 }
 
+/*converts the value 'val' to hounsfield units and returns it*/
 Real_t convert2Hounsfield (Real_t val)
 {
 	Real_t slope, c;
@@ -77,16 +81,19 @@ Real_t convert2Hounsfield (Real_t val)
 	return (slope*val + c);
 }
 
+/*Computes the qGGMRF spatial prior cost value at delta = x_i - x_j. i & j being the voxel and its neighbor*/
 Real_t CE_QGGMRF_Spatial_Value(Real_t delta, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
   return ((pow(fabs(delta),MRF_Q)/TomoInputsPtr->Sigma_S_Q)/(ScannedObjectPtr->C_S + pow(fabs(delta),MRF_Q - ScannedObjectPtr->MRF_P)/TomoInputsPtr->Sigma_S_Q_P));
 }
 
+/*Computes the qGGMRF temporal prior cost value at delta = x_i - x_j. i & j being the voxel and its neighbor*/
 Real_t CE_QGGMRF_Temporal_Value(Real_t delta, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
   return ((pow(fabs(delta),MRF_Q)/TomoInputsPtr->Sigma_T_Q)/(ScannedObjectPtr->C_T + pow(fabs(delta),MRF_Q - ScannedObjectPtr->MRF_P)/TomoInputsPtr->Sigma_T_Q_P));
 }
 
+/*Computes the qGGMRF spatial prior derivative at delta = x_i - x_j. i & j being the voxel and its neighbor*/
 Real_t CE_QGGMRF_Spatial_Derivative(Real_t delta, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
   Real_t temp1,temp2,temp3;
@@ -101,6 +108,7 @@ Real_t CE_QGGMRF_Spatial_Derivative(Real_t delta, ScannedObject* ScannedObjectPt
   }
 }
 
+/*Computes the qGGMRF temporal prior derivative at delta = x_i - x_j. i & j being the voxel and its neighbor*/
 Real_t CE_QGGMRF_Temporal_Derivative(Real_t delta, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
   Real_t temp1,temp2,temp3;
@@ -115,16 +123,22 @@ Real_t CE_QGGMRF_Temporal_Derivative(Real_t delta, ScannedObject* ScannedObjectP
   }
 }
 
+/*Computes the qGGMRF spatial prior second derivative at delta = 0*/
 Real_t CE_QGGMRF_Spatial_SecondDerivative(ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
   return MRF_Q/(TomoInputsPtr->Sigma_S_Q*ScannedObjectPtr->C_S);
 }
 
+/*Computes the qGGMRF spatial prior second derivative at delta = 0*/
 Real_t CE_QGGMRF_Temporal_SecondDerivative(ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
   return MRF_Q/(TomoInputsPtr->Sigma_T_Q*ScannedObjectPtr->C_T);
 }
 
+/*Computes the voxel update and returns it. V is the present value of voxel.
+THETA1 and THETA2 are the values used in voxel update. Spatial_Nhood and Time_Nhood gives the 
+values of voxels in the neighborhood of V. Time_BDFlag and Spatial_BDFlag are masks which determine 
+whether a neighbor should be included in the neighorhood or not.*/
 Real_t CE_FunctionalSubstitution(Real_t V, Real_t THETA1, Real_t THETA2, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], Real_t Time_Nhood[NHOOD_TIME_MAXDIM-1], bool Spatial_BDFlag[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], bool Time_BDFlag[NHOOD_TIME_MAXDIM-1])
 {
   Real_t u,temp1=0,temp2=0,temp_const,RefValue=0,Delta0;
@@ -179,6 +193,7 @@ Real_t CE_FunctionalSubstitution(Real_t V, Real_t THETA1, Real_t THETA2, Scanned
   return RefValue;
 }
 
+/*computes the value of cost function. 'ErrorSino' is the error sinogram*/
 Real_t computeCost(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino)
 {
   Real_t cost=0,temp=0, forward=0, prior=0;
@@ -310,29 +325,44 @@ Real_t computeCost(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoI
 	 }
         }
       }
-  /*Prior Model Error*/
 
+ /*Use MPI reduction operation to add the forward and prior costs from all nodes*/
  MPI_Reduce(&cost, &forward, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
  MPI_Reduce(&temp, &prior, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
  if (TomoInputsPtr->node_rank == 0)
  {
- 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: forward cost=%f\n",cost);
- 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: prior cost =%f\n",temp);
- 	cost = forward + prior + TomoInputsPtr->node_num*SinogramPtr->N_p*SinogramPtr->N_r*SinogramPtr->N_t*log(TomoInputsPtr->var_est)/2;
+ 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: scaled error sino cost=%f\n",forward);
+ 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: decrease in scaled error sino cost=%e\n",TomoInputsPtr->ErrorSino_Cost-forward);
+	TomoInputsPtr->ErrorSino_Cost = forward;
+ 	forward += (Real_t)TomoInputsPtr->node_num*(Real_t)SinogramPtr->N_p*(Real_t)SinogramPtr->N_r*(Real_t)SinogramPtr->N_t*log(TomoInputsPtr->var_est)/2;
+ 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: forward cost=%f\n",forward);
+ 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: prior cost =%f\n",prior);
+ 	fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: variance parameter estimate =%f\n",TomoInputsPtr->var_est);
+	TomoInputsPtr->Forward_Cost = forward;
+	TomoInputsPtr->Prior_Cost = prior;
+ 	cost = forward + prior;
  }
+ 
+/*Broadcase the value of cost to all nodes*/
  MPI_Bcast(&cost, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
   return cost;
 }
 
-
+/*Updates all voxels from time slices 'time_begin - time_end', x-y slices split along the z-axis from 'slice_begin-slice_end'.
+x_rand_select and y_rand_select lists the voxels for each time slice and z-axis slice which needs to be updated.
+ErrorSino - Error sinogram
+DetectorResponse_XY - detector response in the x-y plane
+VoxelLineResponse - Gives the detector response along z-axis for each voxel along z
+Iter - The iteration number
+zero_count - the number of zero attenuation coefficients
+MagUpdateMap - contains the magnitude of each voxel update in the previous iteration which updated that voxel
+Mask - All voxels contained in the 'Mask' (contains true or false values for each voxel) are updated*/
 Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, int32_t slice_end, int32_t xy_begin, int32_t xy_end, int32_t* x_rand_select, int32_t* y_rand_select, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, Real_t** DetectorResponse_XY, AMatrixCol* VoxelLineResponse, int32_t Iter, long int *zero_count, Real_t** MagUpdateMap, uint8_t*** Mask)
 {
-  Real_t UpdatedVoxelValue, ProjectionEntry;
-  int32_t i_r, i_t;
   int32_t p,q,r,slice,i_new,j_new,k_new,idxr,idxq,idxp,index_xy;
-  Real_t V,THETA1,THETA2;
+  Real_t V;
   bool ZSFlag;
   int32_t sino_view;
   int32_t z_min, z_max;
@@ -345,7 +375,7 @@ Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, 
   if (TomoInputsPtr->node_rank == TomoInputsPtr->node_num - 1)
 	z_max = ScannedObjectPtr->N_z;
 
-    Real_t THETASelTemp, Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM]; 
+    Real_t Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM]; 
     Real_t Time_Nhood[NHOOD_TIME_MAXDIM-1]; 
     bool Spatial_BDFlag[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM];
     bool Time_BDFlag[NHOOD_TIME_MAXDIM-1];
@@ -475,59 +505,9 @@ Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, 
 #endif /*#ifdef ZERO_SKIPPING*/
 	if(ZSFlag == false)
 	{
-		THETA1 = 0.0;
-		THETA2 = 0.0;
-		for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++){
-		sino_view = ScannedObjectPtr->ProjIdxPtr[i_new][p];
-		for (q = 0; q < AMatrixPtr[p].count; q++)
-		{
-               	    	i_r = (AMatrixPtr[p].index[q]);
-        	    	ProjectionEntry = (AMatrixPtr[p].values[q]);
-			for (r = 0; r < VoxelLineResponse[slice].count; r++)
-			{ 
-				i_t = VoxelLineResponse[slice].index[r];
-				if (SinogramPtr->ProjSelect[sino_view][i_r][i_t] == true)
-				{
-	            			THETA2 += (VoxelLineResponse[slice].values[r]*VoxelLineResponse[slice].values[r]*ProjectionEntry*ProjectionEntry*TomoInputsPtr->Weight[sino_view][i_r][i_t]);
-               				THETA1 += -(ErrorSino[sino_view][i_r][i_t]*VoxelLineResponse[slice].values[r]*ProjectionEntry*TomoInputsPtr->Weight[sino_view][i_r][i_t]);
-            			}
-				else
-				{
-					THETASelTemp = TomoInputsPtr->ErrorSinoThresh*TomoInputsPtr->ErrorSinoDelta*sqrt(TomoInputsPtr->Weight[sino_view][i_r][i_t])/fabs(ErrorSino[sino_view][i_r][i_t]);
-	            			THETA2 += (VoxelLineResponse[slice].values[r]*VoxelLineResponse[slice].values[r]*ProjectionEntry*ProjectionEntry*THETASelTemp);
-            				THETA1 += -(ErrorSino[sino_view][i_r][i_t]*VoxelLineResponse[slice].values[r]*ProjectionEntry*THETASelTemp);
-				}
-            		}
-		}
-    }
-
-
-            /*Solve the 1-D optimization problem
-            TODO : What if theta1 = 0 ? Then this will give error*/
-
-            UpdatedVoxelValue = CE_FunctionalSubstitution(V, THETA1, THETA2, ScannedObjectPtr, TomoInputsPtr, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag);
-              
-            ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] = UpdatedVoxelValue;
-	
-	    for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++){
-		sino_view = ScannedObjectPtr->ProjIdxPtr[i_new][p];
-		for (q = 0; q < AMatrixPtr[p].count; q++)
-        	{
-               	    	i_r = (AMatrixPtr[p].index[q]);
-        	    	ProjectionEntry = (AMatrixPtr[p].values[q]);
-			for (r = 0; r < VoxelLineResponse[slice].count; r++)
-			{ 
-				i_t = VoxelLineResponse[slice].index[r];
-	        		ErrorSino[sino_view][i_r][i_t] -= (ProjectionEntry*VoxelLineResponse[slice].values[r]*(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] - V));
-	   			if (fabs(ErrorSino[sino_view][i_r][i_t]*sqrt(TomoInputsPtr->Weight[sino_view][i_r][i_t])) < TomoInputsPtr->ErrorSinoThresh)
-					SinogramPtr->ProjSelect[sino_view][i_r][i_t] = true;
-				else
-					SinogramPtr->ProjSelect[sino_view][i_r][i_t] = false;
-	   		}
-		}
-	    }
-	    MagUpdateMap[j_new][k_new] += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] - V);
-	    total_vox_mag += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new]);
+		compute_voxel_update (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, AMatrixPtr, VoxelLineResponse, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag, i_new, slice, j_new, k_new);
+	    	MagUpdateMap[j_new][k_new] += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] - V);
+	    	total_vox_mag += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new]);
  	}
 		else
 		    (*zero_count)++;
@@ -546,7 +526,7 @@ Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, 
       return (total_vox_mag);
 }
 
-
+/*Upsamples the (N_time x N_z x N_y x N_x) size 'Init' by a factor of 2 along the x-y plane and stores it in 'Object'*/
 void upsample_bilinear_2D (Real_t**** Object, Real_t**** Init, int32_t N_time, int32_t N_z, int32_t N_y, int32_t N_x)
 {
 	int32_t i, j, k, m;
@@ -586,6 +566,7 @@ void upsample_bilinear_2D (Real_t**** Object, Real_t**** Init, int32_t N_time, i
 
 }
 
+/*Upsamples the (N_z x N_y x N_x) size 'Init' by a factor of 2 along the x-y plane and stores it in 'Object'*/
 void upsample_object_bilinear_2D (Real_t*** Object, Real_t*** Init, int32_t N_z, int32_t N_y, int32_t N_x)
 {
 	int32_t j, k, slice;
@@ -624,6 +605,7 @@ void upsample_object_bilinear_2D (Real_t*** Object, Real_t*** Init, int32_t N_z,
 }
 
 
+/*Upsamples the (N_time x N_z x N_y x N_x) size 'Init' by a factor of 2 along the in 3D x-y-z coordinates and stores it in 'Object'*/
 
 void upsample_object_bilinear_3D (Real_t*** Object, Real_t*** Init, int32_t N_z, int32_t N_y, int32_t N_x)
 {
@@ -677,25 +659,32 @@ void upsample_object_bilinear_3D (Real_t*** Object, Real_t*** Init, int32_t N_z,
 }
 
 
-/*'InitObject' intializes the Object to be reconstructed to either 0 or an interpolated version of the previous reconstruction. The most important use of this is in multi resolution reconstruction in which after every coarse resolution reconstruction the object should be intialized with an interpolated version of the reconstruction following which the object will be reconstructed at a finer resolution. This code uses pixel replicaiton to initialize the object if the previous reconstruction was at a lower resolution*/
+/*'InitObject' intializes the Object to be reconstructed to either 0 or an interpolated version of the previous reconstruction. It is used in multi resolution reconstruction in which after every coarse resolution reconstruction the object should be intialized with an interpolated version of the reconstruction following which the object will be reconstructed at a finer resolution. 
+--initICD--
+If 1, initializes the object to 0
+If 2, the code uses bilinear interpolation to initialize the object if the previous reconstruction was at a lower resolution
+
+The function also initializes the magnitude update map 'MagUpdateMap' from the previous coarser resolution 
+reconstruction. */
+
 void initObject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t**** MagUpdateMap)
 {
 	char object_file[100];
 	int dimTiff[4];
 	int32_t i, j, k, l;
-	Real_t ***Init, ****UpMapInit, object_init_value;
+	Real_t ***Init, ****UpMapInit;
 	char initfile[100] = "ObjectInit";
 	char MagUpdateMapFile[100] = "mag_update_map";
 
 	sprintf (initfile, "%s_n%d", initfile, TomoInputsPtr->node_rank);
 	sprintf (MagUpdateMapFile, "%s_n%d", MagUpdateMapFile, TomoInputsPtr->node_rank);
 
-	object_init_value = convert_HU2um(OBJECT_INIT_VAL);
+	/*object_init_value = convert_HU2um(OBJECT_INIT_VAL);*/
 	for (i = 0; i < ScannedObjectPtr->N_time; i++)
 	for (j = 0; j < ScannedObjectPtr->N_z; j++)
 	for (k = 0; k < ScannedObjectPtr->N_y; k++)
 	for (l = 0; l < ScannedObjectPtr->N_x; l++)
-		ScannedObjectPtr->Object[i][j][k][l] = object_init_value;
+		ScannedObjectPtr->Object[i][j][k][l] = 0;
 	
 	if (TomoInputsPtr->initICD > 3){
 		fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: initObject: initICD value not recognized\n");
@@ -778,11 +767,11 @@ void initObject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInpu
 
 }	
 
-/*'initErrorSinogram' is used to initialize the error sinogram before start of ICD. It computes e = g - Af. Af is computed by forward projecting the obkject f.*/
+/*'initErrorSinogram' is used to initialize the error sinogram before start of ICD. It computes e = y - Ax - d. Ax is computed by forward projecting the obkject x.*/
 void initErrorSinogam (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t** DetectorResponse, Real_t*** ErrorSino, AMatrixCol* VoxelLineResponse)
 {
-	Real_t pixel, val, avg=0;
-	int32_t dimTiff[4], i, j, k, p, m, n, sino_idx, idx, slice;
+	Real_t pixel, avg=0;
+	int32_t dimTiff[4], i, j, k, p, sino_idx, slice;
 	AMatrixCol* AMatrixPtr = (AMatrixCol*)get_spc(ScannedObjectPtr->N_time, sizeof(AMatrixCol));
   	uint8_t AvgNumXElements = (uint8_t)ceil(3*ScannedObjectPtr->delta_xy/SinogramPtr->delta_r);
 	char error_file[100] = "error_sinogram";	
@@ -795,8 +784,7 @@ void initErrorSinogam (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, T
 	}
 
 	memset(&(ErrorSino[0][0][0]), 0, SinogramPtr->N_p*SinogramPtr->N_t*SinogramPtr->N_r*sizeof(Real_t));	
-
-	#pragma omp parallel for private(j, k, p, sino_idx, slice, pixel, idx, val, m, n)
+	#pragma omp parallel for private(j, k, p, sino_idx, slice, pixel)
 	for (i=0; i<ScannedObjectPtr->N_time; i++)
 	{
 		for (j=0; j<ScannedObjectPtr->N_y; j++)
@@ -808,13 +796,7 @@ void initErrorSinogam (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, T
 	    				for (slice=0; slice<ScannedObjectPtr->N_z; slice++){
 /*		printf("count = %d, idx = %d, val = %f\n",  VoxelLineResponse[slice].count, VoxelLineResponse[slice].index[0], VoxelLineResponse[slice].values[0]);*/
 	    					pixel = ScannedObjectPtr->Object[i][slice+1][j][k]; /*slice+1 to account for extra z slices required for MPI*/	
-	    					for (m=0; m<AMatrixPtr[i].count; m++){
-							idx=AMatrixPtr[i].index[m];
-							val=AMatrixPtr[i].values[m];
-							for (n=0; n<VoxelLineResponse[slice].count; n++){
-								ErrorSino[sino_idx][idx][VoxelLineResponse[slice].index[n]] += pixel*val*VoxelLineResponse[slice].values[n];
-							}
-	        				}
+						forward_project_voxel (SinogramPtr, pixel, ErrorSino, &(AMatrixPtr[i]), &(VoxelLineResponse[slice]), sino_idx);
 	   				}	
 	   			}
 			}
@@ -850,7 +832,7 @@ void initErrorSinogam (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, T
 	free (AMatrixPtr);
 }
 
-
+/*randomly select the voxels lines which need to be updated along the x-y plane for each z-block and time slice*/
 void randomly_select_x_y (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, uint8_t**** Mask)
 {
         int32_t i, j, num,n, Index, col, row, *Counter, ArraySize, block;
@@ -889,6 +871,7 @@ void randomly_select_x_y (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInput
 
 } 
 
+/*Updates the variance parameter \sigma*/
 void update_variance_parameter (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino)
 {
 	int32_t k, i, j;
@@ -908,7 +891,7 @@ void update_variance_parameter (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr
 	}
  
 	MPI_Allreduce(&temp_acc, &temp, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-	TomoInputsPtr->var_est = temp/(TomoInputsPtr->node_num*SinogramPtr->N_p*SinogramPtr->N_r*SinogramPtr->N_t);
+	TomoInputsPtr->var_est = temp/((Real_t)TomoInputsPtr->node_num*(Real_t)SinogramPtr->N_p*(Real_t)SinogramPtr->N_r*(Real_t)SinogramPtr->N_t);
 
   	#pragma omp parallel for private(i, j)
 	for (k = 0; k < SinogramPtr->N_p; k++)
@@ -924,6 +907,7 @@ void update_variance_parameter (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr
 
 } 
 
+/*Updates the projection offset error parameter d_i*/
 void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino)
 {
 /*	int32_t i, j, k;
@@ -998,6 +982,13 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
 	}
 }
 
+/*Implements mutithreaded shared memory parallelization using OpenMP and splits work among
+threads. Each thread gets a certain time slice and z block to update.
+Multithreading is done within the z-blocks assigned to each node.
+ErrorSino - Error sinogram
+Iter - Present iteration number
+MagUpdateMap - Magnitude update map containing the magnitude of update of each voxel
+Mask - If a certain element is true then the corresponding voxel is updated*/
 int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr,  Real_t** DetectorResponse, AMatrixCol* VoxelLineResponse, Real_t*** ErrorSino, int32_t Iter, Real_t**** MagUpdateMap, uint8_t**** Mask)
 {
 	Real_t AverageUpdate = 0, tempUpdate, avg_update_percentage, total_vox_mag = 0.0, vox_mag = 0.0;
@@ -1131,7 +1122,7 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 		}
 	}
   
- 
+
 	MPI_Allreduce(&AverageUpdate, &tempUpdate, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 	MPI_Allreduce(&total_pix, &tempTotPix, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 	MPI_Allreduce(&total_vox_mag, &vox_mag, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
@@ -1181,6 +1172,10 @@ int ICD_BackProject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
 	char projselect_file[100] = "ProjSelect";
 	uint8_t  ****Mask, AvgNumZElements;
 	AMatrixCol *VoxelLineResponse;
+
+#ifdef POSITIVITY_CONSTRAINT
+	fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Enforcing positivity constraint\n");
+#endif
 
 	sprintf(MagUpdateMapFile, "%s_n%d", MagUpdateMapFile, TomoInputsPtr->node_rank);
 	sprintf(scaled_error_file, "%s_n%d", scaled_error_file, TomoInputsPtr->node_rank);
@@ -1235,7 +1230,6 @@ int ICD_BackProject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
 	start=time(NULL);
 	initObject(SinogramPtr, ScannedObjectPtr, TomoInputsPtr, MagUpdateMap);
 	fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Time taken to read object = %fmins\n", difftime(time(NULL),start)/60.0);
-
 	if (TomoInputsPtr->only_Edge_Updates == 1)
 		select_edge_voxels (ScannedObjectPtr, TomoInputsPtr, MagUpdateMap, Mask);
 

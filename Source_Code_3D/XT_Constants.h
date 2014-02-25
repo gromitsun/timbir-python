@@ -69,11 +69,6 @@
 #define OBJECT_FILENAME "object"
 #define PROJ_OFFSET_FILENAME "proj_offset"
 
-#ifndef PHANTOM_FILENAME
-	#define PHANTOM_FILENAME "phantom_23"
-#endif
-
-#define PHANTOM_FOLDER "/Users/aditya/Academics/Graduate_Courses/ECE699/Time_Varying_XRay_Tomography/C_Code/Matlab_Launcher_Continuous_Views/Phantoms/"
 #ifndef SPARSE_ANGLES_LIST_FILE
 	#define SPARSE_ANGLES_LIST_FILE "view_info.txt"
 #endif
@@ -138,5 +133,11 @@
 #ifndef PHANTOM_FILENAME
 	#define PHANTOM_FILENAME "phantom_shrinking_sphere"
 #endif
+
+#ifndef PATH_TO_PHANTOM
+	#define PATH_TO_PHANTOM "phantom_shrinking_sphere"
+#endif
+
+/*#define PHANTOM_IN_HU*/
 
 #endif /*#ifndef XT_CONSTANTS_H*/

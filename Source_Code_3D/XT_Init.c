@@ -43,7 +43,16 @@
 #include "XT_Structures.h"
 #include <ctype.h>
 #include "XT_IOMisc.h"
+#include "XT_HDFIO.h"
 
+/*Parses the input text file and extracts words delimited by any non-alphanumeric character.
+In this code, it is used to parse view_info.txt and extract the time and angle information.
+--Inputs--
+fp - Text file pointer
+str - pointer to memory where extracted text is stored
+numbytes - number of bytes read
+--Outputs--
+returns the last character which acted as a delimiter for the extracted text*/
 char readFileStream(FILE **fp, char* str, int32_t *numbytes)
 {
 	char lastchar;
@@ -65,6 +74,11 @@ char readFileStream(FILE **fp, char* str, int32_t *numbytes)
 	return (lastchar);
 }
 
+/*For each time slice in the reconstruction, the function copies the corresponding view indices to a new array (which is then usedafter copying). 
+--Inputs--
+time - index of time slice
+ViewIndex - contains the indices of the views which are assumed to be the forward projections of reconstruction at index 'time'
+ViewNum - Number of such views*/
 void copyViewIndexMap (ScannedObject* ScannedObjectPtr, int32_t time, int32_t* ViewIndex, int32_t ViewNum)
 {
 	int32_t i;
@@ -78,6 +92,9 @@ void copyViewIndexMap (ScannedObject* ScannedObjectPtr, int32_t time, int32_t* V
 #endif
 }
 
+/*Maps the projections to reconstruction time slices.
+A projection at time 'projection_time' is assigned to a certain time slice in the reconstruction
+ if the start and end time of the time slice includes the 'projection_time'. */
 void initSparseAnglesOfObject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	int32_t  i;
@@ -107,7 +124,9 @@ void initSparseAnglesOfObject(Sinogram* SinogramPtr, ScannedObject* ScannedObjec
 	free(ViewIndex);
 }
 
-
+/*Function which parses view_info.txt containing information about the views
+and the corresponding times at which they were acquired.
+All text before '-' is considered to be the time and all text before a ',' or '\n' is considered to the view angle*/
 void initSparseAnglesfrmFile(Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr)
 {
         char filename[] = SPARSE_ANGLES_LIST_FILE;
@@ -142,6 +161,7 @@ void initSparseAnglesfrmFile(Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr)
 	}
 }
 
+/*Populates the Views and times of each projection from the text file view_info.txt into arrays*/
 void initRandomAngles (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	int32_t i;
@@ -176,17 +196,22 @@ void initRandomAngles (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, T
 
 }
 
+/*Computes the Euclidean distance of a voxel to its neighboring voxels
+--Inputs--
+i, j, k, l are the indices of neighoring voxels
+--Outputs--
+Returns the distance */
 Real_t distance2node(uint8_t i, uint8_t j, uint8_t k, uint8_t l)
 {
 	return(sqrt(pow((Real_t)i-1.0, 2.0)+pow((Real_t)j-1.0, 2.0)+pow((Real_t)k-1.0, 2.0)+pow((Real_t)l-1.0, 2.0)));
 }
 
+/*Initializes the weights w_{ij} used in the qGGMRF models*/
 void initFilter (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	uint8_t i,j,k;
 	Real_t temp1,sum=0,prior_const=0;
-
-	prior_const = ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_z*ScannedObjectPtr->delta_Rtime;
+	prior_const = ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_Rtime;
 /*Filter coefficients of neighboring pixels are inversely proportional to the distance from the center pixel*/
 	TomoInputsPtr->Time_Filter[0] = 1.0/distance2node(0,1,1,1);
 	sum += 2.0*TomoInputsPtr->Time_Filter[0];
@@ -225,8 +250,11 @@ void initFilter (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 			fprintf(TomoInputsPtr->debug_file_ptr, "initFilter: Sum of filter coefficients is %f\n",(sum+2.0*TomoInputsPtr->Time_Filter[0])/prior_const);	
 			fprintf(TomoInputsPtr->debug_file_ptr, "initFilter: delta_xy*delta_xy*delta_z*delta_tau = %f\n",prior_const);	
 #endif /*#ifdef DEBUG_EN*/
+
+
 }
 
+/*Initializes the sines and cosines of angles at which projections are acquired. It is then used when computing the voxel profile*/
 void calculateSinCos(Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr)
 {
   int32_t i;
@@ -243,7 +271,8 @@ void calculateSinCos(Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr)
 }
 
 
-
+/*Initializes the variables in the three major structures used throughout the code -
+Sinogram, ScannedObject, TomoInputs. It also allocates memory for several variables.*/
 void initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	/*Initializing Sinogram parameters*/
@@ -251,6 +280,7 @@ void initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tom
 	Real_t **OffsetTemp;
 	char projOffset_file[100] = PROJ_OFFSET_FILENAME;
 	char VarEstFile[100] = "variance_estimate";
+	Real_t Lap_Kernel[3][3] = {{-0.5,-1,-0.5},{-1,6,-1},{-0.5,-1,-0.5}};
 
 	if (TomoInputsPtr->initICD != 0)
 	{
@@ -259,8 +289,8 @@ void initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tom
 	}
 
 	sprintf(projOffset_file, "%s_n%d", projOffset_file, TomoInputsPtr->node_rank);	
-	SinogramPtr->Length_T = SinogramPtr->Length_T*(SinogramPtr->slice_end - SinogramPtr->slice_begin + 1)/SinogramPtr->total_t_slices/TomoInputsPtr->node_num;
-	SinogramPtr->N_t = (SinogramPtr->slice_end - SinogramPtr->slice_begin + 1)/TomoInputsPtr->node_num;
+	SinogramPtr->Length_T = SinogramPtr->Length_T/TomoInputsPtr->node_num;
+	SinogramPtr->N_t = SinogramPtr->total_t_slices/TomoInputsPtr->node_num;
 
 	if (SinogramPtr->N_t < 3)
 	{
@@ -382,6 +412,9 @@ void initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tom
 
 
 	ScannedObjectPtr->gamma = 0.1;
+	for (i=0; i<=2; i++)
+		for (j=0; j<=2; j++)
+			SinogramPtr->Lap_Kernel[i][j] = Lap_Kernel[i][j]/(SinogramPtr->delta_r*SinogramPtr->delta_r);			
 
 	fprintf(TomoInputsPtr->debug_file_ptr, "initStructures: Number of z blocks is %d\n", TomoInputsPtr->num_z_blocks);
 	initFilter (ScannedObjectPtr, TomoInputsPtr);
@@ -391,7 +424,7 @@ void initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tom
 }
 
 
-
+/*Function which parses the command line input to the C code and initializes several variables.*/
 void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	int option_index;
@@ -406,40 +439,42 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
                {"c_t",  required_argument, 0, 'e'}, 
                {"delta_xy",  required_argument, 0, 'f'}, /*normalized value w.r.t. delta_r*/
                {"delta_z",  required_argument, 0, 'z'}, /*normalized value w.r.t. delta_t*/
-               {"length_r",  required_argument, 0, 'g'}, /*length of detector in mm*/
+               {"length_r",  required_argument, 0, 'g'}, /*length of detector across r axis in mm*/
                {"num_threads",  required_argument, 0, 'h'}, /*Number of threads*/
-               {"length_t",  required_argument, 0, '3'}, /*length of detector in mm*/
+               {"length_t",  required_argument, 0, '3'}, /*length of detector across t axis in mm*/
                {"voxel_thresh",    required_argument, 0, 'j'}, /*Optimization stops once average magnitude of update exceeds this threshold*/
                {"iter",    required_argument, 0, 'k'}, /*Maximum number of iterations of optimization algorithm*/
                {"rotation_center",    required_argument, 0, 'l'}, /*Center of rotation of object*/
                {"alpha",    required_argument, 0, 'm'}, /*Over-relaxation value. Can be between 1 and 2*/
                {"time_reg",    no_argument, 0, 'n'}, /*If true enables time regularization*/
-               {"sinobin",    required_argument, 0, 'o'}, /*If true reads projection values from bin file*/
-               {"initICD",    required_argument, 0, 'p'}, /*Value of n, initializes ICD with upsampled by n values from bin file*/
+               {"sinobin",    required_argument, 0, 'o'}, /*If 1, reads projection and weight values from bin file. If 3, then reads in bright field counts and weight*/
+               {"initICD",    required_argument, 0, 'p'}, /*parameter which specifies the type of interpolation used when initializing object*/
                {"writeTiff",    required_argument, 0, 'q'}, /*Enables writes to Tiff file. If 1 write tiff file. If 2 in addition write object and offset to bin to tiff every iteration*/
                {"NoNoise",    no_argument, 0, 'r'}, /*Does not add noise to projections if true*/
                {"Rtime0",  required_argument, 0, 's'}, /*Time of start of piecewise constant object*/
                {"Rtime_delta",  required_argument, 0, 't'}, /*Length of subinterval of the piecewise constant object along time*/
                {"Rtime_num",  required_argument, 0, 'u'}, /*Number of reconstructions*/
-               {"num_projections",  required_argument, 0, 'v'}, /*Length of subinterval of the piecewise constant object along time*/
-               {"N_r",  required_argument, 0, 'w'}, /*Length of subinterval of the piecewise constant object along time*/
+               {"num_projections",  required_argument, 0, 'v'}, /*number of projections used in reconstruction*/
+               {"N_r",  required_argument, 0, 'w'}, /*N_r is the number of detector bins along r-axis. parallel to x-axis*/
                {"dont_reconstruct",    no_argument, 0, 'x'}, /*if used, program will not do reconstruction*/
-               {"cost_thresh",  required_argument, 0, 'y'}, /*Length of subinterval of the piecewise constant object along time*/
+               {"cost_thresh",  required_argument, 0, 'y'}, /*threshold on cost which decides convergence*/
                {"radius_obj",  required_argument, 0, 'i'}, /*Radius of object. Code will update voxels only in the circular region*/
                {"detector_slice_begin",  required_argument, 0, '1'}, /*First slice to be reconstructed*/
-               {"detector_slice_end",  required_argument, 0, '2'}, /*Last slice to be reconstructed*/
+               {"detector_slice_num",  required_argument, 0, '2'}, /*Number of slices to be reconstructed*/
                {"phantom_N_xy",  required_argument, 0, '4'}, /*Resolution of phantom along x-y dimension*/
                {"phantom_N_z",  required_argument, 0, '5'}, /*Resolution of phantom along z dimension*/
-               {"N_t",  required_argument, 0, '6'}, /*If 1, just initializes the offset error. If 2, does not initialize but updates error offset. If 3, initializes and updates error offset*/
+               {"N_t",  required_argument, 0, '6'},/*Number of detector bins along t-axis (parallel to z axis)*/ 
                {"updateProjOffset",  required_argument, 0, '7'}, 
-               {"no_NHICD",  no_argument, 0, '8'}, 
-               {"WritePerIter",  no_argument, 0, '+'}, 
-               {"only_Edge_Updates",  no_argument, 0, '-'}, 
-               {"zingerT",  required_argument, 0, '*'}, 
-               {"zingerDel",  required_argument, 0, '^'}, 
-               {"initMagUpMap",  no_argument, 0, '&'}, 
-               {"estVariance",  no_argument, 0, '%'}, 
-               {"Variance_Est",  required_argument, 0, '('}, 
+		/*If 1, just initializes the offset error. If 2, does not initialize but updates error offset. If 3, initializes and updates error offset*/
+               {"no_NHICD",  no_argument, 0, '8'},/*if set, the code does not use NHICD*/ 
+               {"WritePerIter",  no_argument, 0, '+'}, /*Writes the object and projection offset data to binary file every iteration of ICD*/
+               {"only_Edge_Updates",  no_argument, 0, '-'}, /*Only updates the edges of the object*/
+               {"zingerT",  required_argument, 0, '*'}, /*Threshold T of generalized Huber function above which measurement is considered anamolous*/
+               {"zingerDel",  required_argument, 0, '^'}, /*Threshold \delta of generalized Huber function*/
+               {"initMagUpMap",  no_argument, 0, '&'}, /*if set, initializes the magnitude update map from coarse resolution reconstruction*/
+               {"readSino4mHDF",  no_argument, 0, '>'}, /*if set, reads the count values from HDF file and computes the projections*/ 
+               {"do_VarEst",  no_argument, 0, '%'},/*if set, estimates the variance parameter*/ 
+               {"Est_of_Var",  required_argument, 0, '('}, /*contains an initial estimate of variance parameter*/
                {0, 0, 0, 0}
          };
 
@@ -463,9 +498,10 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
 	TomoInputsPtr->initMagUpMap = 0;
 	TomoInputsPtr->updateVar = 0;
 	TomoInputsPtr->var_est = 1;
+	TomoInputsPtr->readSino4mHDF = 0;
 	while(1)
 	{		
-	   c = getopt_long (argc, argv, "a:b:c:d:e:f:z:g:h:3:j:k:l:m:no:p:q:rs:t:u:v:w:xy:i:1:2:4:5:6:7:8+-*:^:&%(:", long_options, &option_index);
+	   c = getopt_long (argc, argv, "a:b:c:d:e:f:z:g:h:3:j:k:l:m:no:p:q:rs:t:u:v:w:xy:i:1:2:4:5:6:7:8+-*:^:&>%(:", long_options, &option_index);
      
            /* Detect the end of the options. */
            if (c == -1) break;
@@ -502,7 +538,7 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
 		case 'y': TomoInputsPtr->cost_thresh = (Real_t)atof(optarg); 		break;	
 		case 'i': TomoInputsPtr->radius_obj = (Real_t)atof(optarg); 		break;	
 		case '1': SinogramPtr->slice_begin = (int32_t)atoi(optarg); 		break;	
-		case '2': SinogramPtr->slice_end = (int32_t)atoi(optarg); 		break;	
+		case '2': SinogramPtr->slice_num = (int32_t)atoi(optarg); 		break;	
 		case '4': TomoInputsPtr->phantom_N_xy = (int32_t)atoi(optarg); 	break;	
 		case '5': TomoInputsPtr->phantom_N_z = (int32_t)atoi(optarg); 		break;	
 		case '6': SinogramPtr->total_t_slices = (int32_t)atoi(optarg); 		break;	
@@ -513,16 +549,30 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
 		case '*': TomoInputsPtr->ErrorSinoThresh = (Real_t)atof(optarg);	break;
 		case '^': TomoInputsPtr->ErrorSinoDelta = (Real_t)atof(optarg);	break;
 		case '&': TomoInputsPtr->initMagUpMap = 1;	break;
+		case '>': TomoInputsPtr->readSino4mHDF = 1;	break;
 		case '%': TomoInputsPtr->updateVar = 1; break;
 		case '(': TomoInputsPtr->var_est = (Real_t)atof(optarg); break;
 		case '?': printf("ERROR: argsParser: Cannot recognize argument %s\n",optarg); break;
 		}
 	}
 
+	sprintf(debug_filename ,"DEBUG_n%d_delta_xy_%d_delta_z_%d.log", TomoInputsPtr->node_rank, (int)ScannedObjectPtr->mult_xy, (int)ScannedObjectPtr->mult_z);
+	if (TomoInputsPtr->readSino4mHDF == 1)
+		sprintf(debug_filename ,"DEBUG_HDF_Read_n%d.log", TomoInputsPtr->node_rank);
+	TomoInputsPtr->debug_file_ptr = fopen(debug_filename, "w" );
+	printf ("Refer to %s for more information\n", debug_filename);
+/*	TomoInputsPtr->debug_file_ptr = stdout;*/
+	
+	fprintf(TomoInputsPtr->debug_file_ptr, "argsParser: p = %.2f, sigma_s = %f, sigma_t = %f, c_s = %.3f, c_t = %.3f, mult_xy = %f, mult_z = %f, Length_R = %.2f, Length_T = %.2f, stop threshold = %.2f, number of iterations = %d, center of rotation = %.2f, alpha = %.2f, time regularization = %d, read sinogram from bin = %d, init ICD = %d, Write Tiff file = %d, Don't add noise = %d, Reconstruction start time = %f, Reconstruction time gap = %f, number of reconstructions = %d, N_p = %d, N_r = %d, reconstruct = %d, cost_thresh = %f, PHANTOM_FILENAME = %s, Slice Begin = %d, Slice Num = %d, Phantom X-Y Resolution = %d, Phantom Z Resolution = %d, N_t = %d, radius of object = %f, Update additive offset error = %d, no_NHICD = %d, Write Tiff and Bin every Iteration = %d, only Edge Updates = %d, Zinger threshold T = %f, Zinger Delta = %f, Read projection from HDF = %d, Update Variance = %d, Variance Estimate = %f\n",ScannedObjectPtr->MRF_P, ScannedObjectPtr->Sigma_S, ScannedObjectPtr->Sigma_T, ScannedObjectPtr->C_S, ScannedObjectPtr->C_T, ScannedObjectPtr->mult_xy, ScannedObjectPtr->mult_z, SinogramPtr->Length_R, SinogramPtr->Length_T, TomoInputsPtr->StopThreshold, TomoInputsPtr->NumIter, TomoInputsPtr->RotCenter, TomoInputsPtr->alpha, TomoInputsPtr->time_reg, TomoInputsPtr->sinobin, TomoInputsPtr->initICD, TomoInputsPtr->Write2Tiff, TomoInputsPtr->No_Projection_Noise, ScannedObjectPtr->Rtime0, ScannedObjectPtr->delta_Rtime, ScannedObjectPtr->N_time, SinogramPtr->N_p, SinogramPtr->N_r, TomoInputsPtr->reconstruct, TomoInputsPtr->cost_thresh, PHANTOM_FILENAME, SinogramPtr->slice_begin, SinogramPtr->slice_num, TomoInputsPtr->phantom_N_xy, TomoInputsPtr->phantom_N_z, SinogramPtr->total_t_slices, TomoInputsPtr->radius_obj, TomoInputsPtr->updateProjOffset, TomoInputsPtr->no_NHICD, TomoInputsPtr->WritePerIter, TomoInputsPtr->only_Edge_Updates, TomoInputsPtr->ErrorSinoThresh, TomoInputsPtr->ErrorSinoDelta, TomoInputsPtr->readSino4mHDF, TomoInputsPtr->updateVar, TomoInputsPtr->var_est);
+	
+#ifdef READ_PROJECTION_DATA_4M_HDF
+	if (TomoInputsPtr->readSino4mHDF == 1)
+		gen_projection_4m_HDF (SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
+#endif
+
 	if (TomoInputsPtr->sinobin == 3)
 	{
 		SinogramPtr->total_t_slices = SinogramPtr->total_t_slices/ScannedObjectPtr->mult_z;
-		SinogramPtr->slice_end = (SinogramPtr->slice_end + 1)/ScannedObjectPtr->mult_z - 1;
 		SinogramPtr->N_r = SinogramPtr->N_r/ScannedObjectPtr->mult_xy;
 		ScannedObjectPtr->delta_xy = 1;
 		ScannedObjectPtr->delta_z = 1;
@@ -534,18 +584,10 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
 		ScannedObjectPtr->delta_z = ScannedObjectPtr->mult_z;
 	}
   	
-	sprintf(debug_filename ,"DEBUG_n%d_delta_xy_%d_delta_z_%d.log", TomoInputsPtr->node_rank, (int)ScannedObjectPtr->mult_xy, (int)ScannedObjectPtr->mult_z);
-	TomoInputsPtr->debug_file_ptr = fopen(debug_filename, "w" );
-	printf ("Refer to %s for more information\n", debug_filename);
-/*	TomoInputsPtr->debug_file_ptr = stdout;*/
 
 	if(argc-optind>0){
 		fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: argsParser: Argument list has an error\n");
 		/*exit(1);*/
 	}
 	
-		fprintf(TomoInputsPtr->debug_file_ptr, "argsParser: p = %.2f, sigma_s = %f, sigma_t = %f, c_s = %.3f, c_t = %.3f, delta_xy = %f, delta_z = %f, Length_R = %.2f, Length_T = %.2f, stop threshold = %.2f, number of iterations = %d, center of rotation = %.2f, alpha = %.2f, time regularization = %d, read sinogram from bin = %d, init ICD = %d, Write Tiff file = %d, Don't add noise = %d, Reconstruction start time = %f, Reconstruction time gap = %f, number of reconstructions = %d, N_p = %d, N_r = %d, reconstruct = %d, cost_thresh = %f, PHANTOM_FILENAME = %s, Slice Begin = %d, Slice End = %d, Phantom X-Y Resolution = %d, Phantom Z Resolution = %d, N_t = %d, radius of object = %f, Update additive offset error = %d, no_NHICD = %d, Write Tiff and Bin every Iteration = %d, only Edge Updates = %d, Zinger threshold T = %f, Zinger Delta = %f, Estimate Variance = %d, Initial estimate of variance  = %f\n",ScannedObjectPtr->MRF_P, ScannedObjectPtr->Sigma_S, ScannedObjectPtr->Sigma_T, ScannedObjectPtr->C_S, ScannedObjectPtr->C_T, ScannedObjectPtr->delta_xy, ScannedObjectPtr->delta_z, SinogramPtr->Length_R, SinogramPtr->Length_T, TomoInputsPtr->StopThreshold, TomoInputsPtr->NumIter, TomoInputsPtr->RotCenter, TomoInputsPtr->alpha, TomoInputsPtr->time_reg, TomoInputsPtr->sinobin, TomoInputsPtr->initICD, TomoInputsPtr->Write2Tiff, TomoInputsPtr->No_Projection_Noise, ScannedObjectPtr->Rtime0, ScannedObjectPtr->delta_Rtime, ScannedObjectPtr->N_time, SinogramPtr->N_p, SinogramPtr->N_r, TomoInputsPtr->reconstruct, TomoInputsPtr->cost_thresh, PHANTOM_FILENAME, SinogramPtr->slice_begin, SinogramPtr->slice_end, TomoInputsPtr->phantom_N_xy, TomoInputsPtr->phantom_N_z, SinogramPtr->total_t_slices, TomoInputsPtr->radius_obj, TomoInputsPtr->updateProjOffset, TomoInputsPtr->no_NHICD, TomoInputsPtr->WritePerIter, TomoInputsPtr->only_Edge_Updates, TomoInputsPtr->ErrorSinoThresh, TomoInputsPtr->ErrorSinoDelta, TomoInputsPtr->updateVar, TomoInputsPtr->var_est);
-
-	
-
 }

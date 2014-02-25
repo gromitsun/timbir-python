@@ -35,6 +35,8 @@
 #ifndef XT_IOMISC_H
 #define XT_IOMISC_H
 
+#include "XT_Structures.h"
+#include <stdlib.h>
 Real_t convert_HU2um(Real_t val);
 void Write2Bin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t* img, FILE *debug_file_ptr);
 void Append2Bin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t* img, FILE *debug_file_ptr);

@@ -47,6 +47,7 @@
 #include <ctype.h>
 #include <mpi.h>
 
+/*Free memory of several arrays*/
 void freeMemory(Sinogram* SinogramPtr, ScannedObject *ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	int32_t i;
@@ -67,11 +68,16 @@ void freeMemory(Sinogram* SinogramPtr, ScannedObject *ScannedObjectPtr, TomoInpu
 	multifree(SinogramPtr->ProjOffset,2);
 	multifree(SinogramPtr->ProjSelect,3);
 	multifree(TomoInputsPtr->Weight,3);	
+	free(SinogramPtr->ViewPtr);
+	free(SinogramPtr->TimePtr);
+	free(SinogramPtr->cosine);
+	free(SinogramPtr->sine);
 	free(SinogramPtr);
 	free(ScannedObjectPtr);
 	free(TomoInputsPtr);
 }
 
+/*Reads the projection and weight values; either from binary files or computed from phantoms */
 int computeWriteSinogram(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	char proj_file[100]=PROJECTION_FILENAME;

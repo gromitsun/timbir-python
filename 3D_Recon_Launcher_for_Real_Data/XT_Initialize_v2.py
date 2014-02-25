@@ -203,7 +203,7 @@ def recon_init (proj, recon,inputs):
             recon['updateProjOffset'][0]=0
             recon['updateProjOffset'][1]=2
 
-	recon['do_VarEst'] = [1]*inputs['num_res']
+	recon['do_VarEstimate'] = [0]*inputs['num_res']
         recon['iterations'] = [inputs['max_iter']]*inputs['num_res'] #max iter
 	if inputs['num_res'] > 1:
            recon['iterations'][0]=recon['iterations'][0]*2
@@ -229,7 +229,7 @@ def recon_init (proj, recon,inputs):
 	recon['N_xy'] = proj['recon_N_r']/recon['delta_xy'][-1] #-1 means last elemen in the list
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	
-	recon['calculate_cost'] = 1 #0 for no 1 for yes
+	recon['calculate_cost'] = 0 #0 for no 1 for yes
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1 #Enable or disable NHICD algorithm
 
@@ -257,7 +257,7 @@ def recon_init (proj, recon,inputs):
 	copy_projections - If '1', copies projection.bin and weight.bin from source code folder. If '0' reads the projection data from HDF files, as is described in XT_Projections.py"""
 
 def files_init (files,inputs):
-	files['C_Source_Folder'] = "../Source_Code_4D/" #The script expects the C Code to be in this directory relative to the python scripts
+	files['C_Source_Folder'] = "../Source_Code_3D/" #The script expects the C Code to be in this directory relative to the python scripts
 	files['Result_Folder'] = inputs['output_hdf5'] 
 	files['Launch_Folder'] = inputs['code_launch_folder']
 	files['copy_executables'] = 0 #0 - dont exec, copy code + compile; TO DO : Test if we can only copy this 

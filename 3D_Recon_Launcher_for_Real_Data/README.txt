@@ -14,7 +14,7 @@ Mandatory inputs:
 
 --setup_launch_folder : a flag to tell the code to create the necessary folder to copy the code into - always keep this
 --run_reconstruction  : A flag to tell the code to reconstruct. Always keep this ON.  
---NERSC : This is to set HPC specific parameters 
+--Edison : This is to set HPC specific settings; Options: Edison, Carver, Purdue and PC (for a regular desktop)  
 --input_hdf5 : FULL path of data h5 file. Assume the h5 is in the format given to us by Dula
 --group_hdf5 : The tile folder to be reconstructed  
 --code_launch_folder : FULL path of a folder where the code is going to be copied and called from. Ideally this is in scratch
@@ -34,7 +34,7 @@ Optional parameters:
 
 --view_subsmpl_fact : The value by which to subset the reconstruction. Can help speed up the code. A number like 2 means take every other view, 3 means take every 3rd view and so on.
  
---recon_x_width : The number of pixels in a subsampled version of the data. If the total number of pixels is 2500 and this number is set to 1024 the acquired data is subsampled to "1024" for each row of the detector. Strongly recommended while getting a feel for the code.  
+--recon_x_width : The number of pixels in a subsampled version of the data. If the total number of pixels is 2500 and this number is set to 1024 the acquired data is subsampled to "1024" for each row of the detector. Strongly recommended while getting familiar with the code.  
 
 --smoothness : The MBIR smoothness parameter . Internally a value is computed and then adjusted using this user input. A value of 1 means the code uses the internal value. 2 means a more smooth reconstruction. 1/2 means a less smooth reconstruction. Needs to be adjusted for the best recon. 
 
@@ -48,7 +48,7 @@ Optional parameters:
 
 --multires_2D : Set this flag if you wish to do milt-resolution only in 2-D. Can be used to do for example a 3-slice reconstruction quickly. DONOT use for large 3D volumes. 
 
---Variance_Est : Variance scaling parameter. THis is defaulted to 1.
+--Variance_Est : Variance scaling parameter. This is defaulted to 1.
 See example of this file in NERSC_Sub_Recon.sh and Carver_Sub_Recon.sh
 
 

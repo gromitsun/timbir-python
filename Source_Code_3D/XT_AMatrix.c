@@ -43,7 +43,10 @@
 #include <math.h>
 #include "XT_IOMisc.h"
 
-/*'calcAMatrixColumnforAngle' computes the A matrix column for any voxel and angle of choice. This function is called repeatedy during ICD optimization. The indexing in angle is required since this code implements sparse angle sampling.*/
+/*'calcAMatrixColumnforAngle' computes the A matrix column for any voxel and angle of choice. This function is called repeatedy during ICD optimization. The indexing in angle is required since this code implements sparse angle sampling.
+Ai - Pointer of A Matrix
+row, col - row and column of detector for which the A Matrix values are computed
+proj_idx - angle index at which A matrix values are computed for the given row, col*/
 void calcAMatrixColumnforAngle (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Real_t** DetectorResponse, AMatrixCol *Ai, int32_t row, int32_t col, int32_t proj_idx)
 {
   int32_t j;
@@ -107,3 +110,92 @@ void calcAMatrixColumnforAngle (Sinogram* SinogramPtr, ScannedObject* ScannedObj
 }
 
 
+void compute_2DAMatrix_4m_1D(Real_t*** AMatrix2D, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, int32_t* r_ax_start, int32_t* r_ax_count, int32_t* t_ax_start, int32_t* t_ax_count)
+{
+	int32_t i, j, r_idx, t_idx;
+
+	if (VoxelLineResponse->count != 0 && AMatrixPtr->count != 0)
+	{	
+		*t_ax_count = VoxelLineResponse->index[VoxelLineResponse->count-1] - VoxelLineResponse->index[0] + 1; 
+		*t_ax_start = VoxelLineResponse->index[0];
+		*r_ax_count = AMatrixPtr->index[AMatrixPtr->count-1] - AMatrixPtr->index[0] + 1;
+		*r_ax_start = AMatrixPtr->index[0];
+	}
+	else
+	{
+		*t_ax_count = 0;
+		*t_ax_start = 0;
+		*r_ax_count = 0;
+		*r_ax_start = 0;
+	}
+
+	if (*t_ax_count != 0 && *r_ax_count != 0)
+	{
+		*AMatrix2D = (Real_t**)multialloc(sizeof(Real_t), 2, *r_ax_count, *t_ax_count);
+		memset(&((*AMatrix2D)[0][0]), 0, (*r_ax_count)*(*t_ax_count)*sizeof(Real_t));
+	}
+
+	for (i = 0; i < AMatrixPtr->count; i++)
+		for (j = 0; j < VoxelLineResponse->count; j++)
+		{
+			r_idx = AMatrixPtr->index[i];
+			t_idx = VoxelLineResponse->index[j];
+			(*AMatrix2D)[r_idx-*r_ax_start][t_idx-*t_ax_start] = AMatrixPtr->values[i]*VoxelLineResponse->values[j];	
+		}
+}
+
+
+void compute_LapMatrix_4m_AMatrix(Sinogram* SinogramPtr, Real_t*** LapMatrix2D, Real_t*** AMatrix2D, int32_t* r_ax_start, int32_t* r_ax_count, int32_t* t_ax_start, int32_t* t_ax_count)
+{
+	int32_t i, j, m, n, row, col;
+
+	if (*r_ax_count != 0 && *t_ax_count != 0)
+	{	
+		(*LapMatrix2D) = (Real_t**)multialloc(sizeof(Real_t), 2, *r_ax_count+2, *t_ax_count+2);
+		memset(&((*LapMatrix2D)[0][0]), 0, (*r_ax_count+2)*(*t_ax_count+2)*sizeof(Real_t));
+		for (i = 0; i < *r_ax_count+2; i++)
+			for (j = 0; j < *t_ax_count+2; j++)
+				for (m = -1; m <= 1; m++)
+					for (n = -1; n <= 1; n++)
+					{
+						row = i + m - 1;
+						col = j + n - 1;
+						if (row >= 0 && col >= 0 && row < *r_ax_count && col < *t_ax_count)
+							(*LapMatrix2D)[i][j] += SinogramPtr->Lap_Kernel[m+1][n+1]*(*AMatrix2D)[row][col];	
+					}
+		*r_ax_count = *r_ax_count + 2; 
+		*t_ax_count = *t_ax_count + 2;
+		*r_ax_start = *r_ax_start - 1;
+		*t_ax_start = *t_ax_start - 1;
+
+		if (*r_ax_start < 0)
+		{
+			for (i = 0; i < *r_ax_count - 1; i++)
+				for (j = 0; j < *t_ax_count; j++)
+					(*LapMatrix2D)[i][j] = (*LapMatrix2D)[i+1][j];
+			*r_ax_start = 0;
+			*r_ax_count -= 1;
+		}
+	
+		if (*t_ax_start < 0)
+		{
+			for (i = 0; i < *r_ax_count; i++)
+				for (j = 0; j < *t_ax_count - 1; j++)
+					(*LapMatrix2D)[i][j] = (*LapMatrix2D)[i][j+1];
+			*t_ax_start = 0;
+			*t_ax_count -= 1;
+		}
+
+		if (*r_ax_start + *r_ax_count > SinogramPtr->N_r)
+		{
+			*r_ax_count -= 1;
+		}		
+		
+		if (*t_ax_start + *t_ax_count > SinogramPtr->N_t)
+		{
+			*t_ax_count -= 1;
+		}	
+	
+		multifree(*AMatrix2D,2);
+	}
+}

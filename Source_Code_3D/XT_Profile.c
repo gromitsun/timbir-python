@@ -41,7 +41,8 @@
 #include <math.h>
 #include "XT_IOMisc.h"
 
-/* 'calculateVoxelProfile' computes the voxel profile as a function of angle and detector index. Here we assume that we have PROFILE_RESOULUTION number of detector bins. Note that these bins are virtual and is not the actual resolution of the detector. All distance computations are normalized.*/
+/* 'calculateVoxelProfile' computes the voxel profile as a function of angle and detector index. Here we assume that we have PROFILE_RESOULUTION number of detector bins. Note that these bins are virtual and is not the actual resolution of the detector. All distance computations are normalized.
+'VoxProfile' will contain the voxel profile*/
 void calculateVoxelProfile(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t** VoxProfile)
 {
 	Real_t angle,MaxValLineIntegral;
@@ -98,7 +99,8 @@ void calculateVoxelProfile(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 	fprintf(TomoInputsPtr->debug_file_ptr, "calculateVoxelProfile: Calculated Voxel Profile with Check sum =%f\n",checksum);
 }
 
-/*The response of a single detector bin is not uniform all over its area. In general, the response is maximum at its center and goes down as we move away from the center. In this code, we assume that the response follows the Hamming Window type response.*/
+/*The response of a single detector bin is not uniform all over its area. In general, the response is maximum at its center and goes down as we move away from the center. In this code, we assume that the response follows the Hamming Window type response.
+BeamProfile contains the beam profile*/
 void initializeBeamProfile(ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t *BeamProfile)
 {
   int32_t i;
@@ -117,7 +119,9 @@ void initializeBeamProfile(ScannedObject* ScannedObjectPtr, TomoInputs* TomoInpu
   fprintf(TomoInputsPtr->debug_file_ptr, "initializeBeamProfile: Generated Beam Profile\n");
 }
 
-/*'DetectorResponseProfile' computes the detector response as a function of the distance between the center of the voxel and the center of the detector bin. This response is computed for all the angles of rotation. Note that the response is the same irrespective of whether the voxel is to the right or the left of the center of the detector bin as long as it is at the same distance. Also, the distance is quantized to DETECTOR_RESPONSE_BINS number of bins.*/
+/*'DetectorResponseProfile' computes the detector response as a function of the distance between the center of the voxel and the center of the detector bin. This response is computed for all the angles of rotation. Note that the response is the same irrespective of whether the voxel is to the right or the left of the center of the detector bin as long as it is at the same distance. Also, the distance is quantized to DETECTOR_RESPONSE_BINS number of bins.
+H_r - Detector response along r - axis
+H_t - Detector response along t - axis*/
 void DetectorResponseProfile (Real_t** H_r, Real_t* H_t, Sinogram* SinogramPtr, ScannedObject *ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
   Real_t r,sum=0,rmin,ProfileCenterR,ProfileCenterT,TempConst;
@@ -208,7 +212,7 @@ void DetectorResponseProfile (Real_t** H_r, Real_t* H_t, Sinogram* SinogramPtr, 
 
   }
 
-
+/*Generates the voxel line response from H_t*/
 void storeVoxelLineResponse(Real_t* H_t,  AMatrixCol* VoxelLineResponse, ScannedObject* ScannedObjectPtr, Sinogram* SinogramPtr)
 {
   

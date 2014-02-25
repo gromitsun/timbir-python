@@ -48,9 +48,7 @@
 #include "XT_AMatrix.h"
 #include "XT_Profile.h"
 #include "randlib.h"
-
-/*function read16bitTiff() is defined in TiffUtilities.cpp*/
-unsigned short* read16bitTiff(char* file);
+#include "XT_Filter.h"
 
 /*'gen_projection_filename' generates the name of the projection files given to us complete with the folder heirarchy.*/
 void gen_projection_filename (char *file, int time_step, int slice_num)
@@ -75,7 +73,7 @@ void gen_projection_filename (char *file, int time_step, int slice_num)
 	/*fprintf(TomoInputsPtr->debug_file_ptr, "\n%s,%s,%d\n",REPEAT_DIGITS,file,TIME_DIGITS-time_step/10-1);		*/
 }
 
-
+/*initializes structures used when generating projection data from phantom*/
 void initPhantomStructures(Sinogram* Sino, ScannedObject* ScanObj, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	*Sino = *SinogramPtr;
@@ -83,7 +81,7 @@ void initPhantomStructures(Sinogram* Sino, ScannedObject* ScanObj, Sinogram* Sin
 
     	ScanObj->N_x = TomoInputsPtr->phantom_N_xy;
         ScanObj->N_y = TomoInputsPtr->phantom_N_xy;
-    	ScanObj->N_z = TomoInputsPtr->phantom_N_z/SinogramPtr->total_t_slices*SinogramPtr->N_t;
+    	ScanObj->N_z = SinogramPtr->slice_num/TomoInputsPtr->node_num;
     
     	ScanObj->delta_xy = Sino->Length_R/ScanObj->N_x;
     	ScanObj->delta_z = Sino->Length_T/ScanObj->N_z;
@@ -92,27 +90,31 @@ void initPhantomStructures(Sinogram* Sino, ScannedObject* ScanObj, Sinogram* Sin
 	Sino->OffsetT = ((ScanObj->delta_z/2) + Sino->delta_t/2)/DETECTOR_RESPONSE_BINS;
 }
 
+/*generates projection data from phantom*/
 void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	FILE *fp;
 	Sinogram Phantom_Sino;
 	ScannedObject Phantom_ScanObj;
 	AMatrixCol *VoxelLineResponse;
-	long int stream_offset;
-	int32_t i, j, k, m, n, idx, size, t, slice, result; 
+	long int stream_offset, size, result;
+	int32_t i, j, k, m, n, idx, t, slice; 
         float ***object;
-	Real_t pixel, val, **H_r, *H_t;
+	Real_t proj_avg, weight_avg, pixel, val, **H_r, *H_t;
   	uint8_t AvgNumXElements, AvgNumZElements;
-	char phantom_file[1000] = PHANTOM_FILENAME;
-	char projection_file[] = PROJECTION_FILENAME;
-	char weight_file[] = WEIGHT_MATRIX_FILENAME;
+	char projection_file[100] = PROJECTION_FILENAME;
+	char weight_file[100] = WEIGHT_MATRIX_FILENAME;
+	char phantom_file[100];
 	char detect_file[] = "detector_forwardproj";
 	int dimTiff[4];
 
-	if (TomoInputsPtr->phantom_N_xy % SinogramPtr->N_r != 0 || TomoInputsPtr->phantom_N_z % SinogramPtr->total_t_slices != 0){
-		printf("ERROR: genSinogramFromPhantom: N_r = %d does not divide phantom_N_xy = %d or N_t = %d does not divide phantom_N_z = %d\n", SinogramPtr->N_r, TomoInputsPtr->phantom_N_xy, SinogramPtr->total_t_slices, TomoInputsPtr->phantom_N_z);
+	sprintf(projection_file, "%s_n%d", projection_file, TomoInputsPtr->node_rank);
+	sprintf(weight_file, "%s_n%d", weight_file, TomoInputsPtr->node_rank);
+	if (TomoInputsPtr->phantom_N_xy % SinogramPtr->N_r != 0 || TomoInputsPtr->phantom_N_z < SinogramPtr->slice_begin + SinogramPtr->slice_num){
+		printf("ERROR: genSinogramFromPhantom: N_r = %d does not divide phantom_N_xy = %d or number of slices = %d is more than phantom_N_z = %d\n", SinogramPtr->N_r, TomoInputsPtr->phantom_N_xy, SinogramPtr->slice_num, TomoInputsPtr->phantom_N_z);
 		exit (1);
 	}
+
 	
 	/*printf("\nsizes = %d, %d, %d, %d\n", sizeof(int), sizeof(int64_t), sizeof(long int), sizeof(long long));*/
 
@@ -124,7 +126,7 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
   	AMatrixPtr->values = (Real_t*)get_spc((int32_t)AvgNumXElements,sizeof(Real_t));
   	AMatrixPtr->index  = (int32_t*)get_spc((int32_t)AvgNumXElements,sizeof(int32_t));
 
-	object = (float***)multialloc(sizeof(float), 3, TomoInputsPtr->phantom_N_xy, TomoInputsPtr->phantom_N_xy, TomoInputsPtr->phantom_N_z);
+	object = (float***)multialloc(sizeof(float), 3, Phantom_ScanObj.N_z, Phantom_ScanObj.N_y, Phantom_ScanObj.N_x);
 	memset(&(Phantom_Sino.Projection[0][0][0]), 0, Phantom_Sino.N_p*Phantom_Sino.N_t*Phantom_Sino.N_r*sizeof(Real_t));	
 
 	H_r = (Real_t **)multialloc(sizeof(Real_t), 2, Phantom_Sino.N_p, DETECTOR_RESPONSE_BINS+1);
@@ -140,15 +142,17 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
 	}
 	storeVoxelLineResponse(H_t, VoxelLineResponse, &Phantom_ScanObj, &Phantom_Sino);
 	
-	sprintf(phantom_file, "%s%s.bin", PHANTOM_FOLDER, PHANTOM_FILENAME);
-	fp = fopen (phantom_file, "r" );
- 	if (fp==NULL) {fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: genSinogramFromPhantom: error in reading file %s\n",phantom_file); exit (1);}		
-	size=TomoInputsPtr->phantom_N_xy*TomoInputsPtr->phantom_N_xy*TomoInputsPtr->phantom_N_z;
+	sprintf(phantom_file, "%s", PATH_TO_PHANTOM);
+	fp = fopen (phantom_file, "rb");
+ 	
+	if (fp==NULL) {fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: genSinogramFromPhantom: error in reading file %s\n",phantom_file); exit (1);}		
+	size = (long int)Phantom_ScanObj.N_z*(long int)Phantom_ScanObj.N_y*(long int)Phantom_ScanObj.N_x;
 
 	fprintf(TomoInputsPtr->debug_file_ptr, "DebugMsg: genSinogramFromPhantom: Forward projecting phantoms - \n");	
 	for (i=0; i<Phantom_Sino.N_p; i++){
 		stream_offset = (long int)i*(long int)TomoInputsPtr->phantom_N_z*(long int)Phantom_ScanObj.N_y*(long int)Phantom_ScanObj.N_x;
-		stream_offset += (long int)(TomoInputsPtr->phantom_N_z/SinogramPtr->total_t_slices)*(long int)SinogramPtr->slice_begin;
+		stream_offset += (long int)Phantom_ScanObj.N_z*(long int)Phantom_ScanObj.N_y*(long int)Phantom_ScanObj.N_x*(long int)TomoInputsPtr->node_rank;
+		stream_offset += (long int)SinogramPtr->slice_begin*(long int)Phantom_ScanObj.N_y*(long int)Phantom_ScanObj.N_x;
 		result = fseek (fp, stream_offset*sizeof(float), SEEK_SET);
 
   		if (result != 0) 
@@ -156,19 +160,29 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
 
 		result = fread (&(object[0][0][0]), sizeof(float), size, fp);
   		if (result != size) 
-		{fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: Reading file %s, Number of elements read does not match required, number of elements read=%d\n",phantom_file,result);}
+		{fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: Reading file %s, Number of elements read does not match required, number of elements read=%ld, i=%d, stream_offset=%ld, size=%ld\n",phantom_file,result,i,stream_offset,size);}
 
-		for (j=0; j<TomoInputsPtr->phantom_N_xy; j++)
-		for (k=0; k<TomoInputsPtr->phantom_N_xy; k++){	
+		for (j=0; j<Phantom_ScanObj.N_y; j++)
+		for (k=0; k<Phantom_ScanObj.N_x; k++){	
 	   	    	calcAMatrixColumnforAngle(&Phantom_Sino, &Phantom_ScanObj, H_r, AMatrixPtr, j, k, i); 
-                	for (slice=0; slice<TomoInputsPtr->phantom_N_z; slice++){
-			    	pixel = (Real_t)object[j][k][slice];
+                	for (slice=0; slice<Phantom_ScanObj.N_z; slice++){
+#ifdef PHANTOM_IN_HU
+			    	pixel = convert_HU2um((Real_t)object[slice][j][k]);
+#else
+			    	pixel = (Real_t)object[slice][j][k];
+#endif
 	     	          	for (m=0; m<AMatrixPtr->count; m++){
                             		idx=AMatrixPtr->index[m];
                             		val=AMatrixPtr->values[m];
                             		for (n=0; n<VoxelLineResponse[slice].count; n++)
-                                    		Phantom_Sino.Projection[i][idx][VoxelLineResponse[slice].index[n]]+=pixel*val*VoxelLineResponse[slice].values[n];
+                                    		Phantom_Sino.Projection[i][idx][VoxelLineResponse[slice].index[n]] += pixel*val*VoxelLineResponse[slice].values[n];
 	     			}
+				/*proj_avg += Phantom_Sino.Projection[i][idx][VoxelLineResponse[slice].index[n]];
+				if (proj_avg != proj_avg)
+				{
+					printf("genSinogramFromPhantom: proj_avg = %f, j = %d, k = %d, slice = %d, m = %d, n = %d, pixel = %f, val = %f, line resp = %f, proj = %f\n",proj_avg,j,k,slice,m,n,pixel,val,VoxelLineResponse[slice].values[n],Phantom_Sino.Projection[i][idx][VoxelLineResponse[slice].index[n]]);
+					exit(1);
+				}*/
 			}
 	  	 }
 	}
@@ -188,24 +202,41 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
 	fclose(fp);	
 	multifree(object,3);
 
+	proj_avg = 0; weight_avg = 0;
 	for (i=0; i < SinogramPtr->N_p; i++)
-	for (j=0; j < SinogramPtr->N_r; j++){
+	for (j=0; j < SinogramPtr->N_r; j++)
 	for (slice=0; slice < SinogramPtr->N_t; slice++)
+	{
 		val = SinogramPtr->Projection[i][j][slice];
 		val = EXPECTED_COUNTS_FOR_PHANTOM_DATA*exp(-val);
+		if (val == 0)
+		{
+			printf("ERROR: val = %f, projection = %f, i = %d, j = %d, slice = %d\n",val,SinogramPtr->Projection[i][j][slice], i, j, slice);
+		}
 		/*TomoInputsPtr->Weight[i][j] = val + sqrt(val)*random2();*/
 		if (TomoInputsPtr->No_Projection_Noise == 1)
 			TomoInputsPtr->Weight[i][j][slice] = fabs(val);
 		else
 			TomoInputsPtr->Weight[i][j][slice] = fabs(val + sqrt(val)*normal());
 		
-		SinogramPtr->Projection[i][j][slice] = log(EXPECTED_COUNTS_FOR_PHANTOM_DATA/TomoInputsPtr->Weight[i][j][slice]);			
+		SinogramPtr->Projection[i][j][slice] = fabs(log(EXPECTED_COUNTS_FOR_PHANTOM_DATA/TomoInputsPtr->Weight[i][j][slice]));
+		weight_avg += TomoInputsPtr->Weight[i][j][slice];	
+		proj_avg += SinogramPtr->Projection[i][j][slice];	
 	}
 
+	proj_avg /= size;
+	weight_avg /= size;
+	printf("genSinogramFromPhantom: The average of all projection data after weight computation with/without noise is %f\n", proj_avg);
+	printf("genSinogramFromPhantom: The average of all weight data is %f\n", weight_avg);
 	Write2Bin (projection_file, 1, SinogramPtr->N_p, SinogramPtr->N_r, SinogramPtr->N_t, &(SinogramPtr->Projection[0][0][0]), TomoInputsPtr->debug_file_ptr);
+	
 	dimTiff[0] = 1; dimTiff[1] = SinogramPtr->N_p; dimTiff[2] = SinogramPtr->N_r; dimTiff[3] = SinogramPtr->N_t;
 	if (TomoInputsPtr->Write2Tiff == 1)
+	{	
 		WriteMultiDimArray2Tiff (projection_file, dimTiff, 0, 3, 1, 2, &(SinogramPtr->Projection[0][0][0]), 0, TomoInputsPtr->debug_file_ptr);
+		WriteMultiDimArray2Tiff (weight_file, dimTiff, 0, 3, 1, 2, &(TomoInputsPtr->Weight[0][0][0]), 0, TomoInputsPtr->debug_file_ptr);
+	}
+
 	Write2Bin (weight_file, 1, SinogramPtr->N_p, SinogramPtr->N_r, SinogramPtr->N_t, &(TomoInputsPtr->Weight[0][0][0]), TomoInputsPtr->debug_file_ptr);
 }
 
@@ -229,6 +260,7 @@ int genSinogram_fromBin(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, 
 	Read4mBin (weightfile, 1, SinogramPtr->N_p, SinogramPtr->N_r, SinogramPtr->N_t, &(TomoInputsPtr->Weight[0][0][0]), TomoInputsPtr->debug_file_ptr);
 
 	for (i=0; i<SinogramPtr->N_p; i++){
+		/*Laplacian_Filter (SinogramPtr->Lap_Kernel, SinogramPtr->Projection[i], SinogramPtr->N_r, SinogramPtr->N_t);*/
 		for (k=0; k<SinogramPtr->N_r; k++){
 			for (slice=0; slice<SinogramPtr->N_t; slice++){
 				sino_avg += SinogramPtr->Projection[i][k][slice];
@@ -247,6 +279,7 @@ int genSinogram_fromBin(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, 
 	return(0);	
 }
 
+/*Computes projection data from weight binary file and bright field counts binary file.*/
 int genSinogram_subsampleCounts(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	FILE *fp;
