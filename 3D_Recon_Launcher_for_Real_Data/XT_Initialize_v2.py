@@ -203,7 +203,7 @@ def recon_init (proj, recon,inputs):
             recon['updateProjOffset'][0]=0
             recon['updateProjOffset'][1]=2
 
-	recon['do_VarEstimate'] = [0]*inputs['num_res']
+	recon['do_VarEstimate'] = [1]*inputs['num_res']
         recon['iterations'] = [inputs['max_iter']]*inputs['num_res'] #max iter
 	if inputs['num_res'] > 1:
            recon['iterations'][0]=recon['iterations'][0]*2
