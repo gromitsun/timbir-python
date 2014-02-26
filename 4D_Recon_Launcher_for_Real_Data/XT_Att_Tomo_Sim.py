@@ -4,6 +4,7 @@ import numpy as np
 
 def attenuation_tomo_sim_init (proj, recon, files):
 	proj['Path2Phantom'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard.bin"
+	proj['Path2Mask'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin"
 	proj['Expected_Counts'] = 29473 
 	proj['phantom_N_xy'] = 2048
 	# phantom_N_z is the resolution of phantom along z
@@ -28,8 +29,8 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['K'] = 16
 	proj['N_theta'] = 512
 
-	recon['sigma_s'] = [45*(10**5)]
-	recon['sigma_t'] = [45*(10**4)]
+	recon['sigma_s'] = [10**5, 2*(10**5), 4*(10**5), 8*(10**5)]
+	recon['sigma_t'] = [10**4, 2*(10**4), 4*(10**4), 8*(10**4)]
 	recon['r'] = 16
 	recon['c_s'] = 10**-6
 	recon['c_t'] = 10**-6
@@ -43,10 +44,10 @@ def attenuation_tomo_sim_init (proj, recon, files):
         recon['delta_z'] = [1, 1, 1, 1]
         recon['initICD'] = [0, 2, 2, 2]
         recon['WritePerIter'] = [0, 0, 0, 1]
-        recon['updateProjOffset'] = [0, 2, 3, 3]
+        recon['updateProjOffset'] = [0, 0, 0, 0]
         recon['iterations'] = [500, 400, 400, 400]
-	recon['do_VarEstimate'] = [1]*len(recon['voxel_thresh'])
-	recon['Estimate_of_Var'] = 0.124;	
+	recon['do_VarEstimate'] = [0]*len(recon['voxel_thresh'])
+	recon['Estimate_of_Var'] = 1.0;	
 	
 	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Att_Sim/XT_Result_Repository/"
 	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Att_Sim/XT_run/"
@@ -55,7 +56,7 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['min_time_btw_views'] = 0
 	proj['rotation_speed'] = 100
 	recon['recon_type'] = 'MBIR'
-        recon['sinobin'] = 1
+        recon['sinobin'] = 2
         recon['initMagUpMap'] = [0, 1, 1, 1]
         recon['only_Edge_Updates'] = [0, 0, 0, 0]
 	recon['readSino4mHDF'] = [0, 0, 0, 0]	
