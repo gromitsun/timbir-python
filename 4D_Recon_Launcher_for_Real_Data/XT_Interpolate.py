@@ -148,7 +148,7 @@ def compute_RMSE_of_recon (proj, recon, files):
 		Data2Mat['Proj0RMSE'] = recon['Proj0RMSE']
 		Data2Mat['ProjNumRMSE'] = recon['ProjNumRMSE']
 		Data2Mat['fineres_voxthresh'] = recon['voxel_thresh'][-1]
-		create_param_sweep_file (Data2Mat,files)
+		#create_param_sweep_file (Data2Mat,files)
 		
 		sio.savemat(path2results + 'Params.mat', Data2Mat)
 	print RMSE_EDGE
@@ -164,7 +164,7 @@ def create_param_sweep_file (Data2Mat,files):
 		for i in range(len(sweep['K'])):
 			if (sweep['Z_Slice'][i] == Data2Mat['Z_Slice'] and sweep['K'][i] == Data2Mat['K'] and sweep['N_theta'][i] == Data2Mat['N_theta'] and sweep['r'][i] == Data2Mat['r'] and sweep['sigma_s'][i] == Data2Mat['sigma_s'] and sweep['sigma_t'][i] == Data2Mat['sigma_t'] and sweep['c_s'][i] == Data2Mat['c_s'] and sweep['c_t'][i] == Data2Mat['c_t'] and sweep['ZingerT'][i] == Data2Mat['ZingerT'] and sweep['ZingerDel'][i] == Data2Mat['ZingerDel'] and sweep['Proj0RMSE'][i] == Data2Mat['Proj0RMSE'] and sweep['ProjNumRMSE'][i] == Data2Mat['ProjNumRMSE'] and sweep['fineres_voxthresh'][i] == Data2Mat['fineres_voxthresh']):
 				copy_data2sweep(sweep,Data2Mat,i)
-		copy_data2sweep(sweep,Data2Mat,len(sweep['K']),-1)
+		copy_data2sweep(sweep,Data2Mat,-1)
 	else:
 		sweep = {'RMSE_EDGE':[],'RMSE':[],'Z_Slice':[],'K':[],'N_theta':[],'r':[],'sigma_s':[],'sigma_t':[],'c_s':[],'c_t':[],'ZingerT':[],'ZingerDel':[],'Proj0RMSE':[],'ProjNumRMSE':[],'fineres_voxthresh':[]}
 		copy_data2sweep(sweep,Data2Mat,-1)

@@ -106,7 +106,7 @@ def recon_init (proj, recon):
 	
 	if (proj['recon_N_p']/proj['N_theta'] > 2):
 		recon['Proj0RMSE'] = proj['N_theta']
-		recon['ProjNumRMSE'] = proj['N_theta']
+		recon['ProjNumRMSE'] = (proj['recon_N_p']/proj['N_theta']-2)*proj['N_theta']
 	else:
 		recon['Proj0RMSE'] = proj['N_theta']/proj['K'] 
 		recon['ProjNumRMSE'] = proj['recon_N_p'] - 2*proj['N_theta']/proj['K']
