@@ -22,8 +22,8 @@ Mandatory inputs:
 --pix_size : pixel size in micron 
 ----num_views : total number of views in the data. If the "0 degree projection"  is acquired two times just indicate the number of unique views. 
 --x_width : number of detector pixels in x direction 
---num_bright : Number of brights acquired in the data
---num_dark : Number of darks acquired in the data
+--num_bright : Number of brights acquired in the data at the end of the rotation
+--num_dark : Number of darks acquired in the data at the end of the rotation
 --z_start : the slice number along z in which to start the reconstruction
 --z_numElts : number of z slices to reconstruct. For the default case this should be at least 32. If you want to reconstruct less see the advanced parameters section (so that the 3-D multi-resolution works)
 --num_nodes : Number of nodes to be used

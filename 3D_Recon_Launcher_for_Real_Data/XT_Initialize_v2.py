@@ -169,11 +169,11 @@ def recon_init (proj, recon,inputs):
 	recon['BH_Quad_Coef'] = 0;#need to make zero
 	
 	recon['voxel_thresh'] = [inputs['stop_threshold']]*inputs['num_res'] #[5, 10, 20, 20] #4 stage multi-resolution, with stopping in HU
-        #if inputs['num_res'] > 1:
-	#	recon['voxel_thresh'][0]=recon['voxel_thresh'][0]/2 #The the coarsest resolution lower the threshold
+        if inputs['num_res'] > 1:
+		recon['voxel_thresh'][0]=recon['voxel_thresh'][0]/2 #The the coarsest resolution lower the threshold
 
-	for i in range(inputs['num_res']):
-		recon['voxel_thresh'][i] = recon['voxel_thresh'][i]/(inputs['num_res']-i)	      
+	#for i in range(inputs['num_res']):
+		#recon['voxel_thresh'][i] = recon['voxel_thresh'][i]/(inputs['num_res']-i)	      
  
         recon['cost_thresh'] = [20]*inputs['num_res'] #percentage change presnt-prev / present - initial - Irrelevant
 
@@ -206,7 +206,7 @@ def recon_init (proj, recon,inputs):
 	recon['do_VarEstimate'] = [1]*inputs['num_res']
         recon['iterations'] = [inputs['max_iter']]*inputs['num_res'] #max iter
 	if inputs['num_res'] > 1:
-           recon['iterations'][0]=recon['iterations'][0]*2
+           recon['iterations'][0]=recon['iterations'][0]*1 #Changed from 2 to 1. i.e. At all resolutions same number of iterations
 
         recon['only_Edge_Updates'] = [0]*inputs['num_res'] #DO NOT USE
 
