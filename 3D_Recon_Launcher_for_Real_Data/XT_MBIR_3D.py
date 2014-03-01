@@ -75,7 +75,7 @@ def main():
         parser.add_argument("--zinger_thresh",help="Controls the rejection thresold of bad measurements that cause zingers. In a future version this will have proper units. At present try values in the range 1-50 to correct for zingers",type=float,default=10000)
        
         #Advanced parameters which the user need not worry about but can manipulate if necessary
-        parser.add_argument("--stop_threshold",help="Stopping thresold as a percentage of average change in pixel values in units of HU",type=float,default=1.0)       
+        parser.add_argument("--stop_threshold",help="Stopping thresold as a percentage of average change in pixel values in percentage",type=float,default=1.0)       
         parser.add_argument("--max_iter",help="Maximum number of ICD iterations for the algorithm",type=int,default=30)
         parser.add_argument("--Variance_Est",help="Enter the an estimate for the variance",type=float,default=10)
         parser.add_argument("--num_res",help="Number of resolutions to be used",type=int,default=4)
