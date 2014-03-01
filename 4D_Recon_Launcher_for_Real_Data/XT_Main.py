@@ -3,7 +3,7 @@
 from XT_Initialize import proj_init, recon_init, files_init 
 #from XT_Projections import generate_projections
 from XT_MBIR_Reconstruction import do_MBIR_reconstruction
-#from XT_FBP_Reconstruction import do_FBP_reconstruction
+from XT_FBP_Reconstruction import do_FBP_reconstruction
 from XT_IOMisc import error_by_flag
 from XT_IOMisc import write_object2HDF
 from XT_ObjectHDFIO import writepar_object2HDF
@@ -45,12 +45,15 @@ def main():
 	
 	if (args.MBIR_ATT_SIM):
 		recon['modality'] = 'ATT'
+		recon['datatype'] = 'SIM'
 		proj, recon, files = attenuation_tomo_sim_init (proj, recon, files)
 	elif (args.MBIR_ATT_REAL):
 		recon['modality'] = 'ATT'
+		recon['datatype'] = 'REAL'
 		proj, recon, files = attenuation_tomo_real_init (proj, recon, files)
 	elif (args.MBIR_PHCON_REAL):
 		recon['modality'] = 'PHCON'
+		recon['datatype'] = 'REAL'
 		proj, recon, files = phase_contrast_tomo_real_init (proj, recon, files)
 
 	proj = proj_init(proj, files)
@@ -69,6 +72,7 @@ def main():
 		print 'main: Will do MBIR reconstruction'
 		do_MBIR_reconstruction(proj, recon, files)
 	elif (recon['recon_type'] == 'FBP'):
+		do_MBIR_reconstruction(proj, recon, files)
 		print 'main: Will do FBP reconstruction'
 		do_FBP_reconstruction(proj, recon, files)
 	else:

@@ -5,6 +5,7 @@ import numpy as np
 def attenuation_tomo_sim_init (proj, recon, files):
 	proj['Path2Phantom'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard.bin"
 	proj['Path2Mask'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin"
+	print proj['Path2Phantom']
 	proj['Expected_Counts'] = 29473 
 	proj['phantom_N_xy'] = 2048
 	# phantom_N_z is the resolution of phantom along z
@@ -27,7 +28,7 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	# N_p is just used for angle generation in python. Should be greater than proj_start + proj_num
 	proj['N_p'] = 256*4
 	proj['K'] = 1
-	proj['N_theta'] = 16
+	proj['N_theta'] = 256
 
 #	recon['sigma_s'] = [10**5, 2*(10**5), 4*(10**5), 8*(10**5)]
 #	recon['sigma_t'] = [10**4, 2*(10**4), 4*(10**4), 8*(10**4)]
@@ -57,7 +58,7 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['N_r'] = proj['phantom_N_xy']
 	proj['min_time_btw_views'] = 0
 	proj['rotation_speed'] = 100
-	recon['recon_type'] = 'MBIR'
+	recon['recon_type'] = 'FBP'
         recon['sinobin'] = 2
         recon['initMagUpMap'] = [0, 1, 1, 1]
         recon['only_Edge_Updates'] = [0, 0, 0, 0]

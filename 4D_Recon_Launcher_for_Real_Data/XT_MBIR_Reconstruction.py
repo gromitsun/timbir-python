@@ -132,14 +132,17 @@ def do_MBIR_reconstruction(proj, recon, files):
 					flag = system('cd ' + path2launch + ';' + command + ' --dont_reconstruct --readSino4mHDF')
 					error_by_flag(flag, 'ERROR: Was not able to run - ' + command + ' --dont_reconstruct --readSino4mHDF')
 				
-				if (recon['reconstruct'] == 0):
+				if (recon['recon_type'] == 'FBP'):
 					command = command + ' --dont_reconstruct'
 				print 'Will run reconstruction code for delta_xy = ' + str(recon['delta_xy'][multidx]) + ' and delta_z = ' + str(recon['delta_z'][multidx])
 				flag = system('cd ' + path2launch + ';' + command)
 				error_by_flag(flag, 'ERROR: Was not able to run - ' + command)
 
-				if (recon['reconstruct'] == 0):
+				if (recon['recon_type'] == 'FBP'):
 					break
+		
+		if (recon['recon_type'] == 'FBP'):
+			break
 				
 		#path2results = result_folder + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '_zinger_' + str(recon['ZingerT'][i]) + '_' + str(recon['ZingerDel'][i]) + '/'
 		#create_folder(path2results)	

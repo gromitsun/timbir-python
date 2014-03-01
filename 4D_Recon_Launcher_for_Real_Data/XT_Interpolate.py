@@ -33,10 +33,14 @@ def compute_RMSE_of_recon (proj, recon, files):
 		obj_times = np.linspace(start, stop, recon['Rtime_num'][i], endpoint=True)
 
 		#path2results = files['Results_Folder'] + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_L_' + str(proj['L']) + '_K_' + str(proj['K']) + '_N_p_' + str(proj['N_p']) + '/'
-		path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + '/'
-		path2results = files['Result_Folder'] + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '/'
-		create_folder(path2results)	
-	
+		if (recon['recon_type'] == 'MBIR'):
+			path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + '/'
+			path2results = files['Result_Folder'] + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '/'
+			create_folder(path2results)	
+		elif (recon['recon_type'] == 'FBP'):	
+			path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + '/'
+			path2results = files['Result_Folder'] + 'FBP' + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + '/'
+
 		node = recon['zSlice4RMSE']/(recon['N_z']/recon['node_num'])
 		slice = recon['zSlice4RMSE'] % (recon['N_z']/recon['node_num'])
 		print 'compute_RMSE_of_recon: RMSE will be computed from slice ' + str(slice) + ' from node ' + str(node)
@@ -135,6 +139,7 @@ def compute_RMSE_of_recon (proj, recon, files):
 		Data2Mat = {}	
 		Data2Mat['RMSE_EDGE'] = RMSE_EDGE[i]
 		Data2Mat['RMSE'] = RMSE_FULL[i]
+		Data2Mat['recon_type'] = recon['recon_type']
 		Data2Mat['Z_Slice'] = recon['zSlice4RMSE']
 		Data2Mat['K'] = proj['K']
 		Data2Mat['N_theta'] = proj['N_theta']
@@ -162,11 +167,11 @@ def create_param_sweep_file (Data2Mat,files):
 	if (os.path.isfile(path2results + 'Sweep.mat')):
 		sweep = sio.loadmat(path2results + 'Sweep.mat')
 		for i in range(len(sweep['K'])):
-			if (sweep['Z_Slice'][i] == Data2Mat['Z_Slice'] and sweep['K'][i] == Data2Mat['K'] and sweep['N_theta'][i] == Data2Mat['N_theta'] and sweep['r'][i] == Data2Mat['r'] and sweep['sigma_s'][i] == Data2Mat['sigma_s'] and sweep['sigma_t'][i] == Data2Mat['sigma_t'] and sweep['c_s'][i] == Data2Mat['c_s'] and sweep['c_t'][i] == Data2Mat['c_t'] and sweep['ZingerT'][i] == Data2Mat['ZingerT'] and sweep['ZingerDel'][i] == Data2Mat['ZingerDel'] and sweep['Proj0RMSE'][i] == Data2Mat['Proj0RMSE'] and sweep['ProjNumRMSE'][i] == Data2Mat['ProjNumRMSE'] and sweep['fineres_voxthresh'][i] == Data2Mat['fineres_voxthresh']):
+			if (sweep['recon_type'] == Data2Mat['recon_type'] and sweep['Z_Slice'][i] == Data2Mat['Z_Slice'] and sweep['K'][i] == Data2Mat['K'] and sweep['N_theta'][i] == Data2Mat['N_theta'] and sweep['r'][i] == Data2Mat['r'] and sweep['sigma_s'][i] == Data2Mat['sigma_s'] and sweep['sigma_t'][i] == Data2Mat['sigma_t'] and sweep['c_s'][i] == Data2Mat['c_s'] and sweep['c_t'][i] == Data2Mat['c_t'] and sweep['ZingerT'][i] == Data2Mat['ZingerT'] and sweep['ZingerDel'][i] == Data2Mat['ZingerDel'] and sweep['Proj0RMSE'][i] == Data2Mat['Proj0RMSE'] and sweep['ProjNumRMSE'][i] == Data2Mat['ProjNumRMSE'] and sweep['fineres_voxthresh'][i] == Data2Mat['fineres_voxthresh']):
 				copy_data2sweep(sweep,Data2Mat,i)
 		copy_data2sweep(sweep,Data2Mat,-1)
 	else:
-		sweep = {'RMSE_EDGE':[],'RMSE':[],'Z_Slice':[],'K':[],'N_theta':[],'r':[],'sigma_s':[],'sigma_t':[],'c_s':[],'c_t':[],'ZingerT':[],'ZingerDel':[],'Proj0RMSE':[],'ProjNumRMSE':[],'fineres_voxthresh':[]}
+		sweep = {'RMSE_EDGE':[],'RMSE':[],'recon_type':[],'Z_Slice':[],'K':[],'N_theta':[],'r':[],'sigma_s':[],'sigma_t':[],'c_s':[],'c_t':[],'ZingerT':[],'ZingerDel':[],'Proj0RMSE':[],'ProjNumRMSE':[],'fineres_voxthresh':[]}
 		copy_data2sweep(sweep,Data2Mat,-1)
 	sio.savemat(path2results + 'Sweep.mat', sweep)
 	
@@ -175,6 +180,7 @@ def copy_data2sweep (sweep, Data2Mat, add_or_rem):
 	if (add_or_rem == -1):	
 		sweep['RMSE_EDGE'].append(Data2Mat['RMSE_EDGE'])
 		sweep['RMSE'].append(Data2Mat['RMSE'])
+		sweep['recon_type'].append(Data2Mat['recon_type'])
 		sweep['Z_Slice'].append(Data2Mat['Z_Slice'])
 		sweep['K'].append(Data2Mat['K'])
 		sweep['N_theta'].append(Data2Mat['N_theta'])
@@ -191,6 +197,7 @@ def copy_data2sweep (sweep, Data2Mat, add_or_rem):
 	else:
 		sweep['RMSE_EDGE'].pop(add_or_rem)
 		sweep['RMSE'].pop(add_or_rem)
+		sweep['recon_type'].pop(add_or_rem)
 		sweep['Z_Slice'].pop(add_or_rem)
 		sweep['K'].pop(add_or_rem)
 		sweep['N_theta'].pop(add_or_rem)
