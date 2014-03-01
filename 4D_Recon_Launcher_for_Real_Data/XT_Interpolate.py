@@ -101,6 +101,7 @@ def compute_RMSE_of_recon (proj, recon, files):
 			rmse_edge = rmse_edge + np.sum((phantom[mask]-obj_temp[mask])*(phantom[mask]-obj_temp[mask]),dtype=np.float64)
 			rmse_full = rmse_full + np.sum((phantom-obj_temp)*(phantom-obj_temp),dtype=np.float64)
 			count_mask = count_mask + np.sum(mask.astype(np.float64),dtype=np.float64)
+			interped_object[index,:,:] = obj_temp - phantom
 			index = index + 1			
 
 		fid.close()
@@ -128,7 +129,7 @@ def compute_RMSE_of_recon (proj, recon, files):
 		text_file.write('Proj0RMSE = ' + str(recon['Proj0RMSE']) + '\n')
 		text_file.write('ProjNumRMSE = ' + str(recon['ProjNumRMSE']) + '\n')
 		text_file.close()
-		fid = open(path2results + 'Interped_ObjSlice.bin', 'wb')
+		fid = open(path2results + 'Diff_Obj_Phtm_Slice.bin', 'wb')
 		interped_object.tofile(fid)		
 		fid.close()	
 
