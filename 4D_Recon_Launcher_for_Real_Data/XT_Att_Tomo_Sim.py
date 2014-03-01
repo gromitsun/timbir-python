@@ -27,14 +27,25 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['proj_num'] = 256*4
 	# N_p is just used for angle generation in python. Should be greater than proj_start + proj_num
 	proj['N_p'] = 256*4
+	
 	proj['K'] = 1
 	proj['N_theta'] = 256
+	recon['Proj0RMSE'] = 256
+	recon['ProjNumRMSE'] = 256*2
 
-#	recon['sigma_s'] = [10**5, 2*(10**5), 4*(10**5), 8*(10**5)]
-#	recon['sigma_t'] = [10**4, 2*(10**4), 4*(10**4), 8*(10**4)]
-	recon['sigma_s'] = [5*(10**5), 10**6, 2*(10**6), 4*(10**6)]
-	recon['sigma_t'] = [10**4, 2*(10**4), 4*(10**4), 8*(10**4)]
-	recon['r'] = 1
+	# reg params for N_theta = 16, K = 1, r = 1
+	# recon['sigma_s'] = [2*(10**5), 4*(10**5), 8*(10**5), 16*(10**5)]
+	# recon['sigma_t'] = [5*(10**4), (10**5), 2*(10**5), 4*(10**5)]
+
+	# reg params for N_theta = 256, K = 1, r = 16
+	# recon['sigma_s'] = [10**5, 2*(10**5), 4*(10**5), 8*(10**5)]
+	# recon['sigma_t'] = [10**4, 2*(10**4), 4*(10**4), 8*(10**4)]
+	
+	# reg params for N_theta = 256, K = 16, r = 16
+	recon['sigma_s'] = [25*(10**4), 5*(10**5), (10**6), 2*(10**6)]
+	recon['sigma_t'] = [2*(10**4), 4*(10**4), 8*(10**4), 16*(10**4)]
+	
+	recon['r'] = 16
 	recon['c_s'] = 10**-6
 	recon['c_t'] = 10**-6
 	recon['ZingerT'] = 100000
@@ -52,8 +63,8 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	recon['do_VarEstimate'] = [0]*len(recon['voxel_thresh'])
 	recon['Estimate_of_Var'] = 1.0;	
 	
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Att_Sim/XT_Result_Repository/"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Att_Sim/XT_run/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Att_Recon_Sim_256/XT_Result_Repository/"
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Att_Recon_Sim_256/XT_run/"
 
 	proj['N_r'] = proj['phantom_N_xy']
 	proj['min_time_btw_views'] = 0
