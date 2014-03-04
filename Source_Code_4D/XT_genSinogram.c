@@ -104,7 +104,7 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
   	uint8_t AvgNumXElements, AvgNumZElements;
 	char projection_file[100] = PROJECTION_FILENAME;
 	char weight_file[100] = WEIGHT_MATRIX_FILENAME;
-	char phantom_file[100];
+	char phantom_file[1000];
 	char detect_file[] = "detector_forwardproj";
 	int dimTiff[4];
 
@@ -141,10 +141,10 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
     		VoxelLineResponse[t].index = (int32_t*)get_spc(AvgNumZElements, sizeof(int32_t));
 	}
 	storeVoxelLineResponse(H_t, VoxelLineResponse, &Phantom_ScanObj, &Phantom_Sino);
-	
+
 	sprintf(phantom_file, "%s", PATH_TO_PHANTOM);
 	fp = fopen (phantom_file, "rb");
- 	
+	
 	if (fp==NULL) {fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: genSinogramFromPhantom: error in reading file %s\n",phantom_file); exit (1);}		
 	size = (long int)Phantom_ScanObj.N_z*(long int)Phantom_ScanObj.N_y*(long int)Phantom_ScanObj.N_x;
 
