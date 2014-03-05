@@ -71,11 +71,11 @@ def main():
         parser.add_argument("--z_numElts", help="Number of detector pixels to use along z-direction",type=int)
         parser.add_argument("--p",help="qGGMRF prior model parameter use to control how smooth the edge smoothness",type=float,default=1.2)
         parser.add_argument("--final_res_multiple",help="Final desired resolution of the reconstruction as a multiple of the detector pixel size",type=int,default=1)
-	parser.add_argument("--smoothness",help="A scaling parameter use to control the balance between resolution and noise in the reconstruction. This value is multiplied by a predtermined internal value",type=float,default=1)
+	parser.add_argument("--smoothness",help="A scaling parameter use to control the balance between resolution and noise in the reconstruction. This value is multiplied by a predtermined internal value",type=float,default=0.50)
         parser.add_argument("--zinger_thresh",help="Controls the rejection thresold of bad measurements that cause zingers. In a future version this will have proper units. At present try values in the range 1-50 to correct for zingers",type=float,default=10000)
        
         #Advanced parameters which the user need not worry about but can manipulate if necessary
-        parser.add_argument("--stop_threshold",help="Stopping thresold as a percentage of average change in pixel values in percentage",type=float,default=1.0)       
+        parser.add_argument("--stop_threshold",help="Stopping thresold as a percentage of average change in pixel values in percentage",type=float,default=10)       
         parser.add_argument("--max_iter",help="Maximum number of ICD iterations for the algorithm",type=int,default=30)
         parser.add_argument("--Variance_Est",help="Enter the an estimate for the variance",type=float,default=10)
         parser.add_argument("--num_res",help="Number of resolutions to be used",type=int,default=4)
