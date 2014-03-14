@@ -2,9 +2,9 @@
 # FILENAME:  Single_Node_Job.sub
 
 #PBS -V
-#PBS -q standby
+#PBS -q bouman
 #PBS -l nodes=1:ppn=16
-#PBS -l walltime=04:00:00
+#PBS -l walltime=01:00:00
 
 # start top in batch mode, 30 sec interval between reports, in background
 

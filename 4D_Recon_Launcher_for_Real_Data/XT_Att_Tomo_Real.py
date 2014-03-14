@@ -3,7 +3,7 @@ import numpy as np
 
 
 def attenuation_tomo_real_init (proj, recon, files):
-	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
+	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
 	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
 	proj['voxel_size'] = 0.65
 	# recon_N_r is detector resolution along r-axis used in reconstruction. Subsampled from a resolution of N_r (actual detector resolution)
@@ -11,9 +11,9 @@ def attenuation_tomo_real_init (proj, recon, files):
 	# slice_t_start is first detector slice used in recon
 	proj['slice_t_start'] = 0
 	# N_t is number of detector slices used in recon
-	proj['N_t'] = 32*4
+	proj['N_t'] = 4*4
 	# Subsamples N_t to recon_N_t when doing reconstruction
-	proj['recon_N_t'] = 32
+	proj['recon_N_t'] = 4
 	# Same units as recon_N_r
 	proj['rotation_center_r'] = 264.75
 	proj['proj_start'] = 998
@@ -38,8 +38,8 @@ def attenuation_tomo_real_init (proj, recon, files):
 	recon['voxel_thresh'] = [0.5, 0.5, 0.5, 0.5]
         recon['cost_thresh'] = [10, 10, 10, 10]
         recon['delta_xy'] = [8, 4, 2, 1]
-        recon['delta_z'] = [8, 4, 2, 1]
-        recon['initICD'] = [0, 3, 3, 3]
+        recon['delta_z'] = [1, 1, 1, 1]
+        recon['initICD'] = [0, 2, 2, 2]
         recon['WritePerIter'] = [0, 0, 0, 1]
         recon['updateProjOffset'] = [0, 2, 3, 3]
 	recon['readSino4mHDF'] = [1, 0, 0, 0]	
@@ -47,8 +47,8 @@ def attenuation_tomo_real_init (proj, recon, files):
 	recon['do_VarEstimate'] = [1]*len(recon['voxel_thresh'])
 	recon['Estimate_of_Var'] = 0.124;	
 	
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_New_Sim_Data/XT_Result_Repository/"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_New_Sim_Data/XT_run/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_Att_Real/XT_Result_Repository/"
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_Att_Real/XT_run/"
 
 	recon['recon_type'] = 'MBIR'
         recon['sinobin'] = 1
