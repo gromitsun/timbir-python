@@ -4,7 +4,7 @@
 #PBS -V
 #PBS -q bouman
 #PBS -l nodes=1:ppn=16
-#PBS -l walltime=01:00:00
+#PBS -l walltime=24:00:00
 
 # start top in batch mode, 30 sec interval between reports, in background
 
@@ -20,9 +20,9 @@ export PARALLEL=1
 export OMP_NUM_THREADS=32
 #uniq < $PBS_NODEFILE > nodefile
 
-python XT_Main.py --setup_launch_folder --run_reconstruction --MBIR_ATT_SIM --num_MPI_process 1 --Purdue
+#python XT_Main.py --setup_launch_folder --run_reconstruction --MBIR_ATT_SIM --num_MPI_process 1 --Purdue
 #python XT_Main.py --MBIR_ATT_SIM --num_MPI_process 1 --Purdue
-#python XT_Main.py --setup_launch_folder --run_reconstruction --MBIR_ATT_REAL --num_MPI_process 1 --Purdue
+python XT_Main.py --setup_launch_folder --run_reconstruction --create_objectHDFtiff --MBIR_ATT_REAL --num_MPI_process 1 --Purdue
 #python XT_Main.py --run_reconstruction --node_num 1 --Purdue
 #python XT_Main.py --node_num 1 --create_objectHDFtiffonly --Purdue
 
