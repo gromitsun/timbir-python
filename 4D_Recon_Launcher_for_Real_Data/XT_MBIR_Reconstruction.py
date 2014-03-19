@@ -87,6 +87,8 @@ def do_MBIR_reconstruction(proj, recon, files):
 #            			flag = system(['cd ',path2launch,';g++ -Wall -ansi', macros, ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c allocate.c TiffUtilities.cpp randlib.c tiff.c XT_IOMisc.c -lm -L/usr/local/tiff/lib -I/usr/local/tiff/include -ltiff '],'-echo');
 				print 'cd ' + path2launch + ';' + recon['compile_command'] + macros + ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c XT_NHICD.c allocate.c randlib.c tiff.c XT_IOMisc.c XT_ImageProc.c XT_MPI.c XT_HDFIO.c XT_VoxUpdate.c XT_ForwardProject.c XT_Filter.c -lm '
 				flag = system('cd ' + path2launch + ';' + recon['compile_command'] + macros + ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c XT_NHICD.c allocate.c randlib.c tiff.c XT_IOMisc.c XT_ImageProc.c XT_MPI.c XT_HDFIO.c XT_VoxUpdate.c XT_ForwardProject.c XT_Filter.c -lm ')
+				#print 'cd ' + path2launch + ';' + recon['compile_command'] + macros + ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c XT_NHICD.c allocate.c randlib.c tiff.c XT_IOMisc.c XT_ImageProc.c XT_MPI.c XT_HDFIO.c -lm '
+				#flag = system('cd ' + path2launch + ';' + recon['compile_command'] + macros + ' -o XT_Engine XT_Engine.c XT_ICD_update.c XT_Init.c XT_genSinogram.c XT_AMatrix.c XT_Profile.c XT_NHICD.c allocate.c randlib.c tiff.c XT_IOMisc.c XT_ImageProc.c XT_MPI.c XT_HDFIO.c -lm ')
 				error_by_flag(flag, 'ERROR: Not able to compile')
 				print 'do_reconstruction: Compile successful!'			
 			if (recon['rank'] == 0):

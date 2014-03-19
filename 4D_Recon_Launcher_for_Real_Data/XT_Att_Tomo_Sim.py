@@ -6,9 +6,9 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['Path2Phantom'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard.bin"
 	proj['Path2Mask'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin"
 	proj['Expected_Counts'] = 29473 
-	proj['phantom_N_xy'] = 2048
+	proj['phantom_N_xy'] = 1024
 	# phantom_N_z is the resolution of phantom along z
-	proj['phantom_N_z'] = 4
+	proj['phantom_N_z'] = 32
 	proj['voxel_size'] = 0.65
 
 	# recon_N_r is detector resolution along r-axis used in reconstruction
@@ -17,9 +17,9 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['slice_t_start'] = 0
 	# N_t is number of phantom slices extracted for reconstruction
 	# Assumes same voxel size for phantom and detector (pixel size)
-	proj['N_t'] = 4
+	proj['N_t'] = 32
 	# Subsamples N_t to recon_N_t when doing reconstruction
-	proj['recon_N_t'] = 4
+	proj['recon_N_t'] = 32
 	# Same units as recon_N_r
 	proj['rotation_center_r'] = 132
 	proj['proj_start'] = 0
@@ -57,16 +57,15 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	recon['maxHU'] = 43000
 	recon['minHU'] = 5000
 	
-	recon['voxel_thresh'] = [0.1, 0.1]
-        recon['cost_thresh'] = [10, 10]
-        recon['delta_xy'] = [2, 1]
-        recon['delta_z'] = [1, 1]
-        recon['initICD'] = [0, 2]
-        recon['WritePerIter'] = [0, 1]
-        recon['updateProjOffset'] = [0, 2]
-        recon['iterations'] = [500, 400]
+	recon['voxel_thresh'] = [0.1, 0.1, 0.1, 0.1]
+        recon['cost_thresh'] = [10, 10, 10, 10]
+        recon['delta_xy'] = [8, 4, 2, 1]
+        recon['delta_z'] = [8, 4, 2, 1]
+        recon['initICD'] = [0, 3, 3, 3]
+        recon['WritePerIter'] = [0, 0, 0, 1]
+        recon['updateProjOffset'] = [0, 2, 3, 3]
+        recon['iterations'] = [500, 500, 500, 400]
 	recon['do_VarEstimate'] = [1]*len(recon['voxel_thresh'])
-	recon['do_VarEstimate'][0] = 0
 	recon['Estimate_of_Var'] = 1.0;	
 	
 	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Att_Recon_Sim_256/XT_Result_Repository/"
