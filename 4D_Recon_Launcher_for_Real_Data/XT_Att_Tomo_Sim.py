@@ -17,9 +17,9 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['slice_t_start'] = 0
 	# N_t is number of phantom slices extracted for reconstruction
 	# Assumes same voxel size for phantom and detector (pixel size)
-	proj['N_t'] = 4*4
+	proj['N_t'] = 32
 	# Subsamples N_t to recon_N_t when doing reconstruction
-	proj['recon_N_t'] = 4
+	proj['recon_N_t'] = 32
 	# Same units as recon_N_r
 	proj['rotation_center_r'] = 132
 	proj['proj_start'] = 0
@@ -50,7 +50,7 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	recon['sigma_t'] = [4*(10**4)]
 	
 	recon['r'] = 16
-	recon['c_s'] = 10**-8
+	recon['c_s'] = 10**-6
 	recon['c_t'] = 10**-6
 	recon['ZingerT'] = 4
 	recon['ZingerDel'] = 0.1
@@ -60,8 +60,8 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	recon['voxel_thresh'] = [0.1, 0.1, 0.1, 0.1]
         recon['cost_thresh'] = [10, 10, 10, 10]
         recon['delta_xy'] = [8, 4, 2, 1]
-        recon['delta_z'] = [1, 1, 1, 1]
-        recon['initICD'] = [0, 2, 2, 2]
+        recon['delta_z'] = [8, 4, 2, 1]
+        recon['initICD'] = [0, 3, 3, 3]
         recon['WritePerIter'] = [0, 0, 0, 1]
         recon['updateProjOffset'] = [0, 2, 3, 3]
         recon['iterations'] = [500, 500, 500, 400]
