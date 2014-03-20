@@ -50,7 +50,7 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	recon['sigma_t'] = [4*(10**4)]
 	
 	recon['r'] = 16
-	recon['c_s'] = 10**-8
+	recon['c_s'] = 10**-6
 	recon['c_t'] = 10**-6
 	recon['ZingerT'] = 4
 	recon['ZingerDel'] = 0.1
