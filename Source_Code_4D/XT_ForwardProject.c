@@ -5,17 +5,21 @@
 
 
 
-void forward_project_voxel_AMat1D (Real_t voxel_val, Real_t*** ErrorSino, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, int32_t sino_idx)
+void forward_project_voxel_AMat1D (Sinogram* SinogramPtr, Real_t voxel_val, Real_t*** ErrorSino, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, int32_t sino_idx, int32_t slice)
 {
-	int32_t m, idx, n;
+	int32_t m, idx, n, z_overlap_num;
 	Real_t val;
  
+	z_overlap_num = SinogramPtr->z_overlap_num;
 	for (m = 0; m < AMatrixPtr->count; m++)
 	{
 		idx = AMatrixPtr->index[m];
-		val = AMatrixPtr->values[m];
-		for (n = 0; n < VoxelLineResponse->count; n++){
-			ErrorSino[sino_idx][idx][VoxelLineResponse->index[n]] += voxel_val*val*VoxelLineResponse->values[n];
+		val = AMatrixPtr->values[m]*SinogramPtr->delta_r;
+		/*val = AMatrixPtr->values[m];
+		for (n = 0; n < VoxelLineResponse->count; n++){*/
+		for (n = 0; n < z_overlap_num; n++){
+			/*ErrorSino[sino_idx][idx][VoxelLineResponse->index[n]] += voxel_val*val*VoxelLineResponse->values[n];*/
+			ErrorSino[sino_idx][idx][slice*z_overlap_num + n] += voxel_val*val;
 		}
 	}
 }
@@ -42,11 +46,11 @@ void forward_project_voxel_AMat2D (Sinogram* SinogramPtr, Real_t voxel_val, Real
 }
 
 	
-void forward_project_voxel (Sinogram* SinogramPtr, Real_t voxel_val, Real_t*** ErrorSino, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, int32_t sino_idx)
+void forward_project_voxel (Sinogram* SinogramPtr, Real_t voxel_val, Real_t*** ErrorSino, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, int32_t sino_idx, int32_t slice)
 {
 #ifdef PHASE_CONTRAST_TOMOGRAPHY
 	forward_project_voxel_AMat2D (SinogramPtr, voxel_val, ErrorSino, AMatrixPtr, VoxelLineResponse, sino_idx);
 #else
-	forward_project_voxel_AMat1D (voxel_val, ErrorSino, AMatrixPtr, VoxelLineResponse, sino_idx);
+	forward_project_voxel_AMat1D (SinogramPtr, voxel_val, ErrorSino, AMatrixPtr, VoxelLineResponse, sino_idx, slice);
 #endif
 }

@@ -577,14 +577,15 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
 		ScannedObjectPtr->delta_xy = 1;
 		ScannedObjectPtr->delta_z = 1;
 		TomoInputsPtr->RotCenter /= ScannedObjectPtr->mult_xy;
+		SinogramPtr->z_overlap_num = 1;
 	}
 	else
 	{	
 		ScannedObjectPtr->delta_xy = ScannedObjectPtr->mult_xy;
 		ScannedObjectPtr->delta_z = ScannedObjectPtr->mult_z;
+		SinogramPtr->z_overlap_num = ScannedObjectPtr->mult_z;
 	}
   	
-
 	if(argc-optind>0){
 		fprintf(TomoInputsPtr->debug_file_ptr, "ERROR: argsParser: Argument list has an error\n");
 		/*exit(1);*/

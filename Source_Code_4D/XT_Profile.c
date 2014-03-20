@@ -272,6 +272,7 @@ void storeVoxelLineResponse(Real_t* H_t,  AMatrixCol* VoxelLineResponse, Scanned
       {
         VoxelLineResponse[i].values[VoxelLineResponse[i].count] = ProfileThickness;
         VoxelLineResponse[i].index[VoxelLineResponse[i].count++] = i_t;
+/*	printf ("i = %d, i_t = %d, value = %f\n", i, i_t, ProfileThickness);*/
       }
     }
   }

@@ -796,7 +796,7 @@ void initErrorSinogam (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, T
 	    				for (slice=0; slice<ScannedObjectPtr->N_z; slice++){
 /*		printf("count = %d, idx = %d, val = %f\n",  VoxelLineResponse[slice].count, VoxelLineResponse[slice].index[0], VoxelLineResponse[slice].values[0]);*/
 	    					pixel = ScannedObjectPtr->Object[i][slice+1][j][k]; /*slice+1 to account for extra z slices required for MPI*/	
-						forward_project_voxel (SinogramPtr, pixel, ErrorSino, &(AMatrixPtr[i]), &(VoxelLineResponse[slice]), sino_idx);
+						forward_project_voxel (SinogramPtr, pixel, ErrorSino, &(AMatrixPtr[i]), &(VoxelLineResponse[slice]), sino_idx, slice);
 	   				}	
 	   			}
 			}
@@ -1211,7 +1211,7 @@ int ICD_BackProject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
 	H_t = (Real_t *)get_spc(DETECTOR_RESPONSE_BINS + 1, sizeof(Real_t));
 	DetectorResponseProfile (H_r, H_t, SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
 		
-	VoxelLineResponse = (AMatrixCol*)get_spc(ScannedObjectPtr->N_z, sizeof(AMatrixCol));
+/*	VoxelLineResponse = (AMatrixCol*)get_spc(ScannedObjectPtr->N_z, sizeof(AMatrixCol));
 	AvgNumZElements = (uint8_t)((ScannedObjectPtr->delta_z/SinogramPtr->delta_t) + 2);
 	for (j = 0; j < ScannedObjectPtr->N_z; j++) 
 	{
@@ -1220,7 +1220,7 @@ int ICD_BackProject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
 		VoxelLineResponse[j].index = (int32_t*)get_spc(AvgNumZElements, sizeof(int32_t));
 	}
 
-	storeVoxelLineResponse(H_t, VoxelLineResponse, ScannedObjectPtr, SinogramPtr);
+	storeVoxelLineResponse(H_t, VoxelLineResponse, ScannedObjectPtr, SinogramPtr);*/
 
 	dimTiff[0] = 1; dimTiff[1] = 1; dimTiff[2] = SinogramPtr->N_p; dimTiff[3] = DETECTOR_RESPONSE_BINS+1;
 	if (TomoInputsPtr->Write2Tiff == 1)
@@ -1316,12 +1316,12 @@ int ICD_BackProject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
 	multifree(H_r,2);
 	free(H_t);
 
-	for (j = 0; j < ScannedObjectPtr->N_z; j++) 
+/*	for (j = 0; j < ScannedObjectPtr->N_z; j++) 
 	{
 		free(VoxelLineResponse[j].values);
 		free(VoxelLineResponse[j].index);
 	}
-	free(VoxelLineResponse);
+	free(VoxelLineResponse);*/
 
 	fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Finished running ICD_BackProject\n");
 	multifree(Mask,4);

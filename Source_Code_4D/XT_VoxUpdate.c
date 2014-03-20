@@ -10,11 +10,13 @@
 
 void compute_voxel_update_AMat1D (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, Real_t Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], Real_t Time_Nhood[NHOOD_TIME_MAXDIM-1], bool Spatial_BDFlag[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], bool Time_BDFlag[NHOOD_TIME_MAXDIM-1], int32_t i_new, int32_t slice, int32_t j_new, int32_t k_new)
 {
-  	int32_t p, q, r, sino_view;
+  	int32_t p, q, r, sino_view, z_overlap_num;
 	Real_t V,THETA1,THETA2,THETASelTemp;
 	Real_t UpdatedVoxelValue, ProjectionEntry;
   	int32_t i_r, i_t;
         V = ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new]; /*Store the present value of the voxel*/
+	z_overlap_num = SinogramPtr->z_overlap_num;
+
 	THETA1 = 0.0;
 	THETA2 = 0.0;
 	for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++){
@@ -22,20 +24,27 @@ void compute_voxel_update_AMat1D (Sinogram* SinogramPtr, ScannedObject* ScannedO
 	for (q = 0; q < AMatrixPtr[p].count; q++)
 	{
       	    	i_r = (AMatrixPtr[p].index[q]);
-       	    	ProjectionEntry = (AMatrixPtr[p].values[q]);
-		for (r = 0; r < VoxelLineResponse[slice].count; r++)
+       	    	ProjectionEntry = (AMatrixPtr[p].values[q]*SinogramPtr->delta_r);
+/*       	ProjectionEntry = (AMatrixPtr[p].values[q]);
+		for (r = 0; r < VoxelLineResponse[slice].count; r++)*/
+		for (r = 0; r < z_overlap_num; r++)
 		{ 
-			i_t = VoxelLineResponse[slice].index[r];
+			/*i_t = VoxelLineResponse[slice].index[r];*/
+			i_t = slice*z_overlap_num + r;
 			if (SinogramPtr->ProjSelect[sino_view][i_r][i_t] == true)
 			{
-	           		THETA2 += (VoxelLineResponse[slice].values[r]*VoxelLineResponse[slice].values[r]*ProjectionEntry*ProjectionEntry*TomoInputsPtr->Weight[sino_view][i_r][i_t]);
-               			THETA1 += -(ErrorSino[sino_view][i_r][i_t]*VoxelLineResponse[slice].values[r]*ProjectionEntry*TomoInputsPtr->Weight[sino_view][i_r][i_t]);
+	           		/*THETA2 += (VoxelLineResponse[slice].values[r]*VoxelLineResponse[slice].values[r]*ProjectionEntry*ProjectionEntry*TomoInputsPtr->Weight[sino_view][i_r][i_t]);
+               			THETA1 += -(ErrorSino[sino_view][i_r][i_t]*VoxelLineResponse[slice].values[r]*ProjectionEntry*TomoInputsPtr->Weight[sino_view][i_r][i_t]);*/
+	           		THETA2 += (ProjectionEntry*ProjectionEntry*TomoInputsPtr->Weight[sino_view][i_r][i_t]);
+               			THETA1 += -(ErrorSino[sino_view][i_r][i_t]*ProjectionEntry*TomoInputsPtr->Weight[sino_view][i_r][i_t]);
             		}
 			else
 			{
 				THETASelTemp = TomoInputsPtr->ErrorSinoThresh*TomoInputsPtr->ErrorSinoDelta*sqrt(TomoInputsPtr->Weight[sino_view][i_r][i_t])/fabs(ErrorSino[sino_view][i_r][i_t]);
-	            		THETA2 += (VoxelLineResponse[slice].values[r]*VoxelLineResponse[slice].values[r]*ProjectionEntry*ProjectionEntry*THETASelTemp);
-            			THETA1 += -(ErrorSino[sino_view][i_r][i_t]*VoxelLineResponse[slice].values[r]*ProjectionEntry*THETASelTemp);
+	            		/*THETA2 += (VoxelLineResponse[slice].values[r]*VoxelLineResponse[slice].values[r]*ProjectionEntry*ProjectionEntry*THETASelTemp);
+            			THETA1 += -(ErrorSino[sino_view][i_r][i_t]*VoxelLineResponse[slice].values[r]*ProjectionEntry*THETASelTemp);*/
+	            		THETA2 += (ProjectionEntry*ProjectionEntry*THETASelTemp);
+            			THETA1 += -(ErrorSino[sino_view][i_r][i_t]*ProjectionEntry*THETASelTemp);
 			}
             	}
 	}
@@ -55,11 +64,15 @@ void compute_voxel_update_AMat1D (Sinogram* SinogramPtr, ScannedObject* ScannedO
 		for (q = 0; q < AMatrixPtr[p].count; q++)
         	{
                	    	i_r = (AMatrixPtr[p].index[q]);
-        	    	ProjectionEntry = (AMatrixPtr[p].values[q]);
-			for (r = 0; r < VoxelLineResponse[slice].count; r++)
+        	    	ProjectionEntry = (AMatrixPtr[p].values[q]*SinogramPtr->delta_r);
+        	    	/*ProjectionEntry = (AMatrixPtr[p].values[q]);
+			for (r = 0; r < VoxelLineResponse[slice].count; r++)*/
+			for (r = 0; r < z_overlap_num; r++)
 			{ 
-				i_t = VoxelLineResponse[slice].index[r];
-	        		ErrorSino[sino_view][i_r][i_t] -= (ProjectionEntry*VoxelLineResponse[slice].values[r]*(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] - V));
+				/*i_t = VoxelLineResponse[slice].index[r];
+	        		ErrorSino[sino_view][i_r][i_t] -= (ProjectionEntry*VoxelLineResponse[slice].values[r]*(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] - V));*/
+				i_t = slice*z_overlap_num + r;
+	        		ErrorSino[sino_view][i_r][i_t] -= (ProjectionEntry*(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] - V));
 	   			if (fabs(ErrorSino[sino_view][i_r][i_t]*sqrt(TomoInputsPtr->Weight[sino_view][i_r][i_t])) < TomoInputsPtr->ErrorSinoThresh)
 					SinogramPtr->ProjSelect[sino_view][i_r][i_t] = true;
 				else

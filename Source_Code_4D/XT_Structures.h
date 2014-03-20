@@ -82,6 +82,8 @@ typedef double Real_t;
 
     int32_t slice_begin; /*Starting index of detector slices (along t-axis)*/
     int32_t slice_num; /*Total number of detector slices starting from 'slice_begin'*/
+
+    int32_t z_overlap_num;
     Real_t Lap_Kernel[3][3];
   } Sinogram;
 
