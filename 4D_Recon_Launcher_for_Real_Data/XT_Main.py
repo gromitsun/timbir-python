@@ -52,7 +52,8 @@ def main():
 		recon['datatype'] = 'REAL'
 		proj, recon, files = attenuation_tomo_real_init (proj, recon, files)
 	elif (args.MBIR_PHCON_REAL):
-		recon['modality'] = 'PHCON'
+		#recon['modality'] = 'PHCON'
+		recon['modality'] = 'ATT'
 		recon['datatype'] = 'REAL'
 		proj, recon, files = phase_contrast_tomo_real_init (proj, recon, files)
 
