@@ -2,8 +2,8 @@
 import numpy as np
 
 def phase_contrast_tomo_real_init (proj, recon, files):
-	proj['Path2Dataset'] = files['data_scratch'] + "/Sim_Datasets/SLS_Dataset.h5"
-	proj['Path2WhiteDark'] = files['data_scratch'] + "/Sim_Datasets/SLS_Dataset.h5"
+	proj['Path2Dataset'] = files['data_scratch'] + "/SLS_Datasets/SLS_Dataset.h5"
+	proj['Path2WhiteDark'] = files['data_scratch'] + "/SLS_Datasets/SLS_Dataset.h5"
 	proj['voxel_size'] = 0.74
 
 	# recon_N_r is detector resolution along r-axis used in reconstruction
@@ -25,8 +25,8 @@ def phase_contrast_tomo_real_init (proj, recon, files):
 	proj['K'] = 1
 	proj['N_theta'] = 1000
 
-	recon['sigma_s'] = [45*(10**5)]
-	recon['sigma_t'] = [45*(10**4)]
+	recon['sigma_s'] = [150*(10**5)]
+	recon['sigma_t'] = [2*(10**4)]
 	recon['r'] = 1
 	recon['c_s'] = 10**-6
 	recon['c_t'] = 10**-6
@@ -45,8 +45,8 @@ def phase_contrast_tomo_real_init (proj, recon, files):
 	recon['do_VarEstimate'] = [0]*len(recon['voxel_thresh'])
 	recon['Estimate_of_Var'] = 1;	
 	
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Att_Sim/XT_Result_Repository/"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Att_Sim/XT_run/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/PhCon_Real/XT_Result_Repository/"
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/PhCon_Real/XT_run/"
 
 	proj['Path2Phantom'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard.bin"
 	proj['Expected_Counts'] = 29473 
