@@ -7,17 +7,17 @@ def phase_contrast_tomo_real_init (proj, recon, files):
 	proj['voxel_size'] = 0.74
 
 	# recon_N_r is detector resolution along r-axis used in reconstruction
-	proj['recon_N_r'] = 2560
+	proj['recon_N_r'] = 2560/2
 	proj['N_r'] = 2560
 	# slice_t_start is first slice in phantom where recon starts
 	proj['slice_t_start'] = 0
 	# N_t is number of phantom slices extracted for reconstruction
 	# Assumes same voxel size for phantom and detector (pixel size)
-	proj['N_t'] = 4
+	proj['N_t'] = 4*2
 	# Subsamples N_t to recon_N_t when doing reconstruction
 	proj['recon_N_t'] = 4
 	# Same units as recon_N_r
-	proj['rotation_center_r'] = 1272
+	proj['rotation_center_r'] = (1272)/2
 	proj['proj_start'] = 0
 	proj['proj_num'] = 1000
 	# N_p is just used for angle generation in python. Should be greater than proj_start + proj_num
@@ -25,16 +25,16 @@ def phase_contrast_tomo_real_init (proj, recon, files):
 	proj['K'] = 1
 	proj['N_theta'] = 1000
 
-	recon['sigma_s'] = [10**5]
-	recon['sigma_t'] = [10**4]
+	recon['sigma_s'] = [(10**5)]
+	recon['sigma_t'] = [10**5]
 	recon['r'] = 1
-	recon['c_s'] = 10**-6
-	recon['c_t'] = 10**-6
+	recon['c_s'] = 10**-8
+	recon['c_t'] = 10**-8
 	recon['ZingerT'] = 100000
 	recon['ZingerDel'] = 0.1
 	recon['maxHU'] = 43000
 	recon['minHU'] = 5000
-	recon['voxel_thresh'] = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+	recon['voxel_thresh'] = [2, 2, 2, 2, 2, 2]
         recon['cost_thresh'] = [10, 10, 10, 10, 10, 10]
         recon['delta_xy'] = [32, 16, 8, 4, 2, 1]
         recon['delta_z'] = [1, 1, 1, 1, 1, 1]

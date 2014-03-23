@@ -25,14 +25,16 @@ void forward_project_voxel_AMat1D (Sinogram* SinogramPtr, Real_t voxel_val, Real
 }
 
 	
-void forward_project_voxel_AMat2D (Sinogram* SinogramPtr, Real_t voxel_val, Real_t*** ErrorSino, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, int32_t sino_idx)
+void forward_project_voxel_AMat2D (Sinogram* SinogramPtr, Real_t voxel_val, Real_t*** ErrorSino, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, int32_t sino_idx, int32_t slice)
 {
 	int32_t m, n;
 	int32_t r_ax_start, r_ax_num, t_ax_start, t_ax_num;
-	Real_t **AMatrix2D, **AMatrixTemp;	
+	Real_t **AMatrix2D, *AMatrix2DLine;	
 
-	compute_2DAMatrix_4m_1D(&(AMatrixTemp), AMatrixPtr, VoxelLineResponse, &r_ax_start, &r_ax_num, &t_ax_start, &t_ax_num);
-	compute_LapMatrix_4m_AMatrix(SinogramPtr, &(AMatrix2D), &(AMatrixTemp), &(r_ax_start), &(r_ax_num), &(t_ax_start), &(t_ax_num));
+	t_ax_start = slice*SinogramPtr->z_overlap_num;
+	t_ax_num = SinogramPtr->z_overlap_num;
+	compute_2DAMatrixLine(SinogramPtr, &(AMatrix2DLine), AMatrixPtr, &r_ax_start, &r_ax_num);
+	compute_LapMatrix_4m_AMatrix(SinogramPtr, &(AMatrix2D), &(AMatrix2DLine), &(r_ax_start), &(r_ax_num), &(t_ax_start), &(t_ax_num));
  
 	for (m = 0; m < r_ax_num; m++)
 	{
@@ -49,7 +51,7 @@ void forward_project_voxel_AMat2D (Sinogram* SinogramPtr, Real_t voxel_val, Real
 void forward_project_voxel (Sinogram* SinogramPtr, Real_t voxel_val, Real_t*** ErrorSino, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, int32_t sino_idx, int32_t slice)
 {
 #ifdef PHASE_CONTRAST_TOMOGRAPHY
-	forward_project_voxel_AMat2D (SinogramPtr, voxel_val, ErrorSino, AMatrixPtr, VoxelLineResponse, sino_idx);
+	forward_project_voxel_AMat2D (SinogramPtr, voxel_val, ErrorSino, AMatrixPtr, VoxelLineResponse, sino_idx, slice);
 #else
 	forward_project_voxel_AMat1D (SinogramPtr, voxel_val, ErrorSino, AMatrixPtr, VoxelLineResponse, sino_idx, slice);
 #endif

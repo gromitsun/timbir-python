@@ -87,7 +87,7 @@ void compute_voxel_update_AMat1D (Sinogram* SinogramPtr, ScannedObject* ScannedO
 void compute_voxel_update_AMat2D (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, Real_t Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], Real_t Time_Nhood[NHOOD_TIME_MAXDIM-1], bool Spatial_BDFlag[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], bool Time_BDFlag[NHOOD_TIME_MAXDIM-1], int32_t i_new, int32_t slice, int32_t j_new, int32_t k_new)
 {
   	int32_t p, q, r, sino_view;
-	Real_t V,THETA1,THETA2,THETASelTemp,***AMatrix2D, **AMatrixTemp;
+	Real_t V,THETA1,THETA2,THETASelTemp,***AMatrix2D, *AMatrix2DLine;
 	Real_t UpdatedVoxelValue, ProjectionEntry;
   	int32_t i_r, i_t;
 	int32_t *r_ax_start, *r_ax_num, *t_ax_start, *t_ax_num;
@@ -104,8 +104,11 @@ void compute_voxel_update_AMat2D (Sinogram* SinogramPtr, ScannedObject* ScannedO
 	for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++){
 		sino_view = ScannedObjectPtr->ProjIdxPtr[i_new][p];
 	/*	printf("Start 2D AMatrix computation, p = %d, i_new = %d, j_new = %d, k_new = %d\n", p, i_new, j_new, k_new);*/
-		compute_2DAMatrix_4m_1D(&(AMatrixTemp), &(AMatrixPtr[p]), &(VoxelLineResponse[slice]), &(r_ax_start[p]), &(r_ax_num[p]), &(t_ax_start[p]), &(t_ax_num[p]));
-		compute_LapMatrix_4m_AMatrix(SinogramPtr, &(AMatrix2D[p]), &(AMatrixTemp), &(r_ax_start[p]), &(r_ax_num[p]), &(t_ax_start[p]), &(t_ax_num[p]));
+		t_ax_start[p] = slice*SinogramPtr->z_overlap_num;
+		t_ax_num[p] = SinogramPtr->z_overlap_num;
+
+		compute_2DAMatrixLine(SinogramPtr, &(AMatrix2DLine), &(AMatrixPtr[p]), &(r_ax_start[p]), &(r_ax_num[p]));
+		compute_LapMatrix_4m_AMatrix(SinogramPtr, &(AMatrix2D[p]), &(AMatrix2DLine), &(r_ax_start[p]), &(r_ax_num[p]), &(t_ax_start[p]), &(t_ax_num[p]));
 	/*	printf("End 2D AMatrix computation\n");*/
 		for (q = 0; q < r_ax_num[p]; q++)
 		{
