@@ -42,15 +42,15 @@ def attenuation_tomo_real_init (proj, recon, files):
 	# 1 - initialize at same resolution as previous stage in multiresolution
 	# 2 - initialize by upsampling by a factor of 2 in x-y plane (2D multiresolution)
 	# 3 - initialize by upsampling by a factor of 2 in x-y-z (3D multiresolution)
-        recon['WritePerIter'] = [0].len(recon['delta_xy']) #1 - write tiff and binary files of object every iteratio. 0 - Don't write
+        recon['WritePerIter'] = [0]*len(recon['delta_xy']) #1 - write tiff and binary files of object every iteratio. 0 - Don't write
 	recon['WritePerIter'][-1] = 1
         recon['updateProjOffset'] = [0, 2, 3, 3] 
 	# 0 - Don't update the additive projection offset error term, d.
 	# 1 - Initialize d from binary file but don't update
 	# 2 - Update d after initializing it with 0
 	# 3 - Update d after initializing it from binary file
-	recon['readSino4mHDF'] = [0].len(recon['delta_xy']) # 1 - read projection data from HDF file in C. 0 - read from python if required
-        recon['iterations'] = [500].len(recon['delta_xy']) #number of iterations
+	recon['readSino4mHDF'] = [0]*len(recon['delta_xy']) # 1 - read projection data from HDF file in C. 0 - read from python if required
+        recon['iterations'] = [500]*len(recon['delta_xy']) #number of iterations
 	recon['do_VarEstimate'] = [1]*len(recon['delta_xy']) #1 - estimate variance term parameter
 	recon['Estimate_of_Var'] = 1; #initial estimate for variance parameter
 	
@@ -59,10 +59,10 @@ def attenuation_tomo_real_init (proj, recon, files):
 
 	recon['recon_type'] = 'MBIR' #MBIR - Does MBIR reconstruction. FBP - Does FBP reconstruction
         recon['sinobin'] = 1 #1 - read projection data from binary file (use this in this configuration. don't change.)
-        recon['initMagUpMap'] = [1].len(recon['delta_xy']) 
+        recon['initMagUpMap'] = [1]*len(recon['delta_xy']) 
 	recon['initMagUpMap'][0] = 0 #1 - initialize magnitude update map from binary file. 0 - Don't initialize.
-        recon['only_Edge_Updates'] = [0].len(recon['delta_xy']) # Keep all at 0
-        recon['writeTiff'] = [1].len(recon['delta_xy']) #1 - write reconstructed object to tiff files. 0 - Don't write.
+        recon['only_Edge_Updates'] = [0]*len(recon['delta_xy']) # Keep all at 0
+        recon['writeTiff'] = [1]*len(recon['delta_xy']) #1 - write reconstructed object to tiff files. 0 - Don't write.
 	recon['BH_Quad_Coef'] = 0.5; #0.5 is the quadratic term coefficient used in the beam hardening correction
 
 	# The variables below will be ignored by C-code in this mode
