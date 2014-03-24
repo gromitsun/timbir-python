@@ -176,8 +176,8 @@ def recon_init (proj, recon):
 	copy_projections - If '1', copies projection.bin and weight.bin from source code folder. If '0' reads the projection data from HDF files, as is described in XT_Projections.py"""
 
 def files_init (files):
-	files['C_Source_Folder'] = "../Source_Code_4D/"
-	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
+	files['C_Source_Folder'] = "../Source_Code_4D_Wang/"
+	files['Proj_Offset_File'] = "../Source_Code_4D_Wang/proj_offset.bin"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 

@@ -42,7 +42,8 @@ def attenuation_tomo_real_init (proj, recon, files):
 	# 1 - initialize at same resolution as previous stage in multiresolution
 	# 2 - initialize by upsampling by a factor of 2 in x-y plane (2D multiresolution)
 	# 3 - initialize by upsampling by a factor of 2 in x-y-z (3D multiresolution)
-        recon['WritePerIter'] = [0, 0, 0, 1] #1 - write tiff and binary files of object every iteratio. 0 - Don't write
+        recon['WritePerIter'] = [0].len(recon['delta_xy']) #1 - write tiff and binary files of object every iteratio. 0 - Don't write
+	recon['WritePerIter'][-1] = 1
         recon['updateProjOffset'] = [0, 2, 3, 3] 
 	# 0 - Don't update the additive projection offset error term, d.
 	# 1 - Initialize d from binary file but don't update
