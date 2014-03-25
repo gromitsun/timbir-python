@@ -218,16 +218,21 @@ void write_ObjectProjOff2TiffBinPerIter (Sinogram* SinogramPtr, ScannedObject* S
 {
 	int32_t i, dim[4];
 	char object_file[100];
+	char scaled_object_file[100];
 	char projOffset_file[100] = PROJ_OFFSET_FILENAME;
 
 	sprintf(projOffset_file, "%s_n%d", projOffset_file, TomoInputsPtr->node_rank);
 	for (i = 0; i < ScannedObjectPtr->N_time; i++)
 	{
 		sprintf (object_file, "%s_n%d_time_%d", OBJECT_FILENAME, TomoInputsPtr->node_rank, i);
+		sprintf (scaled_object_file, "scaled_%s_n%d_time_%d", OBJECT_FILENAME, TomoInputsPtr->node_rank, i);
 		Write2Bin (object_file, 1, ScannedObjectPtr->N_z, ScannedObjectPtr->N_y, ScannedObjectPtr->N_x, &(ScannedObjectPtr->Object[i][1][0][0]), TomoInputsPtr->debug_file_ptr);
 		dim[0] = 1; dim[1] = ScannedObjectPtr->N_z; dim[2] = ScannedObjectPtr->N_y; dim[3] = ScannedObjectPtr->N_x;
 		if (TomoInputsPtr->Write2Tiff == 1)
+		{	
 			WriteMultiDimArray2Tiff (object_file, dim, 0, 1, 2, 3, &(ScannedObjectPtr->Object[i][1][0][0]), 0, TomoInputsPtr->debug_file_ptr);
+			WriteMultiDimArray2Tiff (scaled_object_file, dim, 0, 1, 2, 3, &(ScannedObjectPtr->Object[i][1][0][0]), 1, TomoInputsPtr->debug_file_ptr);
+		}
 			/*Changed above line so that output image is scaled from min to max*/
 	}
 	dim[0] = 1; dim[1] = 1; dim[2] = SinogramPtr->N_r; dim[3] = SinogramPtr->N_t;
