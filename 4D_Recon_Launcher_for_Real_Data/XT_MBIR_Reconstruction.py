@@ -21,7 +21,7 @@ def do_MBIR_reconstruction(proj, recon, files):
 ###############################################################################
 
 	for i in range(len(recon['sigma_s'])):
-		path2launch = launch_folder + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + '/'
+		path2launch = launch_folder + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
 		if (recon['set_up_launch_folder'] == 1):
 			if (recon['rank'] == 0):
 				print 'Setting up run folder by node with rank ', recon['rank']
