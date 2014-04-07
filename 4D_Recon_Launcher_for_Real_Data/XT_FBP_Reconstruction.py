@@ -16,13 +16,13 @@ def do_FBP_reconstruction (proj, recon, files):
 ################################################################################
 
 	for k in range(len(recon['Rtime_num'])):		
-		path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][k]) + '_sigt_' + str(recon['sigma_t'][k]) + '_r_' + str(recon['r'][k]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + '/'
+		path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][k]) + '_sigt_' + str(recon['sigma_t'][k]) + '_r_' + str(recon['r'][k]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
 		projections = np.zeros((proj['recon_N_p'], proj['recon_N_r'], proj['recon_N_t']), dtype = np.float64, order = 'C')
 		ratio = proj['recon_N_t']/recon['node_num']
 		for rank in range(recon['node_num']):
 			projections[:,:,rank*ratio:(rank+1)*ratio] = np.fromfile(path2launch + 'projection_n' + str(rank) + '.bin', dtype=np.float64, count=-1).reshape((proj['recon_N_p'],proj['recon_N_r'],ratio),order='C') 	
 		centered_projections = gen_centered_projections(projections,floor(proj['rotation_center_r']))
-		path2results = result_folder + 'FBP_' + 'r_' + str(recon['r'][k]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '/'
+		path2results = result_folder + 'FBP_' + 'r_' + str(recon['r'][k]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
 		create_folder(path2results)
 		
 		for i in range(int(recon['Rtime_num'][k])):
