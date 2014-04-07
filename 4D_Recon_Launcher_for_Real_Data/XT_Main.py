@@ -84,7 +84,8 @@ def main():
 			
 	if (args.create_objectHDFtiff):
 		if (recon['HPC'] == 'Purdue'):
-			recon['size'] = MPI.COMM_WORLD.size
+			#recon['size'] = MPI.COMM_WORLD.size
+			recon['size'] = 1
 			writepar_object2HDF (proj, recon, files)
 			writepar_tiff_from_object_bin_file (proj, recon, files)
 		else:

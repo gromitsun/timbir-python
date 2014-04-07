@@ -5,10 +5,10 @@ def attenuation_tomo_real_init (proj, recon, files):
 	#Dataset paths (Typically, stored in scratch pointed to by the environment variable $RCAC_SCRATCH)
 	#Path2Dataset - File path to the HDF file containing the dataset
 	#Path2WhiteDark - File path to the HDF file containing the white and dark images
-#	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
-#	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
-	proj['Path2Dataset'] = "../../Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31_new.hdf"
-	proj['Path2WhiteDark'] = "../../Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31_new.hdf"
+	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
+	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
+#	proj['Path2Dataset'] = "../../Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31_new.hdf"
+#	proj['Path2WhiteDark'] = "../../Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31_new.hdf"
 	#voxel_size is the side length of each voxel (in micrometer(um))
 	proj['voxel_size'] = 0.65
 	proj['recon_N_r'] = 512 # recon_N_r is detector resolution along r-axis used in reconstruction. Subsampled from the actual detector resolution of N_r)
@@ -26,7 +26,7 @@ def attenuation_tomo_real_init (proj, recon, files):
 	proj['min_time_btw_views'] = 0.014039 #a view will be deleted if the time between two consecutive views is less than min_time_btw_views
 	proj['rotation_speed'] = 100 #rotation speed in degrees per second
 
-	recon['sigma_s'] = [150*(10**5)] #spatial regularization. lesser the value smoother the reconstruction
+	recon['sigma_s'] = [151*(10**5)] #spatial regularization. lesser the value smoother the reconstruction
 	recon['sigma_t'] = [2*(10**4)] #temporal regularization. lesser the value smoother the reconstruction
 	recon['r'] = 16 #Number of reconstruction per frame
 	recon['c_s'] = 10**-6 #parameter of spatial qGGMRF prior controlling the tradeoff between gaussian and generalized gaussian models
@@ -56,8 +56,10 @@ def attenuation_tomo_real_init (proj, recon, files):
 	recon['do_VarEstimate'] = [1]*len(recon['delta_xy']) #1 - estimate variance term parameter
 	recon['Estimate_of_Var'] = 1; #initial estimate for variance parameter
 	
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Al-Cu-Dendrite/XT_Result_Repository/" #results will be stored here
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Al-Cu-Dendrite/XT_run/" #location where reconstruction will be run
+#	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Al-Cu-Dendrite/XT_Result_Repository/" #results will be stored here
+#	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Al-Cu-Dendrite/XT_run/" #location where reconstruction will be run
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Recon_Att_Real_New/XT_Result_Repository/" #results will be stored here
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Recon_Att_Real_New/XT_run/" #location where reconstruction will be run
 
 	recon['recon_type'] = 'MBIR' #MBIR - Does MBIR reconstruction. FBP - Does FBP reconstruction
         recon['sinobin'] = 1 #1 - read projection data from binary file (use this in this configuration. don't change.)

@@ -20,7 +20,7 @@ def CompSys_Init(args, recon, files):
 			recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) + ' -machinefile nodefile '
 		else:
 			recon['run_command'] = 'mpiexec -n ' + str(recon['node_num'])
-		recon['compile_command'] = 'mpicc -ansi -Wall -openmp -lhdf5 '
+		recon['compile_command'] = 'mpicc -ansi -Wall -openmp -O3 -lhdf5 '
 		recon['HPC'] = 'Purdue' 
 		#recon['rank'] = MPI.COMM_WORLD.rank
 		recon['rank'] = 0
