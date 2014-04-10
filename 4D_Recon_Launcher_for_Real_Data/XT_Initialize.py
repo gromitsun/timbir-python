@@ -147,7 +147,7 @@ def recon_init (proj, recon):
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	recon['zSlice4RMSE'] = recon['N_z']/2
 	
-	recon['calculate_cost'] = 0
+	recon['calculate_cost'] = 1
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1
 
@@ -176,8 +176,8 @@ def recon_init (proj, recon):
 	copy_projections - If '1', copies projection.bin and weight.bin from source code folder. If '0' reads the projection data from HDF files, as is described in XT_Projections.py"""
 
 def files_init (files):
-	files['C_Source_Folder'] = "../Source_Code_4D_Wang/"
-	files['Proj_Offset_File'] = "../Source_Code_4D_Wang/proj_offset.bin"
+	files['C_Source_Folder'] = "../Source_Code_4D/"
+	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 

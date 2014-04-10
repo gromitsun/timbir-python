@@ -5,10 +5,12 @@ import numpy as np
 def attenuation_tomo_sim_init (proj, recon, files):
 	proj['Path2Phantom'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard.bin"
 	proj['Path2Mask'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin"
+        recon['msg_string'] = ""
+
 	proj['Expected_Counts'] = 29473 
 	proj['phantom_N_xy'] = 1024
 	# phantom_N_z is the resolution of phantom along z
-	proj['phantom_N_z'] = 32
+	proj['phantom_N_z'] = 4
 	proj['voxel_size'] = 0.65
 
 	# recon_N_r is detector resolution along r-axis used in reconstruction
@@ -17,9 +19,9 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['slice_t_start'] = 0
 	# N_t is number of phantom slices extracted for reconstruction
 	# Assumes same voxel size for phantom and detector (pixel size)
-	proj['N_t'] = 32
+	proj['N_t'] = 4
 	# Subsamples N_t to recon_N_t when doing reconstruction
-	proj['recon_N_t'] = 32
+	proj['recon_N_t'] = 4
 	# Same units as recon_N_r
 	proj['rotation_center_r'] = 132
 	proj['proj_start'] = 0
@@ -44,32 +46,32 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	
 	# reg params for N_theta = 256, K = 16, r = 16
 	# Minimum for 10**6 & 4*(10**4)
-	# recon['sigma_s'] = [25*(10**4), 5*(10**5), (10**6), 2*(10**6)]
-	# recon['sigma_t'] = [2*(10**4), 4*(10**4), 8*(10**4), 16*(10**4)]
-	recon['sigma_s'] = [(10**6)]
+	#recon['sigma_s'] = [25*(10**4), 5*(10**5), (10**6), 2*(10**6)]
+	#recon['sigma_t'] = [2*(10**4), 4*(10**4), 8*(10**4), 16*(10**4)]
+	recon['sigma_s'] = [10*(10**5)]
 	recon['sigma_t'] = [4*(10**4)]
 	
 	recon['r'] = 16
 	recon['c_s'] = 10**-6
 	recon['c_t'] = 10**-6
-	recon['ZingerT'] = 4
+	recon['ZingerT'] = 10000
 	recon['ZingerDel'] = 0.1
 	recon['maxHU'] = 43000
 	recon['minHU'] = 5000
 	
-	recon['voxel_thresh'] = [0.1, 0.1, 0.1, 0.1]
+	recon['voxel_thresh'] = [1, 1, 1, 1]
         recon['cost_thresh'] = [10, 10, 10, 10]
         recon['delta_xy'] = [8, 4, 2, 1]
-        recon['delta_z'] = [8, 4, 2, 1]
-        recon['initICD'] = [0, 3, 3, 3]
+        recon['delta_z'] = [1, 1, 1, 1]
+        recon['initICD'] = [0, 2, 2, 2]
         recon['WritePerIter'] = [0, 0, 0, 1]
         recon['updateProjOffset'] = [0, 2, 3, 3]
         recon['iterations'] = [500, 500, 500, 400]
-	recon['do_VarEstimate'] = [1]*len(recon['voxel_thresh'])
+	recon['do_VarEstimate'] = [0]*len(recon['voxel_thresh'])
 	recon['Estimate_of_Var'] = 1.0;	
 	
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Att_Recon_Sim_256/XT_Result_Repository/"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Att_Recon_Sim_256/XT_run/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Att_Recon_Float_Debug/XT_Result_Repository/"
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Att_Recon_Float_Debug/XT_run/"
 
 	proj['N_r'] = proj['phantom_N_xy']
 	proj['min_time_btw_views'] = 0

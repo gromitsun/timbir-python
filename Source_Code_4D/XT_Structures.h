@@ -56,7 +56,6 @@
    V
    Z
    */
-typedef double Real_t;
 
 /*Structure 'Sinogram' contains the sinogram itself and also other parameters related to the sinogram and the detector*/
   typedef struct
@@ -119,7 +118,7 @@ typedef double Real_t;
     int32_t **ProjIdxPtr; /*Dictates the mapping of projection views to time slices*/
     int32_t *ProjNum; /*Number of projections assigned to each time slices*/
 
-   Real_t gamma; /*percentage of voxel lines selected in NHICD*/
+   int32_t NHICD_Iterations; /*percentage of voxel lines selected in NHICD*/
    Real_t Rtime0; /*start time of first time slices in reconstruction*/
    Real_t delta_Rtime; /*Time gap between time slices in reconstruction*/
   } ScannedObject;

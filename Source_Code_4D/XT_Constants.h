@@ -37,7 +37,15 @@
 #define XT_CONSTANTS_H
 
 /*#define NO_COST_CALCULATE*/
-/*#define DEBUG_EN*/
+/*#define DEBUG_HIGH*/
+#ifdef DEBUG_HIGH
+	#define DEBUG_LOW
+#endif
+
+typedef float Real_t;
+#define MPI_TEMP_DATATYPE MPI_FLOAT
+#define MPI_OBJECT_DATATYPE MPI_FLOAT
+
 #define ZERO_SKIPPING
 #define INIT_SPARSE_ANGLES_FROM_FILE
 
