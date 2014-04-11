@@ -327,8 +327,8 @@ Real_t computeCost(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoI
       }
 
  /*Use MPI reduction operation to add the forward and prior costs from all nodes*/
- MPI_Reduce(&cost, &forward, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
- MPI_Reduce(&temp, &prior, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+ MPI_Reduce(&cost, &forward, 1, MPI_TEMP_DATATYPE, MPI_SUM, 0, MPI_COMM_WORLD);
+ MPI_Reduce(&temp, &prior, 1, MPI_TEMP_DATATYPE, MPI_SUM, 0, MPI_COMM_WORLD);
 
  if (TomoInputsPtr->node_rank == 0)
  {
@@ -345,7 +345,7 @@ Real_t computeCost(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoI
  }
  
 /*Broadcase the value of cost to all nodes*/
- MPI_Bcast(&cost, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+ MPI_Bcast(&cost, 1, MPI_TEMP_DATATYPE, 0, MPI_COMM_WORLD);
 
   return cost;
 }
@@ -381,6 +381,7 @@ Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, 
     bool Time_BDFlag[NHOOD_TIME_MAXDIM-1];
 
   int32_t maxview = find_max(ScannedObjectPtr->ProjNum, ScannedObjectPtr->N_time);
+   /*printf ("maxview = %d, size of AMatrixCol = %d\n",maxview,sizeof(AMatrixCol));*/
   AMatrixCol* AMatrixPtr = (AMatrixCol*)get_spc(maxview, sizeof(AMatrixCol));
   uint8_t AvgNumXElements = (uint8_t)ceil(3*ScannedObjectPtr->delta_xy/SinogramPtr->delta_r);
   
@@ -390,12 +391,15 @@ Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, 
   	AMatrixPtr[p].index  = (int32_t*)get_spc(AvgNumXElements,sizeof(int32_t));
   }  
 
-   /*printf ("time_begin = %d, time_end = %d, slice_begin = %d, slice_end = %d\n", time_begin, time_end, slice_begin, slice_end);*/
+   #ifdef DEBUG_HIGH
+   fprintf (TomoInputsPtr->debug_file_ptr, "time_begin = %d, time_end = %d, slice_begin = %d, slice_end = %d\n", time_begin, time_end, slice_begin, slice_end);
+   #endif
+
    for (i_new = time_begin; i_new <= time_end; i_new++) 
    {
       for (index_xy = xy_begin; index_xy <= xy_end; index_xy++) 
       {
-        /*printf ("Entering index\n"); */
+    /*    printf ("Entering index\n");*/ 
 	k_new = x_rand_select[index_xy];
         j_new = y_rand_select[index_xy];
     	MagUpdateMap[j_new][k_new] = 0;  
@@ -406,7 +410,7 @@ Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, 
 		calcAMatrixColumnforAngle(SinogramPtr, ScannedObjectPtr, DetectorResponse_XY, &(AMatrixPtr[p]), j_new, k_new, sino_view);
     	  }
           for (slice = slice_begin; slice <= slice_end; slice++) {
-     /*      	printf ("Entering slice\n");*/ 
+        /*  	printf ("Entering slice\n");*/ 
             /*For a given (i,j,k) store its 26 point neighborhood*/           
 	    if (Mask[j_new][k_new][slice] == 1)
 	    {   
@@ -890,7 +894,7 @@ void update_variance_parameter (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr
 		temp_acc += temp;
 	}
  
-	MPI_Allreduce(&temp_acc, &temp, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(&temp_acc, &temp, 1, MPI_TEMP_DATATYPE, MPI_SUM, MPI_COMM_WORLD);
 	TomoInputsPtr->var_est = temp/((Real_t)TomoInputsPtr->node_num*(Real_t)SinogramPtr->N_p*(Real_t)SinogramPtr->N_r*(Real_t)SinogramPtr->N_t);
 
   	#pragma omp parallel for private(i, j)
@@ -1010,7 +1014,7 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
     
 	randomly_select_x_y (ScannedObjectPtr, TomoInputsPtr, Mask);
     
-	zero_count = (long int**)multialloc(sizeof(Real_t), 2, ScannedObjectPtr->N_time, TomoInputsPtr->num_z_blocks);
+	zero_count = (long int**)multialloc(sizeof(long int), 2, ScannedObjectPtr->N_time, TomoInputsPtr->num_z_blocks);
 /*	offset_numerator = (Real_t**)multialloc(sizeof(Real_t), 2, SinogramPtr->N_r, SinogramPtr->N_t);
 	memset(&(offset_denominator[0][0]), 0, SinogramPtr->N_r*SinogramPtr->N_t*sizeof(Real_t));	
     
@@ -1038,14 +1042,17 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 			xy_start = j*floor(TomoInputsPtr->UpdateSelectNum[i][idx]/K);
 			xy_end = (j + 1)*floor(TomoInputsPtr->UpdateSelectNum[i][idx]/K) - 1;
 			xy_end = (j == K - 1) ? TomoInputsPtr->UpdateSelectNum[i][idx] - 1: xy_end;
+		/*	printf ("Loop 1 Start - j = %d, i = %d, idx = %d, z_start = %d, z_stop = %d, xy_start = %d, xy_end = %d\n", j, i, idx, z_start[i][idx], z_stop[i][idx], xy_start, xy_end);*/
 			total_vox_mag += updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], xy_start, xy_end, TomoInputsPtr->x_rand_select[i][idx], TomoInputsPtr->y_rand_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, VoxelLineResponse, Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
 			thread_num[i][idx] = omp_get_thread_num();
-		/*	printf ("Loop 1 - j = %d, i = %d, idx = %d, z_start = %d, z_stop = %d, xy_start = %d, xy_end = %d\n", j, i, idx, z_start[i][idx], z_stop[i][idx], xy_start, xy_end);*/
 		}
 		
+		/*fprintf(TomoInputsPtr->debug_file_ptr, "Send MPI info\n");*/
 		MPI_Send_Recv_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 0);
+	/*	fprintf(TomoInputsPtr->debug_file_ptr, "update_Sinogram_Offset: Will compute projection offset error\n");*/
 		if (TomoInputsPtr->updateProjOffset > 1)
 			update_Sinogram_Offset (SinogramPtr, TomoInputsPtr, ErrorSino);
+	/*	fprintf(TomoInputsPtr->debug_file_ptr, "update_Sinogram_Offset: Done computing projection offset error\n");*/
 		MPI_Wait_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 0);
 
 		#pragma omp parallel for collapse(2) private(i, block, idx, xy_start, xy_end) reduction(+:total_vox_mag)
@@ -1083,7 +1090,7 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 				z_stop[i][idx] = (idx >= TomoInputsPtr->num_z_blocks - 1) ? ScannedObjectPtr->N_z - 1: z_stop[i][idx]; 
 				updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], 0, TomoInputsPtr->NHICDSelectNum[i][idx]-1, TomoInputsPtr->x_NHICD_select[i][idx], TomoInputsPtr->y_NHICD_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, VoxelLineResponse, Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
 				thread_num[i][idx] = omp_get_thread_num();
-/*				printf ("Loop 1 NHICD - i = %d, idx = %d, z_start = %d, z_stop = %d\n", i, idx, z_start[i][idx], z_stop[i][idx]);*/
+		/*		printf ("Loop 1 NHICD - i = %d, idx = %d, z_start = %d, z_stop = %d\n", i, idx, z_start[i][idx], z_stop[i][idx]);*/
 			}
 			
 			MPI_Send_Recv_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 0);
@@ -1101,7 +1108,7 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 				z_stop[i][idx] = (idx >= TomoInputsPtr->num_z_blocks - 1) ? ScannedObjectPtr->N_z - 1: z_stop[i][idx]; 
 				updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], 0, TomoInputsPtr->NHICDSelectNum[i][idx]-1, TomoInputsPtr->x_NHICD_select[i][idx], TomoInputsPtr->y_NHICD_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, VoxelLineResponse, Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
 				thread_num[i][idx] = omp_get_thread_num();
-/*				printf ("Loop 2 NHICD - i = %d, idx = %d, z_start = %d, z_stop = %d\n", i, idx, z_start[i][idx], z_stop[i][idx]);*/
+		/*		printf ("Loop 2 NHICD - i = %d, idx = %d, z_start = %d, z_stop = %d\n", i, idx, z_start[i][idx], z_stop[i][idx]);*/
 			}
 	
 			MPI_Send_Recv_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 1);
@@ -1128,9 +1135,9 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 	}
   
 
-	MPI_Allreduce(&AverageUpdate, &tempUpdate, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-	MPI_Allreduce(&total_pix, &tempTotPix, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-	MPI_Allreduce(&total_vox_mag, &vox_mag, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(&AverageUpdate, &tempUpdate, 1, MPI_TEMP_DATATYPE, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(&total_pix, &tempTotPix, 1, MPI_TEMP_DATATYPE, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(&total_vox_mag, &vox_mag, 1, MPI_TEMP_DATATYPE, MPI_SUM, MPI_COMM_WORLD);
 
         AverageUpdate = tempUpdate/(tempTotPix);
         AverageUpdate = convert2Hounsfield(AverageUpdate);

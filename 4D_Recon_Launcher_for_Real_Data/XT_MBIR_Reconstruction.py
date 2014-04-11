@@ -146,7 +146,7 @@ def do_MBIR_reconstruction(proj, recon, files):
 		if (recon['recon_type'] == 'FBP'):
 			break
 				
-		path2results = result_folder + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + '_zinger_' + str(recon['ZingerT'][i]) + '_' + str(recon['ZingerDel'][i]) + recon['msg_string'] + '/'
+		path2results = result_folder + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
 		create_folder(path2results)	
 	
 			#flag = system('cp ' + path2launch + 'object_*tif ' + path2results + '.')

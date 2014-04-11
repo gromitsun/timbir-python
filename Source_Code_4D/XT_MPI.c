@@ -63,19 +63,19 @@ void MPI_Send_Recv_Z_Slices (ScannedObject* ScannedObjectPtr, TomoInputs* TomoIn
 	for (i = off1; i < ScannedObjectPtr->N_time; i = i + 2)
 	{
 		if (TomoInputsPtr->node_rank > 0)
-			MPI_Isend(&(ScannedObjectPtr->Object[i][1][0][0]), num, MPI_DOUBLE, TomoInputsPtr->node_rank - 1, i, MPI_COMM_WORLD, &(send_reqs[i]));
+			MPI_Isend(&(ScannedObjectPtr->Object[i][1][0][0]), num, MPI_OBJECT_DATATYPE, TomoInputsPtr->node_rank - 1, i, MPI_COMM_WORLD, &(send_reqs[i]));
 		
 		if (TomoInputsPtr->node_rank < TomoInputsPtr->node_num - 1)	
-			MPI_Irecv(&(ScannedObjectPtr->Object[i][N_z+1][0][0]), num, MPI_DOUBLE, TomoInputsPtr->node_rank + 1, i, MPI_COMM_WORLD, &(recv_reqs[i]));	
+			MPI_Irecv(&(ScannedObjectPtr->Object[i][N_z+1][0][0]), num, MPI_OBJECT_DATATYPE, TomoInputsPtr->node_rank + 1, i, MPI_COMM_WORLD, &(recv_reqs[i]));	
 	}
 		
 	for (i = off2; i < ScannedObjectPtr->N_time; i = i + 2)
 	{
 		if (TomoInputsPtr->node_rank > 0)
-			MPI_Irecv(&(ScannedObjectPtr->Object[i][0][0][0]), num, MPI_DOUBLE, TomoInputsPtr->node_rank - 1, i, MPI_COMM_WORLD, &(recv_reqs[i]));	
+			MPI_Irecv(&(ScannedObjectPtr->Object[i][0][0][0]), num, MPI_OBJECT_DATATYPE, TomoInputsPtr->node_rank - 1, i, MPI_COMM_WORLD, &(recv_reqs[i]));	
 		
 		if (TomoInputsPtr->node_rank < TomoInputsPtr->node_num - 1)	
-			MPI_Isend(&(ScannedObjectPtr->Object[i][N_z][0][0]), num, MPI_DOUBLE, TomoInputsPtr->node_rank + 1, i, MPI_COMM_WORLD, &(send_reqs[i]));
+			MPI_Isend(&(ScannedObjectPtr->Object[i][N_z][0][0]), num, MPI_OBJECT_DATATYPE, TomoInputsPtr->node_rank + 1, i, MPI_COMM_WORLD, &(send_reqs[i]));
 	}
 }
 			

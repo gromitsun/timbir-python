@@ -56,8 +56,6 @@
    V
    Z
    */
-/*typedef double Real_t;*/
-typedef float Real_t;
 
 /*Structure 'Sinogram' contains the sinogram itself and also other parameters related to the sinogram and the detector*/
   typedef struct

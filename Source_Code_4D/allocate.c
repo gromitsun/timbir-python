@@ -38,6 +38,7 @@ void *get_spc(size_t num, size_t size)
 {
 	void *pt;
 
+/*	fprintf(stdout, "==> calloc(), num=%zu, size=%zu\n", num, size);*/
 	if( (pt=calloc((size_t)num,size)) == NULL ) {
 		fprintf(stderr, "==> calloc() error, num=%zu, size=%zu\n", num, size);
 		exit(-1);
