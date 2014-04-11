@@ -5,5 +5,3 @@ for i in $param_idx; do
         qsub -N z_270 -v PARAM_INDEX Multi_Node_Job.sub 
 	sleep 0.2
 done 
-
-

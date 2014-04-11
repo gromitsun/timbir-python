@@ -411,7 +411,7 @@ void initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tom
         TomoInputsPtr->NHICDSelectNum = (int32_t**)multialloc(sizeof(int32_t), 2, ScannedObjectPtr->N_time, TomoInputsPtr->num_z_blocks);
 
 
-	ScannedObjectPtr->gamma = 0.1;
+	ScannedObjectPtr->NHICD_Iterations = 10;
 	for (i=0; i<=2; i++)
 		for (j=0; j<=2; j++)
 			SinogramPtr->Lap_Kernel[i][j] = Lap_Kernel[i][j]/(SinogramPtr->delta_r*SinogramPtr->delta_r);			

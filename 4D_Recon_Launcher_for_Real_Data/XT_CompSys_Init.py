@@ -10,6 +10,7 @@ def CompSys_Init(args, recon, files):
 		files['data_scratch'] = '/Users/aditya/Academics/Graduate_Courses/ECE699/Time_Varying_XRay_Tomography/C_Code/Workspace_Argonne'
 		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num'])
 		recon['compile_command'] = 'mpicc -ansi -Wall -fopenmp '
+		#recon['compile_command'] = 'mpicc -fopenmp '
 		recon['HPC'] = 'PC' 
 		recon['rank'] = 0
 	elif (args.Purdue):
