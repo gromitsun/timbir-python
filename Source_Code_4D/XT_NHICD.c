@@ -179,7 +179,7 @@ int32_t VSC_based_Voxel_Line_Select (ScannedObject* ScannedObjectPtr, TomoInputs
 	for (block = 0; block < TomoInputsPtr->num_z_blocks; block++)
 	{
 		idx = 0;
-		TomoInputsPtr->NHICDSelectNum[i][block] = floor(ScannedObjectPtr->gamma*TomoInputsPtr->UpdateSelectNum[i][block]);	
+		TomoInputsPtr->NHICDSelectNum[i][block] = floor(TomoInputsPtr->UpdateSelectNum[i][block]/ScannedObjectPtr->NHICD_Iterations);	
 		/*avg = 0;*/
 		ComputeVSC (ScannedObjectPtr, MagUpdateMap[i][block], filtMagUpdateMap, filtMagUpdateMap_copy);
 		thresh = RandomizedSelect(&(filtMagUpdateMap[0][0]), 0, ScannedObjectPtr->N_x*ScannedObjectPtr->N_y - 1, ScannedObjectPtr->N_x*ScannedObjectPtr->N_y - TomoInputsPtr->NHICDSelectNum[i][block]);

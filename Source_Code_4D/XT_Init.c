@@ -411,7 +411,7 @@ void initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tom
         TomoInputsPtr->NHICDSelectNum = (int32_t**)multialloc(sizeof(int32_t), 2, ScannedObjectPtr->N_time, TomoInputsPtr->num_z_blocks);
 
 
-	ScannedObjectPtr->gamma = 0.1;
+	ScannedObjectPtr->NHICD_Iterations = 10;
 	for (i=0; i<=2; i++)
 		for (j=0; j<=2; j++)
 			SinogramPtr->Lap_Kernel[i][j] = Lap_Kernel[i][j]/(SinogramPtr->delta_r*SinogramPtr->delta_r);			
@@ -561,7 +561,7 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
 		sprintf(debug_filename ,"DEBUG_HDF_Read_n%d.log", TomoInputsPtr->node_rank);
 	TomoInputsPtr->debug_file_ptr = fopen(debug_filename, "w" );
 	printf ("Refer to %s for more information\n", debug_filename);
-/*	TomoInputsPtr->debug_file_ptr = stdout;*/
+	TomoInputsPtr->debug_file_ptr = stdout;
 	
 	fprintf(TomoInputsPtr->debug_file_ptr, "argsParser: p = %.2f, sigma_s = %f, sigma_t = %f, c_s = %f, c_t = %f, mult_xy = %f, mult_z = %f, Length_R = %.2f, Length_T = %.2f, stop threshold = %.2f, number of iterations = %d, center of rotation = %.2f, alpha = %.2f, time regularization = %d, read sinogram from bin = %d, init ICD = %d, Write Tiff file = %d, Don't add noise = %d, Reconstruction start time = %f, Reconstruction time gap = %f, number of reconstructions = %d, N_p = %d, N_r = %d, reconstruct = %d, cost_thresh = %f, PHANTOM_FILENAME = %s, Slice Begin = %d, Slice Num = %d, Phantom X-Y Resolution = %d, Phantom Z Resolution = %d, N_t = %d, radius of object = %f, Update additive offset error = %d, no_NHICD = %d, Write Tiff and Bin every Iteration = %d, only Edge Updates = %d, Zinger threshold T = %f, Zinger Delta = %f, Read projection from HDF = %d, Update Variance = %d, Variance Estimate = %f\n",ScannedObjectPtr->MRF_P, ScannedObjectPtr->Sigma_S, ScannedObjectPtr->Sigma_T, ScannedObjectPtr->C_S, ScannedObjectPtr->C_T, ScannedObjectPtr->mult_xy, ScannedObjectPtr->mult_z, SinogramPtr->Length_R, SinogramPtr->Length_T, TomoInputsPtr->StopThreshold, TomoInputsPtr->NumIter, TomoInputsPtr->RotCenter, TomoInputsPtr->alpha, TomoInputsPtr->time_reg, TomoInputsPtr->sinobin, TomoInputsPtr->initICD, TomoInputsPtr->Write2Tiff, TomoInputsPtr->No_Projection_Noise, ScannedObjectPtr->Rtime0, ScannedObjectPtr->delta_Rtime, ScannedObjectPtr->N_time, SinogramPtr->N_p, SinogramPtr->N_r, TomoInputsPtr->reconstruct, TomoInputsPtr->cost_thresh, PHANTOM_FILENAME, SinogramPtr->slice_begin, SinogramPtr->slice_num, TomoInputsPtr->phantom_N_xy, TomoInputsPtr->phantom_N_z, SinogramPtr->total_t_slices, TomoInputsPtr->radius_obj, TomoInputsPtr->updateProjOffset, TomoInputsPtr->no_NHICD, TomoInputsPtr->WritePerIter, TomoInputsPtr->only_Edge_Updates, TomoInputsPtr->ErrorSinoThresh, TomoInputsPtr->ErrorSinoDelta, TomoInputsPtr->readSino4mHDF, TomoInputsPtr->updateVar, TomoInputsPtr->var_est);
 	
