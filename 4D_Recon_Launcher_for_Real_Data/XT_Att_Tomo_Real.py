@@ -45,8 +45,8 @@ def attenuation_tomo_real_init (proj, recon, files):
 	recon['voxel_thresh'] = [0.5, 0.5, 1, 1] #convergence threshold (percentage change in average magnitude of updates
         recon['cost_thresh'] = [10, 10, 10, 10] #convergence threshold on cost (percentage of change in cost normalized with the change in 1st iteration) 
         recon['delta_xy'] = [8, 4, 2, 1] #voxel size as a multiple of detector pixel size in x-y plane 
-        recon['delta_z'] = [1, 1, 1, 1] #voxel size as a multiple of detector pixel size in z plane
-        recon['initICD'] = [0, 2, 2, 2]
+        recon['delta_z'] = [2, 2, 2, 1] #voxel size as a multiple of detector pixel size in z plane
+        recon['initICD'] = [0, 2, 2, 3]
 	# 0 - initialize all voxels to 0
 	# 1 - initialize at same resolution as previous stage in multiresolution
 	# 2 - initialize by upsampling by a factor of 2 in x-y plane (2D multiresolution)
