@@ -152,14 +152,14 @@ def do_MBIR_reconstruction(proj, recon, files):
 			#flag = system('cp ' + path2launch + 'object_*tif ' + path2results + '.')
 			#error_by_flag(flag, 'ERROR: Could not move object_*.tif files')
 					
-		flag = system('cp ' + path2launch + 'object*.bin ' + path2results + '.')
-		error_by_flag(flag, 'ERROR: Could not move object.bin files')
+		#flag = system('cp ' + path2launch + 'object*.bin ' + path2results + '.')
+		#error_by_flag(flag, 'ERROR: Could not move object.bin files')
 					
-		#flag = system('cp ' + path2launch + 'view_info.txt ' + path2results + '.')
-		#error_by_flag(flag, 'ERROR: Could not move view_info.txt')
+		flag = system('cp ' + path2launch + 'view_info.txt ' + path2results + '.')
+		error_by_flag(flag, 'ERROR: Could not move view_info.txt')
 				
-		#flag = system('cp ' + path2launch + 'DEBUG*.log ' + path2results + '.')
-		#error_by_flag(flag, 'ERROR: Could not move debug.log')
+		flag = system('cp ' + path2launch + 'DEBUG*.log ' + path2results + '.')
+		error_by_flag(flag, 'ERROR: Could not move debug.log')
 			
 #		if (any(recon['updateProjOffset'] > 1)): 
 #			flag = system('cp ' + path2launch + 'proj_offset* ' + path2results + '.')
