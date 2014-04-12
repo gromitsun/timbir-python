@@ -7,7 +7,7 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['Path2Mask'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin"
         recon['msg_string'] = ""
 
-	proj['Expected_Counts'] = 9600
+	proj['Expected_Counts'] = 29473 
 	proj['phantom_N_xy'] = 1024
 	# phantom_N_z is the resolution of phantom along z
 	proj['phantom_N_z'] = 32
@@ -47,7 +47,7 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	# reg params for N_theta = 256, K = 16, r = 16
 	# Minimum for 10**6 & 4*(10**4)
 	recon['sigma_s'] = [25*(10**4), 5*(10**5), (10**6), 2*(10**6)]
-	recon['sigma_t'] = [25*(10**2), 5*(10**3), 10**4]
+	recon['sigma_t'] = [25*(10**2), 5*(10**3), 10**4, 2*(10**4)]
 	
 	recon['r'] = 16
 	recon['c_s'] = 10**-6
