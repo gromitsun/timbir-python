@@ -403,7 +403,7 @@ Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, 
 	k_new = x_rand_select[index_xy];
         j_new = y_rand_select[index_xy];
     	MagUpdateMap[j_new][k_new] = 0;  
-      /*     printf ("Entering mask\n");*/ 
+           /*printf ("Entering mask\n"); */
 	  for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++)
     	  {
 		sino_view = ScannedObjectPtr->ProjIdxPtr[i_new][p];
@@ -1144,7 +1144,7 @@ int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 
         fprintf(TomoInputsPtr->debug_file_ptr, "\nupdateVoxelsTimeSlices: Average voxel update over all voxels is %f, total voxels is %f\n", AverageUpdate, tempTotPix);
         fprintf(TomoInputsPtr->debug_file_ptr, "updateVoxelsTimeSlices: Zero count is %ld\n", total_zero_count);
-        fprintf(TomoInputsPtr->debug_file_ptr, "updateVoxelsTimeSlices: variance parameter divisor is %f\n", (Real_t)TomoInputsPtr->node_num*(Real_t)SinogramPtr->N_p*(Real_t)SinogramPtr->N_r*(Real_t)SinogramPtr->N_t);
+/*        fprintf(TomoInputsPtr->debug_file_ptr, "updateVoxelsTimeSlices: variance parameter divisor is %f\n", (Real_t)TomoInputsPtr->node_num*(Real_t)SinogramPtr->N_p*(Real_t)SinogramPtr->N_r*(Real_t)SinogramPtr->N_t);*/
 	
 	multifree(zero_count,2);
 	multifree(thread_num,2);

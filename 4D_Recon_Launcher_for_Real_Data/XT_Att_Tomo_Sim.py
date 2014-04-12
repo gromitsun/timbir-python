@@ -7,10 +7,10 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['Path2Mask'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin"
         recon['msg_string'] = "_double"
 
-	proj['Expected_Counts'] = 29473 
+	proj['Expected_Counts'] = 9600
 	proj['phantom_N_xy'] = 1024
 	# phantom_N_z is the resolution of phantom along z
-	proj['phantom_N_z'] = 4
+	proj['phantom_N_z'] = 32
 	proj['voxel_size'] = 0.65
 
 	# recon_N_r is detector resolution along r-axis used in reconstruction
@@ -19,7 +19,7 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	proj['slice_t_start'] = 0
 	# N_t is number of phantom slices extracted for reconstruction
 	# Assumes same voxel size for phantom and detector (pixel size)
-	proj['N_t'] = 4
+	proj['N_t'] = 4*4
 	# Subsamples N_t to recon_N_t when doing reconstruction
 	proj['recon_N_t'] = 4
 	# Same units as recon_N_r
@@ -46,10 +46,8 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	
 	# reg params for N_theta = 256, K = 16, r = 16
 	# Minimum for 10**6 & 4*(10**4)
-	#recon['sigma_s'] = [25*(10**4), 5*(10**5), (10**6), 2*(10**6)]
-	#recon['sigma_t'] = [2*(10**4), 4*(10**4), 8*(10**4), 16*(10**4)]
-	recon['sigma_s'] = [10*(10**5)]
-	recon['sigma_t'] = [4*(10**4)]
+	recon['sigma_s'] = [25*(10**4), 5*(10**5), (10**6), 2*(10**6)]
+	recon['sigma_t'] = [25*(10**2), 5*(10**3), 10**4]
 	
 	recon['r'] = 16
 	recon['c_s'] = 10**-6
@@ -70,8 +68,8 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	recon['do_VarEstimate'] = [0]*len(recon['voxel_thresh'])
 	recon['Estimate_of_Var'] = 1.0;	
 	
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Att_Recon_Float_Debug/XT_Result_Repository/"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Att_Recon_Float_Debug/XT_run/"
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Att_Recon_Sim_256/XT_Result_Repository/"
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Att_Recon_Sim_256/XT_run/"
 
 	proj['N_r'] = proj['phantom_N_xy']
 	proj['min_time_btw_views'] = 0

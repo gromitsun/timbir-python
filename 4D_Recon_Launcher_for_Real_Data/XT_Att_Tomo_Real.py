@@ -5,45 +5,44 @@ def attenuation_tomo_real_init (proj, recon, files):
 	#Dataset paths (Typically, stored in scratch pointed to by the environment variable $RCAC_SCRATCH)
 	#Path2Dataset - File path to the HDF file containing the dataset
 	#Path2WhiteDark - File path to the HDF file containing the white and dark images
-	proj['Path2Dataset'] = files['data_scratch'] + "/APS_PhaseContrast_Tomo/Datasets/APS14_AlSi_interlace_test_03_slice_extract.hdf"
-	proj['Path2WhiteDark'] = files['data_scratch'] + "/APS_PhaseContrast_Tomo/Datasets/APS14_AlSi_interlace_test_03_slice_extract.hdf"
+	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/APS_Beamtime_042014/APS14_AlCu_21.hdf"
+	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/APS_Beamtime_042014/APS14_AlCu_19.hdf"
 #	proj['Path2Dataset'] = "../../Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
 #	proj['Path2WhiteDark'] = "../../Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
 	#voxel_size is the side length of each voxel (in micrometer(um))
-	files['Result_Folder'] = files['scratch'] + "/APS_PhaseContrast_Tomo/Reconstructions/XT_Result_Repository/" #results will be stored here
-	files['Launch_Folder'] = files['scratch'] + "/APS_PhaseContrast_Tomo/Reconstructions/XT_run/" #location where reconstruction will be run
+	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/APS_032014_AlCu/XT_Result_Repository/" #results will be stored here
+	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/APS_032014_AlCu/XT_run/" #location where reconstruction will be run
 
-	proj['use_slice_white'] = 0 
-	proj['recon_N_r'] = 2080/2 # recon_N_r is detector resolution along r-axis used in reconstruction. Subsampled from the actual detector resolution of N_r)
-	proj['N_t'] = 8 # N_t is number of detector slices used in recon
-	proj['recon_N_t'] = 4 # Subsamples N_t to recon_N_t before doing reconstruction
-	proj['K'] = 16 #Number of interlaced sub-frames in a frame
-        recon['r'] = 16 #Number of reconstruction per frame
-        recon['msg_string']="_Res1040_Dataset_03_LowThresh"
+	proj['use_slice_white'] = -1 
+	proj['recon_N_r'] = 1600/4 # recon_N_r is detector resolution along r-axis used in reconstruction. Subsampled from the actual detector resolution of N_r)
+	proj['N_t'] = 1080 # N_t is number of detector slices used in recon
+	proj['recon_N_t'] = 1080/4 # Subsamples N_t to recon_N_t before doing reconstruction
+	proj['K'] = 32 #Number of interlaced sub-frames in a frame
+        recon['r'] = 32 #Number of reconstruction per frame
+        recon['msg_string']="_z_270_proj_start_1000_proj_num_6144"
         
 	proj['voxel_size'] = 0.65
 	proj['slice_t_start'] = 0 # slice_t_start is first detector slice used in recon
-	proj['rotation_center_r'] = 1049.75/2 # Same units as recon_N_r
-#	proj['rotation_center_r'] = 772.0/4 # Same units as recon_N_r
-	proj['proj_start'] = 0 # Index of the first view used for reconstruction 
-	proj['proj_num'] = 3069 # Total number of views used for reconstruction
-	proj['N_p'] = 3072 # N_p is just used for angle generation in python. Should be greater than proj_start + proj_num
-	proj['N_theta'] = 3072 #number of views in a frame
-	proj['N_r'] = 2080 #detector resolution along r-axis
+	proj['rotation_center_r'] = 800.0/4 # Same units as recon_N_r
+	proj['proj_start'] = 1000 # Index of the first view used for reconstruction 
+	proj['proj_num'] = 1536*2 # Total number of views used for reconstruction
+	proj['N_p'] = 1536*25 # N_p is just used for angle generation in python. Should be greater than proj_start + proj_num
+	proj['N_theta'] = 1536 #number of views in a frame
+	proj['N_r'] = 1600 #detector resolution along r-axis
 	proj['min_time_btw_views'] = 0.0047 #a view will be deleted if the time between two consecutive views is less than min_time_btw_views
-	proj['rotation_speed'] = 90 #rotation speed in degrees per second
+	proj['rotation_speed'] = 720 #rotation speed in degrees per second
 	
         #recon['sigma_s'] = [100*(10**5)] #spatial regularization. lesser the value smoother the reconstruction
 	#recon['sigma_t'] = [(10**4)] #temporal regularization. lesser the value smoother the reconstruction
-        recon['sigma_s'] = [30*(10**5)] #spatial regularization. lesser the value smoother the reconstructioni
-	recon['sigma_t'] = [10*(10**4)] #temporal regularization. lesser the value smoother the reconstruction
+        recon['sigma_s'] = [50*(10**5)] #spatial regularization. lesser the value smoother the reconstructioni
+	recon['sigma_t'] = [(10**4)] #temporal regularization. lesser the value smoother the reconstruction
 	recon['c_s'] = 10**-6 #parameter of spatial qGGMRF prior controlling the tradeoff between gaussian and generalized gaussian models
 	recon['c_t'] = 10**-6 #same but for temporal qGGMRF term
-	recon['ZingerT'] = 100000 #threshold on error sinogram value above which measurement is classified as zinger
+	recon['ZingerT'] = 4 #threshold on error sinogram value above which measurement is classified as zinger
 	recon['ZingerDel'] = 0.1 #generalized huber function parameter
 	recon['maxHU'] = 40000 #maximum value of reconstructed attenuation coefficient 
 	recon['minHU'] = 0 #minimum value of reconstructed attenuation coefficient
-	recon['voxel_thresh'] = [1, 1, 2, 2] #convergence threshold (percentage change in average magnitude of updates
+	recon['voxel_thresh'] = [0.5, 0.5, 1, 1] #convergence threshold (percentage change in average magnitude of updates
         recon['cost_thresh'] = [10, 10, 10, 10] #convergence threshold on cost (percentage of change in cost normalized with the change in 1st iteration) 
         recon['delta_xy'] = [8, 4, 2, 1] #voxel size as a multiple of detector pixel size in x-y plane 
         recon['delta_z'] = [1, 1, 1, 1] #voxel size as a multiple of detector pixel size in z plane
@@ -61,8 +60,9 @@ def attenuation_tomo_real_init (proj, recon, files):
 	# 2 - Update d after initializing it with 0
 	# 3 - Update d after initializing it from binary file
 	recon['readSino4mHDF'] = [0]*len(recon['delta_xy']) # 1 - read projection data from HDF file in C. 0 - read from python if required
+	recon['readSino4mHDF'][0] = 1
 	recon['iterations'] = [500]*len(recon['delta_xy']) #number of iterations
-	recon['do_VarEstimate'] = [0]*len(recon['delta_xy']) #1 - estimate variance term parameter
+	recon['do_VarEstimate'] = [1]*len(recon['delta_xy']) #1 - estimate variance term parameter
 	recon['Estimate_of_Var'] = 1; #initial estimate for variance parameter	
 
 	recon['recon_type'] = 'MBIR' #MBIR - Does MBIR reconstruction. FBP - Does FBP reconstruction
