@@ -82,15 +82,15 @@ def main():
 	if (args.MBIR_ATT_SIM == 1):
 		compute_RMSE_of_recon (proj, recon, files)
 			
+#	if (args.create_objectHDFtiff):
+#		if (recon['HPC'] == 'Purdue'):
+#			#recon['size'] = MPI.COMM_WORLD.size
+#			recon['size'] = 1
+#			writepar_object2HDF (proj, recon, files)
+#			writepar_tiff_from_object_bin_file (proj, recon, files)
 	if (args.create_objectHDFtiff):
-		if (recon['HPC'] == 'Purdue'):
-			#recon['size'] = MPI.COMM_WORLD.size
-			recon['size'] = 1
-			writepar_object2HDF (proj, recon, files)
-			writepar_tiff_from_object_bin_file (proj, recon, files)
-		else:
-		#	write_tiff_from_object_bin_file (proj, recon, files)
-			write_object2HDF (proj, recon, files)
+		write_tiff_from_object_bin_file (proj, recon, files)
+		write_object2HDF (proj, recon, files)
 	
 	print 'main: Done!'
 	print 'main: Total time taken by program - ' + str((time.time() - start_time)/60.0) + 'mins'

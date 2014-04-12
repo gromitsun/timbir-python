@@ -5,7 +5,7 @@ import numpy as np
 def attenuation_tomo_sim_init (proj, recon, files):
 	proj['Path2Phantom'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard.bin"
 	proj['Path2Mask'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin"
-        recon['msg_string'] = ""
+        recon['msg_string'] = "_double"
 
 	proj['Expected_Counts'] = 9600
 	proj['phantom_N_xy'] = 1024
