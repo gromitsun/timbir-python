@@ -5,7 +5,7 @@ import numpy as np
 def attenuation_tomo_sim_init (proj, recon, files):
 	proj['Path2Phantom'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard.bin"
 	proj['Path2Mask'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin"
-        recon['msg_string'] = ""
+        recon['msg_string'] = "_new_2"
 
 	proj['Expected_Counts'] = 29473 
 	proj['phantom_N_xy'] = 1024
@@ -29,7 +29,7 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	# N_p is just used for angle generation in python. Should be greater than proj_start + proj_num
 	proj['N_p'] = 256*4
 	
-	proj['K'] = 16
+	proj['K'] = 1
 	proj['N_theta'] = 256
 	recon['Proj0RMSE'] = 256
 	recon['ProjNumRMSE'] = 256*2
@@ -41,15 +41,18 @@ def attenuation_tomo_sim_init (proj, recon, files):
 
 	# reg params for N_theta = 256, K = 1, r = 1
 	# Minimum for 8*(10**5) & 10**4
-	# recon['sigma_s'] = [10**5, 2*(10**5), 4*(10**5), 8*(10**5)]
-	# recon['sigma_t'] = [10**4, 2*(10**4), 4*(10**4), 8*(10**4)]
+	#recon['sigma_s'] = [25*(10**4), 5*(10**5), (10**6), 2*(10**6), 4*(10**6)]
+	#recon['sigma_t'] = [2000, 1000, 500, 250, 100, 50]
 	
 	# reg params for N_theta = 256, K = 16, r = 16
 	# Minimum for 10**6 & 4*(10**4)
-	recon['sigma_s'] = [25*(10**4), 5*(10**5), (10**6), 2*(10**6)]
-	recon['sigma_t'] = [25*(10**2), 5*(10**3), 10**4, 2*(10**4)]
+	#recon['sigma_s'] = [25*(10**4), 5*(10**5), (10**6), 2*(10**6), 4*(10**6)]
+	#recon['sigma_t'] = [16000, 8000, 4000, 2000, 1000]
+
+	recon['sigma_s'] = [10*(10**5)]
+	recon['sigma_t'] = [500]
 	
-	recon['r'] = 16
+	recon['r'] = 1
 	recon['c_s'] = 10**-6
 	recon['c_t'] = 10**-6
 	recon['ZingerT'] = 10000
@@ -57,14 +60,14 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	recon['maxHU'] = 43000
 	recon['minHU'] = 5000
 	
-	recon['voxel_thresh'] = [0.5, 0.5, 0.5, 0.5]
-        recon['cost_thresh'] = [10, 10, 10, 10]
-        recon['delta_xy'] = [8, 4, 2, 1]
-        recon['delta_z'] = [1, 1, 1, 1]
-        recon['initICD'] = [0, 2, 2, 2]
-        recon['WritePerIter'] = [0, 0, 0, 1]
-        recon['updateProjOffset'] = [0, 2, 3, 3]
-        recon['iterations'] = [500, 500, 500, 400]
+	recon['voxel_thresh'] = [0.05, 0.05, 0.05]
+        recon['cost_thresh'] = [0.1, 0.1, 0.1]
+        recon['delta_xy'] = [4, 2, 1]
+        recon['delta_z'] = [1, 1, 1]
+        recon['initICD'] = [0, 2, 2]
+        recon['WritePerIter'] = [0, 0, 1]
+        recon['updateProjOffset'] = [0, 2, 3]
+        recon['iterations'] = [500, 500, 400]
 	recon['do_VarEstimate'] = [0]*len(recon['voxel_thresh'])
 	recon['Estimate_of_Var'] = 1.0;	
 	
