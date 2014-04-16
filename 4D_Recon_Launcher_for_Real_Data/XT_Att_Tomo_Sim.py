@@ -5,7 +5,7 @@ import numpy as np
 def attenuation_tomo_sim_init (proj, recon, files):
 	proj['Path2Phantom'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard.bin"
 	proj['Path2Mask'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin"
-        recon['msg_string'] = "_new_2"
+        recon['msg_string'] = ""
 
 	proj['Expected_Counts'] = 29473 
 	proj['phantom_N_xy'] = 1024
@@ -49,13 +49,15 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	#recon['sigma_s'] = [25*(10**4), 5*(10**5), (10**6), 2*(10**6), 4*(10**6)]
 	#recon['sigma_t'] = [16000, 8000, 4000, 2000, 1000]
 
-	recon['sigma_s'] = [10*(10**5)]
-	recon['sigma_t'] = [500]
+	recon['sigma_s'] = [25*(10**4), 5*(10**5), 10*(10**5), 2*(10**6), 4*(10**6)]
+	recon['sigma_t'] = [125, 250, 500, 1000, 2*(10**3)]
+	#recon['sigma_s'] = [25*(10**4), 5*(10**5), 10*(10**5), 2*(10**6)]
+	#recon['sigma_t'] = [2*(10**3), 4*(10**3), 8*(10**3), 16*(10**3), 32*(10**3)]
 	
 	recon['r'] = 1
 	recon['c_s'] = 10**-6
 	recon['c_t'] = 10**-6
-	recon['ZingerT'] = 10000
+	recon['ZingerT'] = 4
 	recon['ZingerDel'] = 0.1
 	recon['maxHU'] = 43000
 	recon['minHU'] = 5000
