@@ -14,17 +14,17 @@ def attenuation_tomo_real_init (proj, recon, files):
 	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/APS_032014_AlCu/XT_run/" #location where reconstruction will be run
 
 	proj['use_slice_white'] = -1 
-	proj['recon_N_r'] = 1600/4 # recon_N_r is detector resolution along r-axis used in reconstruction. Subsampled from the actual detector resolution of N_r)
-	proj['N_t'] = 1080 # N_t is number of detector slices used in recon
-	proj['recon_N_t'] = 1080/4 # Subsamples N_t to recon_N_t before doing reconstruction
+	proj['recon_N_r'] = 1024/2 # recon_N_r is detector resolution along r-axis used in reconstruction. Subsampled from the actual detector resolution of N_r)
+	proj['N_t'] = 1024 # N_t is number of detector slices used in recon
+	proj['recon_N_t'] = 1024/2 # Subsamples N_t to recon_N_t before doing reconstruction
 	proj['K'] = 32 #Number of interlaced sub-frames in a frame
         recon['r'] = 32 #Number of reconstruction per frame
-        recon['msg_string']="_z_270_proj_start_1000_proj_num_6144"
+        recon['msg_string'] = "_ROI_512x512x512_proj_start_16360"
         
-	proj['voxel_size'] = 0.65
+	proj['voxel_size'] = 1.3
 	proj['slice_t_start'] = 0 # slice_t_start is first detector slice used in recon
-	proj['rotation_center_r'] = 800.0/4 # Same units as recon_N_r
-	proj['proj_start'] = 1000 # Index of the first view used for reconstruction 
+	proj['rotation_center_r'] = 512.0/2 # Same units as recon_N_r
+	proj['proj_start'] = 16360 # Index of the first view used for reconstruction 
 	proj['proj_num'] = 1536*2 # Total number of views used for reconstruction
 	proj['N_p'] = 1536*25 # N_p is just used for angle generation in python. Should be greater than proj_start + proj_num
 	proj['N_theta'] = 1536 #number of views in a frame
@@ -34,19 +34,19 @@ def attenuation_tomo_real_init (proj, recon, files):
 	
         #recon['sigma_s'] = [100*(10**5)] #spatial regularization. lesser the value smoother the reconstruction
 	#recon['sigma_t'] = [(10**4)] #temporal regularization. lesser the value smoother the reconstruction
-        recon['sigma_s'] = [50*(10**5)] #spatial regularization. lesser the value smoother the reconstructioni
-	recon['sigma_t'] = [(10**4)] #temporal regularization. lesser the value smoother the reconstruction
+        recon['sigma_s'] = [5*(10**5)] #spatial regularization. lesser the value smoother the reconstructioni
+	recon['sigma_t'] = [2*(10**4)] #temporal regularization. lesser the value smoother the reconstruction
 	recon['c_s'] = 10**-6 #parameter of spatial qGGMRF prior controlling the tradeoff between gaussian and generalized gaussian models
 	recon['c_t'] = 10**-6 #same but for temporal qGGMRF term
-	recon['ZingerT'] = 4 #threshold on error sinogram value above which measurement is classified as zinger
+	recon['ZingerT'] = 3 #threshold on error sinogram value above which measurement is classified as zinger
 	recon['ZingerDel'] = 0.1 #generalized huber function parameter
-	recon['maxHU'] = 40000 #maximum value of reconstructed attenuation coefficient 
+	recon['maxHU'] = 10000 #maximum value of reconstructed attenuation coefficient 
 	recon['minHU'] = 0 #minimum value of reconstructed attenuation coefficient
-	recon['voxel_thresh'] = [0.5, 0.5, 1, 1] #convergence threshold (percentage change in average magnitude of updates
+	recon['voxel_thresh'] = [0.5, 0.5, 0.5, 0.5] #convergence threshold (percentage change in average magnitude of updates
         recon['cost_thresh'] = [10, 10, 10, 10] #convergence threshold on cost (percentage of change in cost normalized with the change in 1st iteration) 
         recon['delta_xy'] = [8, 4, 2, 1] #voxel size as a multiple of detector pixel size in x-y plane 
-        recon['delta_z'] = [2, 2, 2, 1] #voxel size as a multiple of detector pixel size in z plane
-        recon['initICD'] = [0, 2, 2, 3]
+        recon['delta_z'] = [4, 4, 2, 1] #voxel size as a multiple of detector pixel size in z plane
+        recon['initICD'] = [0, 2, 3, 3]
 	# 0 - initialize all voxels to 0
 	# 1 - initialize at same resolution as previous stage in multiresolution
 	# 2 - initialize by upsampling by a factor of 2 in x-y plane (2D multiresolution)
@@ -71,7 +71,7 @@ def attenuation_tomo_real_init (proj, recon, files):
 	recon['initMagUpMap'][0] = 0 #1 - initialize magnitude update map from binary file. 0 - Don't initialize.
         recon['only_Edge_Updates'] = [0]*len(recon['delta_xy']) # Keep all at 0
         recon['writeTiff'] = [1]*len(recon['delta_xy']) #1 - write reconstructed object to tiff files. 0 - Don't write.
-	recon['BH_Quad_Coef'] = 0; #0.5 is the quadratic term coefficient used in the beam hardening correction
+	recon['BH_Quad_Coef'] = 0.0; #0.5 is the quadratic term coefficient used in the beam hardening correction
 
 	# The variables below will be ignored by C-code in this mode
 	proj['Expected_Counts'] = 29473 

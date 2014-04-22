@@ -74,7 +74,7 @@ def write_tiff_from_object_bin_file (proj, recon, files):
 			for k in range(recon['N_z']):
 				slice_object = convert_um2HU(Object[k,:,:])
 		#		print 'write_tiff_from_object_bin_file: Average value of time slice ' + str(j) + ' in HU is ' + str(np.mean(slice_object))
-				write_array2tif(path2results + 'object_z_' + str(k) + '_time_' + str(j) + '.tif', convert_HU2uint8(slice_object, recon['maxHU'], recon['minHU']))
+				write_array2tif(path2results + 'object_time_z_' + str(j) + '_' + str(k) + '.tif', convert_HU2uint8(slice_object, recon['maxHU'], recon['minHU']))
 			print 'write_tiff_from_object_bin_file: Average value of time slice ' + str(j) + ' in um^-1 is ' + str(np.mean(Object))
 
 def write_object2HDF (proj, recon, files):

@@ -3,7 +3,7 @@
 
 #PBS -V
 #PBS -q standby
-#PBS -l nodes=27:ppn=16
+#PBS -l nodes=32:ppn=16
 #PBS -l walltime=4:00:00
 
 # start top in batch mode, 30 sec interval between reports, in background
@@ -24,7 +24,7 @@ uniq < $PBS_NODEFILE > nodefile
 #python XT_Main.py --setup_launch_folder --run_reconstruction --MBIR_PHCON_REAL --num_MPI_process 1 --Purdue
 #python XT_Main.py --setup_launch_folder --run_reconstruction --create_objectHDFtiff --MBIR_PHCON_REAL --num_MPI_process 1 --Purdue
 #python XT_Main.py --MBIR_ATT_SIM --num_MPI_process 1 --Purdue
-python XT_Main.py --setup_launch_folder --run_reconstruction --create_objectHDFtiff --MBIR_ATT_REAL --num_MPI_process 27 --Purdue
+python XT_Main.py --setup_launch_folder --run_reconstruction --create_objectHDFtiff --MBIR_ATT_REAL --num_MPI_process 32 --Purdue
 #python XT_Main.py --run_reconstruction --node_num 1 --Purdue
 #python XT_Main.py --node_num 1 --create_objectHDFtiffonly --Purdue
 
