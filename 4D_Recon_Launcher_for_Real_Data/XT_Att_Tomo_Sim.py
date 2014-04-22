@@ -1,36 +1,17 @@
 
 import numpy as np
+from XT_IOMisc import error_by_flag
 
 
 def attenuation_tomo_sim_init (proj, recon, files):
-	proj['Path2Phantom'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard.bin"
-	proj['Path2Mask'] = files['data_scratch'] + "/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin"
-        recon['msg_string'] = ""
-
 	proj['Expected_Counts'] = 29473 
 	proj['phantom_N_xy'] = 1024
 	# phantom_N_z is the resolution of phantom along z
 	proj['phantom_N_z'] = 32
-	proj['voxel_size'] = 0.65
 
-	# recon_N_r is detector resolution along r-axis used in reconstruction
-	proj['recon_N_r'] = 256
-	# slice_t_start is first slice in phantom where recon starts
-	proj['slice_t_start'] = 0
-	# N_t is number of phantom slices extracted for reconstruction
-	# Assumes same voxel size for phantom and detector (pixel size)
-	proj['N_t'] = 4*4
+	if (proj['slice_t_start'] + proj['N_t'] > proj['phantom_N_z']):
+		error_by_flag(1,"proj['slice_t_start'] + proj['N_t'] > proj['phantom_N_z']")
 	# Subsamples N_t to recon_N_t when doing reconstruction
-	proj['recon_N_t'] = 4
-	# Same units as recon_N_r
-	proj['rotation_center_r'] = 132
-	proj['proj_start'] = 0
-	proj['proj_num'] = 256*4
-	# N_p is just used for angle generation in python. Should be greater than proj_start + proj_num
-	proj['N_p'] = 256*4
-	
-	proj['K'] = 1
-	proj['N_theta'] = 256
 	recon['Proj0RMSE'] = 256
 	recon['ProjNumRMSE'] = 256*2
 
@@ -53,8 +34,6 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	recon['sigma_t'] = [125, 250, 500, 1000, 2*(10**3)]
 	#recon['sigma_s'] = [25*(10**4), 5*(10**5), 10*(10**5), 2*(10**6)]
 	#recon['sigma_t'] = [2*(10**3), 4*(10**3), 8*(10**3), 16*(10**3), 32*(10**3)]
-	
-	recon['r'] = 1
 	recon['c_s'] = 10**-6
 	recon['c_t'] = 10**-6
 	recon['ZingerT'] = 4
@@ -73,10 +52,8 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	recon['do_VarEstimate'] = [0]*len(recon['voxel_thresh'])
 	recon['Estimate_of_Var'] = 1.0;	
 	
-	files['Result_Folder'] = files['scratch'] + "/Recon_Runs/Att_Recon_Sim_256/XT_Result_Repository/"
-	files['Launch_Folder'] = files['scratch'] + "/Recon_Runs/Att_Recon_Sim_256/XT_run/"
-
-	proj['N_r'] = proj['phantom_N_xy']
+	if (proj['N_r'] == proj['phantom_N_xy']):
+		error_by_flag(1,"ERROR: N_r is not equal to phantom_N_xy")
 	proj['min_time_btw_views'] = 0
 	proj['rotation_speed'] = 100
 	recon['recon_type'] = 'MBIR'
