@@ -1,7 +1,7 @@
-param_idx=`seq 1 1`
+param_idx=`seq 0 0`
 for i in $param_idx; do
 	export PARAM_INDEX=$i
-#	qsub -N sweep -v PARAM_INDEX Single_Node_Job.sub 
-        qsub -N z_270 -v PARAM_INDEX Multi_Node_Job.sub 
+#	qsub -N sim_$i -v PARAM_INDEX Conte_SimData_Submit.sh
+        qsub -N z_270 -v PARAM_INDEX Conte_RealData_Submit.sh 
 	sleep 0.2
 done 

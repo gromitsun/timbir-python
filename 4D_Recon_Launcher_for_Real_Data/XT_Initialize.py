@@ -25,16 +25,45 @@ import os
 	angles - Angles of projections used for reconstruction
 	times - Times at which these projections were acquired """
 
-def proj_init (proj, files):
+def proj_init (proj, args):
 
 #	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_22.hdf"
 #	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_16_N_theta_2000_RotSpeed_100_Exp_4_ROI_1000x2080_Ramp_2/k-16-4ms-last_31.hdf"
 #	proj['Path2Dataset'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
 #	proj['Path2WhiteDark'] = files['data_scratch'] + "/Argonne_Datasets/K_32_N_theta_1984_RotSpeed_100_Exp_8_ROI_2000x2080_Ramp_5/k-32-08ms_1.hdf"
 	
+	#Dataset paths (Typically, stored in scratch pointed to by the environment variable $RCAC_SCRATCH)
+	#Path2Dataset - File path to the HDF file containing the dataset
+	#Path2WhiteDark - File path to the HDF file containing the white and dark images
+	proj['Path2Dataset'] = args.Path2Data
+	proj['Path2WhiteDark'] = args.Path2WhitesDarks
+	proj['Path2Phantom'] = args.Path2Phantom
+	proj['Path2Mask'] = args.Path2Mask
+	
+	proj['Expected_Counts'] = 29473 
+	proj['phantom_N_xy'] = 1024
+	# phantom_N_z is the resolution of phantom along z
+	proj['phantom_N_z'] = 32
+	proj['rotation_center_r'] = args.rot_center # Same units as recon_N_r	
+	#voxel_size is the side length of each voxel (in micrometer(um))
+	proj['voxel_size'] = args.vox_size
+	proj['proj_num'] = args.proj_num # Total number of views used for reconstruction
+	proj['proj_start'] = args.proj_start # Index of the first view used for reconstruction
+	proj['N_r'] = args.x_width
+	proj['recon_N_r'] = args.recon_x_width # recon_N_r is detector resolution along r-axis used in reconstruction. Subsampled from the actual detector resolution of N_r)
+	proj['slice_t_start'] = args.z_start # slice_t_start is first detector slice used in recon
+	proj['N_t'] = args.z_width # N_t is number of detector slices used in recon
+	proj['recon_N_t'] = args.recon_z_width # Subsamples N_t to recon_N_t before doing reconstruction
+	proj['K'] = args.K 
+	proj['N_theta'] = args.N_theta #number of views in a frame 
+	proj['min_time_btw_views'] = args.min_time_btw_views #a view will be deleted if the time between two consecutive views is less than min_time_btw_views
+	proj['rotation_speed'] = args.rotation_speed #rotation speed in degrees per second
+	
+	proj['use_slice_white'] = -1 
 	proj['length_r'] = proj['voxel_size']*proj['N_r']	
 	proj['length_t'] = proj['voxel_size']*proj['N_t']	
 	proj['L'] = proj['N_theta']/proj['K']
+	proj['N_p'] = ((proj['proj_start'] + proj['proj_num'])/proj['N_theta'] + 1)*proj['N_theta']
 	
 	fps_of_camera = proj['L']/(180.0/proj['rotation_speed'])
 	angles, times = gen_interlaced_views_0_to_Inf(proj['K'], proj['N_theta'], proj['N_p'])
@@ -47,6 +76,9 @@ def proj_init (proj, files):
 	
 	proj['recon_N_p'] = len(proj['angles']) 	
 	print 'proj_init: Total number of projections used for reconstruction is ' + str(proj['recon_N_p'])
+	
+	if (args.MBIR_ATT_SIM and proj['slice_t_start'] + proj['N_t'] > proj['phantom_N_z']):
+		error_by_flag(1, "proj['slice_t_start'] + proj['N_t'] > proj['phantom_N_z']")
 
 	return proj
 
@@ -82,27 +114,35 @@ def proj_init (proj, files):
 
 """ r, c_s, c_t, sigma_s, sigma_t are lists. Each corresponding item in the lists will be used to run a instance of reconstruction. """
 
-def recon_init (proj, recon):
-	recon['sigma_s'],recon['sigma_t'] = np.meshgrid(recon['sigma_s'], recon['sigma_t'])
-
-	recon['sigma_s'] = recon['sigma_s'].flatten()
-	recon['sigma_t'] = recon['sigma_t'].flatten()
-	recon['r'] = [recon['r']]*len(recon['sigma_s'])
-	recon['c_s'] = [recon['c_s']]*len(recon['r'])
-	recon['c_t'] = [recon['c_t']]*len(recon['r'])
-	recon['ZingerT'] = [recon['ZingerT']]*len(recon['r'])
-	recon['ZingerDel'] = [recon['ZingerDel']]*len(recon['r'])
+def recon_init (proj, recon, args):
+	recon['r'] = [args.r]
+	recon['c_s'] = [10**-6]
+	recon['c_t'] = [10**-6]
+	recon['sigma_s'] = [args.sigma_s]
+	recon['sigma_t'] = [args.sigma_t]
 	
-	param_idx = int(os.environ['PARAM_INDEX'])
+	recon['ZingerDel'] = [0.1]
+	recon['ZingerT'] = [args.ZingerT]
+	recon['maxHU'] = args.maxHU
+	recon['minHU'] = args.minHU
+	#recon['sigma_s'],recon['sigma_t'] = np.meshgrid(recon['sigma_s'], recon['sigma_t'])	
+	recon['msg_string'] = args.msg_string
+	recon['multres_xy'] = args.multres_xy
+	recon['multres_z'] = args.multres_z
+
+	#recon['sigma_s'] = recon['sigma_s'].flatten()
+	#recon['sigma_t'] = recon['sigma_t'].flatten()
+	
+	# param_idx = int(os.environ['PARAM_INDEX'])
 	# if param_idx is 0, the one python process will run recon for all params
-	if (param_idx > 0):
-		recon['r'] = [recon['r'][param_idx-1]]
-		recon['c_s'] = [recon['c_s'][param_idx-1]]
-		recon['c_t'] = [recon['c_t'][param_idx-1]]
-		recon['sigma_s'] = [recon['sigma_s'][param_idx-1]]
-		recon['sigma_t'] = [recon['sigma_t'][param_idx-1]]
-		recon['ZingerT'] = [recon['ZingerT'][param_idx-1]]
-		recon['ZingerDel'] = [recon['ZingerDel'][param_idx-1]]
+	#if (param_idx > 0):
+	#	recon['r'] = [recon['r'][param_idx-1]]
+	#	recon['c_s'] = [recon['c_s'][param_idx-1]]
+	#	recon['c_t'] = [recon['c_t'][param_idx-1]]
+	#	recon['sigma_s'] = [recon['sigma_s'][param_idx-1]]
+	#	recon['sigma_t'] = [recon['sigma_t'][param_idx-1]]
+	#	recon['ZingerT'] = [recon['ZingerT'][param_idx-1]]
+	#	recon['ZingerDel'] = [recon['ZingerDel'][param_idx-1]]
 	
 #	if (proj['recon_N_p']/proj['N_theta'] > 2):
 #		recon['Proj0RMSE'] = proj['N_theta']
@@ -110,23 +150,50 @@ def recon_init (proj, recon):
 #	else:
 #		recon['Proj0RMSE'] = proj['N_theta']/proj['K'] 
 #		recon['ProjNumRMSE'] = proj['recon_N_p'] - 2*proj['N_theta']/proj['K']
+	recon['Proj0RMSE'] = 256
+	recon['ProjNumRMSE'] = 256*2
+	if (args.MBIR_ATT_SIM and recon['Proj0RMSE'] < proj['proj_start']):
+		error_by_flag(1, "ERROR: proj_start is greater than Proj0RMSE")
+	if (args.MBIR_ATT_SIM and recon['Proj0RMSE'] + recon['ProjNumRMSE'] > proj['proj_start'] + proj['proj_num']):
+		error_by_flag(1, "ERROR: proj_start + proj_num is less than Proj0RMSE + ProjNumRMSE")
 
+	recon['delta_xy'] = np.arange(recon['multres_xy']-1, -1, -1)
+	recon['delta_xy'] = 2**recon['delta_xy']
+	recon['delta_z'] = np.arange(recon['multres_z']-1, -1, -1)
+	recon['delta_z'] = 2**recon['delta_z']
+	multres_extras = recon['delta_z'][0]*np.ones(recon['multres_xy']-recon['multres_z'],dtype=np.int)
+	recon['delta_z'] = np.concatenate((multres_extras,recon['delta_z']), axis=0)
+	recon['voxel_thresh'] = args.vox_stop_thresh*np.ones(recon['multres_xy'])
+	recon['cost_thresh'] = args.cost_stop_thresh*np.ones(recon['multres_xy'])
+	recon['initICD'] = 3*np.ones(recon['multres_z'])
+	recon['initICD'][0] = 2
+	recon['initICD'] = np.concatenate((2*np.ones(recon['multres_xy']-recon['multres_z']), recon['initICD']), axis=0)
+	recon['initICD'][0] = 0 
+	recon['WritePerIter'] = 0*np.ones(recon['multres_xy'])
+	recon['updateProjOffset'] = 3*np.ones(recon['multres_xy'])
+	recon['updateProjOffset'][0] = 0
+	recon['updateProjOffset'][1] = 2
+	recon['readSino4mHDF'] = 0*np.ones(recon['multres_xy'])
+	if (args.MBIR_ATT_REAL):
+		recon['readSino4mHDF'][0] = 1
+	recon['iterations'] = args.MaxIter*np.ones(recon['multres_xy'])
+	recon['do_VarEstimate'] = args.do_VarEstimate*np.ones(recon['multres_xy'])
+	recon['Estimate_of_Var'] = 1
+	recon['recon_type'] = 'MBIR'
+	if (args.MBIR_ATT_SIM):
+		recon['sinobin'] = 2
+	else:
+		recon['sinobin'] = 1
+	recon['initMagUpMap'] = 1*np.ones(recon['multres_xy'])
+	recon['initMagUpMap'][0] = 0
+	recon['only_Edge_Updates'] = 0*np.ones(recon['multres_xy'])
+	recon['writeTiff'] = 1*np.ones(recon['multres_xy'])
+	if (args.MBIR_ATT_REAL):
+		recon['BH_Quad_Coef'] = 0.5
+	else:
+		recon['BH_Quad_Coef'] = 0
 	recon['init_object4mHDF'] = 0
-	
 	recon['radius_obj'] = proj['voxel_size']*proj['N_r']
-	
-	#recon['voxel_thresh'] = [10]
-        #recon['cost_thresh'] = [10]
-        #recon['delta_xy'] = [1]
-        #recon['delta_z'] = [1]
-        #recon['initICD'] = [2]
-        #recon['sinobin'] = 1 
-        #recon['writeTiff'] = [1]
-        #recon['WritePerIter'] = [1]
-        #recon['updateProjOffset'] = [3]
-        #recon['iterations'] = [5]
-        #recon['only_Edge_Updates'] = [0]
-        #recon['initMagUpMap'] = [1]
 	
 	recon['init_with_FBP'] = 0
 	#recon['num_threads'] = 1
@@ -141,8 +208,7 @@ def recon_init (proj, recon):
 #	recon['Rtime_num'] = proj['r']*proj['N_p']/proj['N_theta']
 	recon['Rtime_delta'] = [(proj['times'][-1]-proj['times'][0])/recon['Rtime_num'][i] for i in range(len(recon['r']))]
 #	recon['Rtime_delta'] = proj['N_p']*proj['delta_time']/recon['Rtime_num']
-
-	recon['multi_res_stages'] = len(recon['delta_xy'])
+	
 	recon['N_xy'] = proj['recon_N_r']/recon['delta_xy'][-1]
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	recon['zSlice4RMSE'] = recon['N_z']/2
@@ -150,7 +216,6 @@ def recon_init (proj, recon):
 	recon['calculate_cost'] = 1
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1
-
 
 	recon['FBP_N_xy'] = proj['recon_N_r']
 	if (recon['init_with_FBP'] == 1):
@@ -175,9 +240,11 @@ def recon_init (proj, recon):
 	copy_executables - If '1', copies the executables from the source code folder and hence is not compiled again (Keep it at 0)
 	copy_projections - If '1', copies projection.bin and weight.bin from source code folder. If '0' reads the projection data from HDF files, as is described in XT_Projections.py"""
 
-def files_init (files):
-	files['C_Source_Folder'] = "../Source_Code_4D/"
-	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
+def files_init (files, args):
+	files['Launch_Folder'] = args.run_folder + '/XT_run/'
+	files['Result_Folder'] = args.run_folder + '/XT_Results/'
+	files['C_Source_Folder'] = "../Source_Code_4D_Fast/"
+	files['Proj_Offset_File'] = "../Source_Code_4D_Fast/proj_offset.bin"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 
