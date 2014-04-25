@@ -243,8 +243,8 @@ def recon_init (proj, recon, args):
 def files_init (files, args):
 	files['Launch_Folder'] = args.run_folder + '/XT_run/'
 	files['Result_Folder'] = args.run_folder + '/XT_Results/'
-	files['C_Source_Folder'] = "../Source_Code_4D_Fast/"
-	files['Proj_Offset_File'] = "../Source_Code_4D_Fast/proj_offset.bin"
+	files['C_Source_Folder'] = "../Source_Code_4D/"
+	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 
