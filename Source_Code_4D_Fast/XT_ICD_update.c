@@ -332,10 +332,11 @@ Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, 
   Real_t total_vox_mag = 0.0;
   z_min = 0;
   z_max = ScannedObjectPtr->N_z + 1;
+  
   if (TomoInputsPtr->node_rank == 0)
-  z_min = 1;
+  	z_min = 1;
   if (TomoInputsPtr->node_rank == TomoInputsPtr->node_num - 1)
-  z_max = ScannedObjectPtr->N_z;
+  	z_max = ScannedObjectPtr->N_z;
   Real_t Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM];
   Real_t Time_Nhood[NHOOD_TIME_MAXDIM-1];
   bool Spatial_BDFlag[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM];
@@ -378,7 +379,7 @@ Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, 
       Real_t deltar=SinogramPtr->delta_r;
       float errorSinoThresh=(float)TomoInputsPtr->ErrorSinoThresh;
       float errorSinoDelta=(float)TomoInputsPtr->ErrorSinoDelta;
-      Real_t projectionValueArray[sum];
+      Real_t projectionValueArray[sum];/*Ask*/
       Real_t* projectionValueArrayPointer=&projectionValueArray[0];
       Real_t weightValueArray[sum*z_overlap_num*(slice_end-slice_begin+1)];
       Real_t* weightValueArrayPointer=&weightValueArray[0];
@@ -604,11 +605,11 @@ Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, 
         {
             Real_t ProjectionEntry = (*projectionValueArrayPointer);
 	    for (s=0;s<=(slice_end-slice_begin);s++){
-	      if(UpdatedVoxelValueArray[s]!=0){ 	            	   	    
+	      if(UpdatedVoxelValueArray[s]!=0){ /*Ask*/	            	   	    
 	        Real_t temp=(ProjectionEntry*(UpdatedVoxelValueArray[s] - ObjectArray[s]));
 	        for (r = 0; r <z_overlap_num; r++)
 	        {
-	            *errorSinoValueArray =(*errorValueArrayPointer)- temp;
+	            *errorSinoValueArray =(*errorValueArrayPointer)- temp;/*Ask*/
 		    *ProjSelectArray = (fabs((*errorValueArrayPointer- temp)*sqrt(*weightValueArrayPointer)) < errorSinoThresh);
 		    weightValueArrayPointer++;
 		    errorValueArrayPointer++;
