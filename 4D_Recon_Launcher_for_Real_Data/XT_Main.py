@@ -3,7 +3,7 @@
 from XT_Initialize import proj_init, recon_init, files_init 
 #from XT_Projections import generate_projections
 from XT_MBIR_Reconstruction import do_MBIR_reconstruction
-#from XT_FBP_Reconstruction import do_FBP_reconstruction
+from XT_FBP_Reconstruction import do_FBP_reconstruction
 from XT_IOMisc import error_by_flag
 from XT_IOMisc import write_object2HDF
 from XT_ObjectHDFIO import writepar_object2HDF
@@ -28,10 +28,6 @@ def main():
 	args = ArgParser()
 	recon['node_num'] = args.num_nodes
 	recon, files = CompSys_Init(args, recon, files)
-	
-	recon['modality'] = 'ATT'
-	if (args.MBIR_PHCON_REAL):
-		recon['modality'] = 'PHCON'
 
 	proj = proj_init(proj, args)
 	recon = recon_init(proj, recon, args)
@@ -49,13 +45,13 @@ def main():
 		print 'main: Will do MBIR reconstruction'
 		do_MBIR_reconstruction(proj, recon, files)
 	elif (recon['recon_type'] == 'FBP'):
-		do_MBIR_reconstruction(proj, recon, files)
+#		do_MBIR_reconstruction(proj, recon, files)
 		print 'main: Will do FBP reconstruction'
-#		do_FBP_reconstruction(proj, recon, files)
+		do_FBP_reconstruction(proj, recon, files)
 	else:
 		print 'ERROR: main: Reconstruction type not recognized'
 
-	if (args.MBIR_ATT_SIM == 1):
+	if (args.SIM_DATA == 1):
 		compute_RMSE_of_recon (proj, recon, files)
 			
 #	if (args.create_objectHDFtiff):
