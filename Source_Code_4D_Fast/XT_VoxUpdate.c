@@ -9,794 +9,334 @@
 #include "allocate.h"
 
 
-
-Real_t compute_voxel_update_AMat1D (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, AMatrixCol* AMatrixPtr, Real_t Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], Real_t Time_Nhood[NHOOD_TIME_MAXDIM-1], bool Spatial_BDFlag[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], bool Time_BDFlag[NHOOD_TIME_MAXDIM-1], int32_t i_new, int32_t slice, int32_t j_new, int32_t k_new,Real_t* projectionValueArrayPointer,Real_t* weightValueArrayPointer,int32_t slice_begin,int32_t slice_end,bool* selectValueArrayPointer,Real_t* errorValueArrayPointer,Real_t V,Real_t THETA1,Real_t THETA2)
+/*Updates all voxels from time slices 'time_begin - time_end', x-y slices split along the z-axis from 'slice_begin-slice_end'.
+x_rand_select and y_rand_select lists the voxels for each time slice and z-axis slice which needs to be updated.
+ErrorSino - Error sinogram
+DetectorResponse_XY - detector response in the x-y plane
+VoxelLineResponse - Gives the detector response along z-axis for each voxel along z
+Iter - The iteration number
+zero_count - the number of zero attenuation coefficients
+MagUpdateMap - contains the magnitude of each voxel update in the previous iteration which updated that voxel
+Mask - All voxels contained in the 'Mask' (contains true or false values for each voxel) are updated*/
+Real_t updateVoxels_AttTomo (int32_t time_begin, int32_t time_end, int32_t slice_begin, int32_t slice_end, int32_t xy_begin, int32_t xy_end, int32_t* x_rand_select, int32_t* y_rand_select, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, Real_t** DetectorResponse_XY, AMatrixCol* VoxelLineResponse, int32_t Iter, long int *zero_count, Real_t** MagUpdateMap, uint8_t*** Mask)
 {
-	Real_t UpdatedVoxelValue;
-        /*V = ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new];*/ 
+  int32_t p,q,r,slice,i_new,j_new,k_new,idxr,idxq,idxp,index_xy;
+  Real_t V;
+  bool ZSFlag;
+  int32_t sino_view;
+  int32_t z_min, z_max;
+  Real_t total_vox_mag = 0.0;
+  z_min = 0;
+  z_max = ScannedObjectPtr->N_z + 1;
+  if (TomoInputsPtr->node_rank == 0)
+  z_min = 1;
+  if (TomoInputsPtr->node_rank == TomoInputsPtr->node_num - 1)
+  z_max = ScannedObjectPtr->N_z;
+  Real_t Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM];
+  Real_t Time_Nhood[NHOOD_TIME_MAXDIM-1];
+  bool Spatial_BDFlag[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM];
+  bool Time_BDFlag[NHOOD_TIME_MAXDIM-1];
+  int32_t maxview = find_max(ScannedObjectPtr->ProjNum, ScannedObjectPtr->N_time);
+  /*printf ("maxview = %d, size of AMatrixCol = %d\n",maxview,sizeof(AMatrixCol));*/
+  AMatrixCol* AMatrixPtr = (AMatrixCol*)get_spc(maxview, sizeof(AMatrixCol));
+  uint8_t AvgNumXElements = (uint8_t)ceil(3*ScannedObjectPtr->delta_xy/SinogramPtr->delta_r);
+  
+  for (p = 0; p < maxview; p++)
+  {
+    AMatrixPtr[p].values = (Real_t*)get_spc(AvgNumXElements,sizeof(Real_t));
+    AMatrixPtr[p].index = (int32_t*)get_spc(AvgNumXElements,sizeof(int32_t));
+  }
+  #ifdef DEBUG_HIGH
+  fprintf (TomoInputsPtr->debug_file_ptr, "time_begin = %d, time_end = %d, slice_begin = %d, slice_end = %d\n", time_begin, time_end, slice_begin, slice_end);
+  #endif
+  for (i_new = time_begin; i_new <= time_end; i_new++)
+  {
+    for (index_xy = xy_begin; index_xy <= xy_end; index_xy++)
+    {
+      /* printf ("Entering index\n");*/
+      k_new = x_rand_select[index_xy];
+      j_new = y_rand_select[index_xy];
+      MagUpdateMap[j_new][k_new] = 0;
+      /* printf ("Entering mask\n");*/
+      int32_t sum=0;
+      for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++)
+      {
+        sino_view = ScannedObjectPtr->ProjIdxPtr[i_new][p];
+        calcAMatrixColumnforAngle(SinogramPtr, ScannedObjectPtr, DetectorResponse_XY, &(AMatrixPtr[p]), j_new, k_new, sino_view);
+        sum+=AMatrixPtr[p].count;
+      }
+      
+      int32_t z_overlap_num = SinogramPtr->z_overlap_num;
+      int32_t i_tBeginning=slice_begin*z_overlap_num;
+      int32_t sino_viewBegin=ScannedObjectPtr->ProjIdxPtr[i_new][0];
+      int32_t NtNrMul=SinogramPtr->N_t*SinogramPtr->N_r;
+      int32_t distance= SinogramPtr->N_t;
+      Real_t deltar=SinogramPtr->delta_r;
+      float errorSinoThresh=(float)TomoInputsPtr->ErrorSinoThresh;
+      float errorSinoDelta=(float)TomoInputsPtr->ErrorSinoDelta;
+      Real_t projectionValueArray[sum];
+      Real_t* projectionValueArrayPointer=&projectionValueArray[0];
+      Real_t weightValueArray[sum*z_overlap_num*(slice_end-slice_begin+1)];
+      Real_t* weightValueArrayPointer=&weightValueArray[0];
+      Real_t* TomoInputsWeightArrayBegin=&TomoInputsPtr->Weight[sino_viewBegin][0][i_tBeginning];
+      
+      
+      bool selectValueArray[sum*z_overlap_num*(slice_end-slice_begin+1)];
+      bool* selectValueArrayPointer=&selectValueArray[0];
+      bool* ProjSelectArrayBegin=&SinogramPtr->ProjSelect[sino_viewBegin][0][i_tBeginning];
+      
+      Real_t errorValueArray[sum*z_overlap_num*(slice_end-slice_begin+1)];
+      Real_t* errorValueArrayPointer=&errorValueArray[0];
+      Real_t* errorSinoValueArrayBegin=&ErrorSino[sino_viewBegin][0][i_tBeginning];             
+                      
+      for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++){
+        int32_t i_rBeginning=(AMatrixPtr[p].index[0]);
+        Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
 
-        /*
-	for (q = 0; q < sum; q++)
-	{
-	        Real_t projectionEntry=*projectionValueArrayPointer;
-		for (r = 0; r < z_overlap_num; r++)
-		{
-			if (*selectValueArrayPointer )
-			{
+        Real_t* errorSinoValueArray=errorSinoValueArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;        
+        bool* ProjSelectArray=ProjSelectArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;        
+        memcpy(projectionValueArrayPointer,&(AMatrixPtr[p].values[0]),sizeof(Real_t)*AMatrixPtr[p].count);
+        projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[p].count;
+        for (q = 0; q < AMatrixPtr[p].count; q++)
+        {
+          memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num*(slice_end-slice_begin+1));
+          weightValueArrayPointer=weightValueArrayPointer+z_overlap_num*(slice_end-slice_begin+1);
+          TomoInputsWeightArray=TomoInputsWeightArray+distance;
 
-	           		THETA2 += (projectionEntry*projectionEntry*(*weightValueArrayPointer));
-               			THETA1 += -((*errorValueArrayPointer)*projectionEntry*(*weightValueArrayPointer));
-            		}
-			else
-			{
-				THETASelTemp = errorSinoThresh*errorSinoDelta*sqrt(*weightValueArrayPointer)/fabs(*errorValueArrayPointer);
-	            		THETA2 += (projectionEntry*projectionEntry*THETASelTemp);
-            			THETA1 += -((*errorValueArrayPointer)*projectionEntry*THETASelTemp);
-			}
-			weightValueArrayPointer++;
-			errorValueArrayPointer++;
-			selectValueArrayPointer++;
-            	}
-            	weightValueArrayPointer+=(slice_end-slice_begin)*z_overlap_num;
-            	errorValueArrayPointer+=(slice_end-slice_begin)*z_overlap_num;
-            	selectValueArrayPointer+=(slice_end-slice_begin)*z_overlap_num;
-            	projectionValueArrayPointer++;	    
-	}
-         */     
-        
-        UpdatedVoxelValue = CE_FunctionalSubstitution(V, THETA1, THETA2, ScannedObjectPtr, TomoInputsPtr, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag);
-              
-
-	
-/*
-        weightValueArrayPointer=copyweightValueArrayPointer;
-        errorValueArrayPointer=&errorValueArray[0];
-        selectValueArrayPointer=&selectValueArray[0];
-        projectionValueArrayPointer=copyprojectionValueArrayPointer;	 
-	 
-	  for(q=0;q<ScannedObjectPtr->ProjNum[i_new];q++){
-	    int32_t i_rBegin=i_rArray[2*q];
-	    int32_t i_rEnd=i_rArray[2*q+1];
-	    for(t=i_rBegin;t<=i_rEnd;t++){
-	      Real_t temp=(*projectionValueArrayPointer)*(UpdatedVoxelValue - V);	    
-	      for(r=0;r<z_overlap_num;r++){
-	        ErrorSino[sino_viewBegin+q][t][i_tBeginning + r]=(*errorValueArrayPointer)-temp;
-	        SinogramPtr->ProjSelect[sino_viewBegin+q][t][i_tBeginning +r]=(fabs((*errorValueArrayPointer-temp)*sqrt(*weightValueArrayPointer)) < errorSinoThresh);
-                weightValueArrayPointer++;	      	        
-	        errorValueArrayPointer++;
-	        selectValueArrayPointer++;
-	      }
-	    weightValueArrayPointer+=(slice_end-slice_begin)*z_overlap_num;  
-	    projectionValueArrayPointer++; 	      
-	    }
-	    
-	  }	 	
-*/	
-	return UpdatedVoxelValue;	
-
-
-
-
-
-/*
-  	int32_t p, q, r, t, sino_viewBegin, z_overlap_num;
-	Real_t V,THETA1,THETA2,THETASelTemp;	
-	Real_t UpdatedVoxelValue;
-        V = ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new]; 
-	z_overlap_num = SinogramPtr->z_overlap_num;
-        int32_t i_tBeginning=slice*z_overlap_num;
-        float errorSinoThresh=(float)TomoInputsPtr->ErrorSinoThresh;
-        float errorSinoDelta=(float)TomoInputsPtr->ErrorSinoDelta;
-        Real_t deltar=SinogramPtr->delta_r;
-
-	THETA1 = 0.0;
-	THETA2 = 0.0;
-        sino_viewBegin=ScannedObjectPtr->ProjIdxPtr[i_new][0];
-        int32_t sino_viewEnd=ScannedObjectPtr->ProjIdxPtr[i_new][ScannedObjectPtr->ProjNum[i_new]-1];
-        
-        Real_t* TomoInputsWeightArrayBegin=&TomoInputsPtr->Weight[sino_viewBegin][0][i_tBeginning];
-        Real_t* errorSinoValueArrayBegin=&ErrorSino[sino_viewBegin][0][i_tBeginning];
-        bool* ProjSelectArrayBegin=&SinogramPtr->ProjSelect[sino_viewBegin][0][i_tBeginning]; 
-        int32_t NtNrMul=SinogramPtr->N_t*SinogramPtr->N_r; 
-        int32_t distance=  SinogramPtr->N_t;
-
-        int32_t i_rArray[ScannedObjectPtr->ProjNum[i_new]*2];
-        int32_t sum=0;
-        for(p=0;p<ScannedObjectPtr->ProjNum[i_new];p++){
-          i_rArray[p*2]=AMatrixPtr[p].index[0];
-          i_rArray[p*2+1]=AMatrixPtr[p].index[0]+AMatrixPtr[p].count-1;
-          sum+=AMatrixPtr[p].count;
+	  memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num*(slice_end-slice_begin+1));
+	  errorValueArrayPointer=errorValueArrayPointer+z_overlap_num*(slice_end-slice_begin+1);
+          errorSinoValueArray=errorSinoValueArray+distance;
+                    
+          memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num*(slice_end-slice_begin+1));	      
+          selectValueArrayPointer=selectValueArrayPointer+z_overlap_num*(slice_end-slice_begin+1);
+          ProjSelectArray=ProjSelectArray+distance;          
         }
-        int32_t maxI_r=0;
-        int32_t pMax=0;
-        int32_t pMiddle=0;
-        int32_t startI_r=AMatrixPtr[0].index[0];
-        int32_t minI_r=startI_r;
-        int32_t pMin=0;        
-        for(p=0;p<ScannedObjectPtr->ProjNum[i_new];p++){
-          if(i_rArray[p*2]>maxI_r){
-            maxI_r=i_rArray[p*2];
-            pMax=p;
-          }  
-          if(i_rArray[p*2]<minI_r){
-            minI_r=i_rArray[p*2];
-            pMin=p;  
-          }  
-        }
-       int32_t pMiddleCount=0;
-       p=pMiddle;        
-        if(pMax>0&&pMax<(ScannedObjectPtr->ProjNum[i_new]-1)){
-         pMiddle=pMax;
-         while(AMatrixPtr[p].index[0]==maxI_r){
-           pMiddleCount++;
-           p++;
-         }
-       }  
-       else{
-         pMiddle=pMin;
-         while(AMatrixPtr[p].index[0]==minI_r){
-           pMiddleCount++;
-           p++;
-         }
-       }  
-         
+      }
+      
+      for(p=0;p<sum;p++)
+        projectionValueArray[p]=projectionValueArray[p]*deltar;
+      projectionValueArrayPointer=&projectionValueArray[0];
+      weightValueArrayPointer=&weightValueArray[0];
 
-         
-                
-
-        fprintf(TomoInputsPtr->debug_file_ptr, "pMiddleCount is %d i_r-2 %d i_r-1 %d i_r %d i_r+pMiddleCount %d i_r+pMiddleCount+1 %d \n",pMiddleCount,AMatrixPtr[pMiddle-2].index[0],AMatrixPtr[pMiddle-1].index[0],AMatrixPtr[pMiddle].index[0],AMatrixPtr[pMiddle+pMiddleCount].index[0],AMatrixPtr[pMiddle+pMiddleCount+1].index[0]);              
-        
-        Real_t weightValueArray[sum*z_overlap_num];
-        Real_t errorValueArray[sum*z_overlap_num];
-        bool selectValueArray[sum*z_overlap_num];
-        Real_t projectionValueArray[sum];
-        Real_t* weightValueArrayPointer=&weightValueArray[0];
-        Real_t* errorValueArrayPointer=&errorValueArray[0];
-        bool* selectValueArrayPointer=&selectValueArray[0];
-        Real_t* projectionValueArrayPointer=&projectionValueArray[0];
-
-        if(pMiddle<(ScannedObjectPtr->ProjNum[i_new]/2)){
-	  for (p = 0; p <= (pMiddle-1); p++){
-            int32_t i_rBeginning=(AMatrixPtr[p].index[0]);          	                   
-            Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            Real_t* errorSinoValueArray=errorSinoValueArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            bool* ProjSelectArray=ProjSelectArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 
- 	    memcpy(projectionValueArrayPointer,&(AMatrixPtr[p].values[0]),sizeof(Real_t)*AMatrixPtr[p].count);
- 	    projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[p].count;                  
-	    for (q = 0; q < AMatrixPtr[p].count; q++)
-	    {
-	        memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	        weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-                TomoInputsWeightArray=TomoInputsWeightArray+distance;	      
-	        memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	        errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-                errorSinoValueArray=errorSinoValueArray+distance;         	      
-	        memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-                selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-                ProjSelectArray=ProjSelectArray+distance;
-	    }
-          }
-          int32_t i_rBeginning=(AMatrixPtr[pMiddle].index[0]);
-          Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+pMiddle*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-          Real_t* errorSinoValueArray=errorSinoValueArrayBegin+pMiddle*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-          bool* ProjSelectArray=ProjSelectArrayBegin+pMiddle*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;          	                             
-	  for (p = pMiddle; p < (pMiddle+pMiddleCount); p++){
- 
- 	    memcpy(projectionValueArrayPointer,&(AMatrixPtr[p].values[0]),sizeof(Real_t)*AMatrixPtr[p].count);
- 	    projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[p].count;                  
-	    for (q = 0; q < AMatrixPtr[p].count; q++)
-	    {
-	        memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	        weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-                TomoInputsWeightArray=TomoInputsWeightArray+distance;	      
-	        memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	        errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-                errorSinoValueArray=errorSinoValueArray+distance;         	      
-	        memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-                selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-                ProjSelectArray=ProjSelectArray+distance;
-	    }
-          } 
-	  for (p = (pMiddle+1); p <= 2*pMiddle; p++){
-            int32_t i_rBeginning=(AMatrixPtr[p].index[0]);	                   
-            Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            Real_t* errorSinoValueArray=errorSinoValueArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            bool* ProjSelectArray=ProjSelectArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 
- 	    memcpy(projectionValueArrayPointer,&(AMatrixPtr[p].values[0]),sizeof(Real_t)*AMatrixPtr[p].count);
- 	    projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[p].count;                  
-	    for (q = 0; q < AMatrixPtr[p].count; q++)
-	    {
-	        memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	        weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-                TomoInputsWeightArray=TomoInputsWeightArray+distance;	      
-	        memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	        errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-                errorSinoValueArray=errorSinoValueArray+distance;         	      
-	        memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-                selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-                ProjSelectArray=ProjSelectArray+distance;
-	    }
-          } 
-	  for (p = (2*pMiddle+1); p <=( ScannedObjectPtr->ProjNum[i_new]-1); p++){
-            int32_t i_rBeginning=(AMatrixPtr[p].index[0]);	                   
-            Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            Real_t* errorSinoValueArray=errorSinoValueArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            bool* ProjSelectArray=ProjSelectArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 
- 	    memcpy(projectionValueArrayPointer,&(AMatrixPtr[p].values[0]),sizeof(Real_t)*AMatrixPtr[p].count);
- 	    projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[p].count;                  
-	    for (q = 0; q < AMatrixPtr[p].count; q++)
-	    {
-	        memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	        weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-                TomoInputsWeightArray=TomoInputsWeightArray+distance;	      
-	        memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	        errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-                errorSinoValueArray=errorSinoValueArray+distance;         	      
-	        memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-                selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-                ProjSelectArray=ProjSelectArray+distance;
-	    }
-          }                                     
-        }
-        else{
-	  for (p = 0; p <= (ScannedObjectPtr->ProjNum[i_new]-1-(2*(ScannedObjectPtr->ProjNum[i_new]-1-pMiddle)+1)); p++){
-            int32_t i_rBeginning=(AMatrixPtr[p].index[0]);	                   
-            Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            Real_t* errorSinoValueArray=errorSinoValueArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            bool* ProjSelectArray=ProjSelectArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 
- 	    memcpy(projectionValueArrayPointer,&(AMatrixPtr[p].values[0]),sizeof(Real_t)*AMatrixPtr[p].count);
- 	    projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[p].count;                  
-	    for (q = 0; q < AMatrixPtr[p].count; q++)
-	    {
-	        memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	        weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-                TomoInputsWeightArray=TomoInputsWeightArray+distance;	      
-	        memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	        errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-                errorSinoValueArray=errorSinoValueArray+distance;         	      
-	        memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-                selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-                ProjSelectArray=ProjSelectArray+distance;
-	    }
-          }
-	  for (p = (ScannedObjectPtr->ProjNum[i_new]-(2*(ScannedObjectPtr->ProjNum[i_new]-1-pMiddle)+1)); p <=(pMiddle-1); p++){
-            int32_t i_rBeginning=(AMatrixPtr[p].index[0]);	                   
-            Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            Real_t* errorSinoValueArray=errorSinoValueArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            bool* ProjSelectArray=ProjSelectArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 
- 	    memcpy(projectionValueArrayPointer,&(AMatrixPtr[p].values[0]),sizeof(Real_t)*AMatrixPtr[p].count);
- 	    projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[p].count;                  
-	    for (q = 0; q < AMatrixPtr[p].count; q++)
-	    {
-	        memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	        weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-                TomoInputsWeightArray=TomoInputsWeightArray+distance;	      
-	        memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	        errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-                errorSinoValueArray=errorSinoValueArray+distance;         	      
-	        memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-                selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-                ProjSelectArray=ProjSelectArray+distance;
-	    }
-          }
-	  for (p = pMiddle; p <(pMiddle+1); p++){
-            int32_t i_rBeginning=(AMatrixPtr[p].index[0]);	                   
-            Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            Real_t* errorSinoValueArray=errorSinoValueArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            bool* ProjSelectArray=ProjSelectArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 
- 	    memcpy(projectionValueArrayPointer,&(AMatrixPtr[p].values[0]),sizeof(Real_t)*AMatrixPtr[p].count);
- 	    projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[p].count;                  
-	    for (q = 0; q < AMatrixPtr[p].count; q++)
-	    {
-	        memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	        weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-                TomoInputsWeightArray=TomoInputsWeightArray+distance;	      
-	        memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	        errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-                errorSinoValueArray=errorSinoValueArray+distance;         	      
-	        memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-                selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-                ProjSelectArray=ProjSelectArray+distance;
-	    }
-          }
-	  for (p = (pMiddle+1); p <=(ScannedObjectPtr->ProjNum[i_new]-1); p++){
-            int32_t i_rBeginning=(AMatrixPtr[p].index[0]);	                   
-            Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            Real_t* errorSinoValueArray=errorSinoValueArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            bool* ProjSelectArray=ProjSelectArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 
- 	    memcpy(projectionValueArrayPointer,&(AMatrixPtr[p].values[0]),sizeof(Real_t)*AMatrixPtr[p].count);
- 	    projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[p].count;                  
-	    for (q = 0; q < AMatrixPtr[p].count; q++)
-	    {
-	        memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	        weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-                TomoInputsWeightArray=TomoInputsWeightArray+distance;	      
-	        memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	        errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-                errorSinoValueArray=errorSinoValueArray+distance;         	      
-	        memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-                selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-                ProjSelectArray=ProjSelectArray+distance;
-	    }
-          }                                      
-        }
-*/
-
-        
-        /*
-        if(pMiddle<(ScannedObjectPtr->ProjNum[i_new]/2)){
-	  for (p = 0; p <= (pMiddle-1); p++){
-                int32_t i_rBeginning=(AMatrixPtr[p].index[0]);	                   
-            	int32_t size=AMatrixPtr[p].count;	                   
-            	Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            	Real_t* TomoInputsWeightArray2=TomoInputsWeightArray+2*(pMiddle-p)*NtNrMul;
-            	Real_t* errorSinoValueArray=errorSinoValueArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            	Real_t* errorSinoValueArray2=errorSinoValueArray+2*(pMiddle-p)*NtNrMul;
-            	bool* ProjSelectArray=ProjSelectArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            	bool* ProjSelectArray2=ProjSelectArray+2*(pMiddle-p)*NtNrMul;
- 
- 	    	memcpy(projectionValueArrayPointer,&(AMatrixPtr[p].values[0]),sizeof(Real_t)*size);
- 	    	projectionValueArrayPointer=projectionValueArrayPointer+size;
- 	    	memcpy(projectionValueArrayPointer,&(AMatrixPtr[2*pMiddle-p].values[0]),sizeof(Real_t)*size);
- 	    	projectionValueArrayPointer=projectionValueArrayPointer+size; 	                      
-	    	for (q = 0; q < size; q++)
-	    	{
-	      		memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	      		weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-              		TomoInputsWeightArray=TomoInputsWeightArray+distance;
-	      		memcpy(weightValueArrayPointer,TomoInputsWeightArray2,sizeof(Real_t)*z_overlap_num);
-	      		weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-              		TomoInputsWeightArray2=TomoInputsWeightArray2+distance;  
-              
-                          	      
-	      		memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	      		errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-              		errorSinoValueArray=errorSinoValueArray+distance;
-	      		memcpy(errorValueArrayPointer,errorSinoValueArray2,sizeof(Real_t)*z_overlap_num);
-	      		errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-              		errorSinoValueArray2=errorSinoValueArray2+distance;               
-              
-                      	      
-	      		memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-              		selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-              		ProjSelectArray=ProjSelectArray+distance;
-	      		memcpy(selectValueArrayPointer,ProjSelectArray2,sizeof(bool)*z_overlap_num);	      
-              		selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-              		ProjSelectArray2=ProjSelectArray2+distance;
-              	}		  
-          }
-          int32_t i_rBeginning=(AMatrixPtr[pMiddle].index[0]);	                   
-          Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+pMiddle*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-          Real_t* errorSinoValueArray=errorSinoValueArrayBegin+pMiddle*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-          bool* ProjSelectArray=ProjSelectArrayBegin+pMiddle*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 
- 	  memcpy(projectionValueArrayPointer,&(AMatrixPtr[pMiddle].values[0]),sizeof(Real_t)*AMatrixPtr[pMiddle].count);
- 	  projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[pMiddle].count;                  
-	  for (q = 0; q < AMatrixPtr[pMiddle].count; q++)
-	  {
-	      memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	      weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-              TomoInputsWeightArray=TomoInputsWeightArray+distance;	      
-	      memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	      errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-              errorSinoValueArray=errorSinoValueArray+distance;         	      
-	      memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-              selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-              ProjSelectArray=ProjSelectArray+distance;
-	  }
-	  for (p = (2*pMiddle+1); p <= (ScannedObjectPtr->ProjNum[i_new]-1); p++){
-            i_rBeginning=(AMatrixPtr[p].index[0]);	                   
-            TomoInputsWeightArray=TomoInputsWeightArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            errorSinoValueArray=errorSinoValueArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            ProjSelectArray=ProjSelectArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 
- 	    memcpy(projectionValueArrayPointer,&(AMatrixPtr[p].values[0]),sizeof(Real_t)*AMatrixPtr[p].count);
- 	    projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[p].count;                  
-	    for (q = 0; q < AMatrixPtr[p].count; q++)
-	    {
-	        memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	        weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-                TomoInputsWeightArray=TomoInputsWeightArray+distance;	      
-	        memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	        errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-                errorSinoValueArray=errorSinoValueArray+distance;         	      
-	        memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-                selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-                ProjSelectArray=ProjSelectArray+distance;
-	    }
-          }
-	                    
-        }
-        else{
-	for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++){
-          int32_t i_rBeginning=(AMatrixPtr[p].index[0]);	                   
-          Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-          Real_t* errorSinoValueArray=errorSinoValueArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-          bool* ProjSelectArray=ProjSelectArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 
- 	  memcpy(projectionValueArrayPointer,&(AMatrixPtr[p].values[0]),sizeof(Real_t)*AMatrixPtr[p].count);
- 	  projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[p].count;                  
-	  for (q = 0; q < AMatrixPtr[p].count; q++)
-	  {
-	      memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	      weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-              TomoInputsWeightArray=TomoInputsWeightArray+distance;	      
-	      memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	      errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-              errorSinoValueArray=errorSinoValueArray+distance;         	      
-	      memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-              selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-              ProjSelectArray=ProjSelectArray+distance;
-	  }
-        }        
-        
-        }                
-        */
-        
-        
-
-        /*
-	for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++){
-          int32_t i_rBeginning=(AMatrixPtr[p].index[0]);	                   
-          Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-          Real_t* errorSinoValueArray=errorSinoValueArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-          bool* ProjSelectArray=ProjSelectArrayBegin+p*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 
- 	  memcpy(projectionValueArrayPointer,&(AMatrixPtr[p].values[0]),sizeof(Real_t)*AMatrixPtr[p].count);
- 	  projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[p].count;                  
-	  for (q = 0; q < AMatrixPtr[p].count; q++)
-	  {
-	      memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	      weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-              TomoInputsWeightArray=TomoInputsWeightArray+distance;	      
-	      memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	      errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-              errorSinoValueArray=errorSinoValueArray+distance;         	      
-	      memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-              selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-              ProjSelectArray=ProjSelectArray+distance;
-	  }
-        }
-        */
-        /*
-            for(p=0;p<sum;p++)
-	      projectionValueArray[p]=projectionValueArray[p]*deltar;        
-
-        
-       
-        weightValueArrayPointer=&weightValueArray[0];
-        errorValueArrayPointer=&errorValueArray[0];
-        selectValueArrayPointer=&selectValueArray[0];
+      errorValueArrayPointer=&errorValueArray[0];      
+      selectValueArrayPointer=&selectValueArray[0];      
+      
+      Real_t UpdatedVoxelValueArray[slice_end-slice_begin+1];
+      Real_t ObjectArray[slice_end-slice_begin+1];
+      Real_t THETA1[slice_end-slice_begin+1];
+      Real_t THETA2[slice_end-slice_begin+1];
+      int zeroSkipping[slice_end-slice_begin+1];
+      for(p=0;p<(slice_end-slice_begin+1);p++){
+        ObjectArray[p]=ScannedObjectPtr->Object[i_new][p+slice_begin+1][j_new][k_new];
+      }
+      
+      for (q=0;q<=(slice_end-slice_begin);q++){
+        weightValueArrayPointer=&weightValueArray[0]+q*z_overlap_num;
+        errorValueArrayPointer=&errorValueArray[0]+q*z_overlap_num;
+        selectValueArrayPointer=&selectValueArray[0]+q*z_overlap_num;
         projectionValueArrayPointer=&projectionValueArray[0];
+	Real_t TH2=0.0;
+	Real_t TH1=0.0;
+        Real_t THETASelTemp;             
+        for (p = 0; p < sum; p++)
+        {
+	  Real_t projectionEntry=*projectionValueArrayPointer;          	  
+	  for (r = 0; r < z_overlap_num; r++)
+	  {
+	     if (*selectValueArrayPointer )
+	     {
 
-	for (q = 0; q < sum; q++)
-	{
-	        Real_t projectionEntry=*projectionValueArrayPointer;
-		for (r = 0; r < z_overlap_num; r++)
-		{
-			if (*selectValueArrayPointer )
-			{
-
-	           		THETA2 += (projectionEntry*projectionEntry*(*weightValueArrayPointer));
-               			THETA1 += -((*errorValueArrayPointer)*projectionEntry*(*weightValueArrayPointer));
-            		}
-			else
-			{
-				THETASelTemp = errorSinoThresh*errorSinoDelta*sqrt(*weightValueArrayPointer)/fabs(*errorValueArrayPointer);
-	            		THETA2 += (projectionEntry*projectionEntry*THETASelTemp);
-            			THETA1 += -((*errorValueArrayPointer)*projectionEntry*THETASelTemp);
-			}
-			weightValueArrayPointer++;
-			errorValueArrayPointer++;
-			selectValueArrayPointer++;
-            	}
-            	projectionValueArrayPointer++;	    
-	}
-
-
-        
-        UpdatedVoxelValue = CE_FunctionalSubstitution(V, THETA1, THETA2, ScannedObjectPtr, TomoInputsPtr, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag);
-              
-
-	
-
-        weightValueArrayPointer=&weightValueArray[0];
-        errorValueArrayPointer=&errorValueArray[0];
-        selectValueArrayPointer=&selectValueArray[0];
-        projectionValueArrayPointer=&projectionValueArray[0];	 
-	 
-	for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++){
-		int32_t sino_view = ScannedObjectPtr->ProjIdxPtr[i_new][p];
-		for (q = 0; q < AMatrixPtr[p].count; q++)
-        	{
-               	    	int32_t i_r = (AMatrixPtr[p].index[q]);
-        	    	Real_t ProjectionEntry = (AMatrixPtr[p].values[q]*deltar);
-			for (r = 0; r < z_overlap_num; r++)
-			{ 
-				int32_t i_t = slice*z_overlap_num + r;
-	        		ErrorSino[sino_view][i_r][i_t] -= (ProjectionEntry*(UpdatedVoxelValue - V));
-	   			if (fabs(ErrorSino[sino_view][i_r][i_t]*sqrt(TomoInputsPtr->Weight[sino_view][i_r][i_t])) < TomoInputsPtr->ErrorSinoThresh)
-					SinogramPtr->ProjSelect[sino_view][i_r][i_t] = true;
-				else
-					SinogramPtr->ProjSelect[sino_view][i_r][i_t] = false;
-	   		}
-		}
-	}	 	
-	
-	return UpdatedVoxelValue;	
-        */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-  	int32_t p, q, r, t, sino_viewBegin, z_overlap_num;
-	Real_t V,THETA1,THETA2,THETASelTemp;	
-	Real_t UpdatedVoxelValue;
-        V = ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new]; 
-	z_overlap_num = SinogramPtr->z_overlap_num;
-        int32_t i_tBeginning=slice*z_overlap_num;
-        float errorSinoThresh=(float)TomoInputsPtr->ErrorSinoThresh;
-        float errorSinoDelta=(float)TomoInputsPtr->ErrorSinoDelta;
-        Real_t deltar=SinogramPtr->delta_r;
-
-	THETA1 = 0.0;
-	THETA2 = 0.0;
-        sino_viewBegin=ScannedObjectPtr->ProjIdxPtr[i_new][0];
-        
-        Real_t* TomoInputsWeightArrayBegin=&TomoInputsPtr->Weight[sino_viewBegin][0][i_tBeginning];
-        Real_t* errorSinoValueArrayBegin=&ErrorSino[sino_viewBegin][0][i_tBeginning];
-        bool* ProjSelectArrayBegin=&SinogramPtr->ProjSelect[sino_viewBegin][0][i_tBeginning]; 
-        int32_t NtNrMul=SinogramPtr->N_t*SinogramPtr->N_r; 
-        int32_t distance=  SinogramPtr->N_t;
-
-        int32_t i_rArray[ScannedObjectPtr->ProjNum[i_new]*2];
-        int32_t sum=0;
-        for(p=0;p<ScannedObjectPtr->ProjNum[i_new];p++){
-          i_rArray[p*2]=AMatrixPtr[p].index[0];
-          i_rArray[p*2+1]=AMatrixPtr[p].index[0]+AMatrixPtr[p].count-1;
-          sum+=AMatrixPtr[p].count;
+	         TH2 += (projectionEntry*projectionEntry*(*weightValueArrayPointer));
+                 TH1 += -((*errorValueArrayPointer)*projectionEntry*(*weightValueArrayPointer));
+             }
+	     else
+	     {
+	         THETASelTemp = errorSinoThresh*errorSinoDelta*sqrt(*weightValueArrayPointer)/fabs(*errorValueArrayPointer);
+	         TH2 += (projectionEntry*projectionEntry*THETASelTemp);
+                 TH1 += -((*errorValueArrayPointer)*projectionEntry*THETASelTemp);
+	     }
+	     weightValueArrayPointer++;
+	     errorValueArrayPointer++;
+	     selectValueArrayPointer++;
+          }
+        weightValueArrayPointer+=(slice_end-slice_begin)*z_overlap_num;
+        errorValueArrayPointer+=(slice_end-slice_begin)*z_overlap_num;
+        selectValueArrayPointer+=(slice_end-slice_begin)*z_overlap_num;
+        projectionValueArrayPointer++;	                        	          
         }
-        
-        int32_t maxI_r=0;
-        int32_t pMax=0;
-        int32_t pMiddle=0;
-        int32_t maxCount=0;
-        int32_t startI_r=AMatrixPtr[0].index[0];
-        int32_t minI_r=startI_r;
-        int32_t pMin=0;        
-        for(p=0;p<ScannedObjectPtr->ProjNum[i_new];p++){
-          if(i_rArray[p*2]>maxI_r){
-            maxI_r=i_rArray[p*2];
-            pMax=p;
-            maxCount=AMatrixPtr[p].count;
-          }  
-          if(i_rArray[p*2]<minI_r){
-            minI_r=i_rArray[p*2];
-            pMin=p;  
-          }  
-        }
-        if(pMax>0&&pMax<ScannedObjectPtr->ProjNum[i_new])
-         pMiddle=pMax;
-       else
-         pMiddle=pMin;
-         
-       int32_t copyCount=0;                 
-       if((2*pMiddle)>=ScannedObjectPtr->ProjNum[i_new])
-         copyCount=pMiddle+1;
-       else
-         copyCount= ScannedObjectPtr->ProjNum[i_new] - pMiddle;        
-        
-        
-        
-        
-        Real_t weightValueArray[sum*z_overlap_num];
-        Real_t errorValueArray[sum*z_overlap_num];
-        bool selectValueArray[sum*z_overlap_num];
-        Real_t projectionValueArray[sum];
-        Real_t* weightValueArrayPointer=&weightValueArray[0];
-        Real_t* errorValueArrayPointer=&errorValueArray[0];
-        bool* selectValueArrayPointer=&selectValueArray[0];
-        Real_t* projectionValueArrayPointer=&projectionValueArray[0];
-        
+        THETA2[q]=TH2;
+        THETA1[q]=TH1;        
+      }      
+      
+      
+      projectionValueArrayPointer=&projectionValueArray[0];
+      weightValueArrayPointer=&weightValueArray[0];
 
-        fprintf(TomoInputsPtr->debug_file_ptr, "reach 1 \n");
-        
-	for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++){
-	  if(p==0){
-            int32_t i_rBeginning=(AMatrixPtr[pMiddle].index[0]);	                   
-            Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+pMiddle*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            Real_t* errorSinoValueArray=errorSinoValueArrayBegin+pMiddle*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            bool* ProjSelectArray=ProjSelectArrayBegin+pMiddle*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 
- 	    memcpy(projectionValueArrayPointer,&(AMatrixPtr[pMiddle].values[0]),sizeof(Real_t)*AMatrixPtr[pMiddle].count);
- 	    projectionValueArrayPointer=projectionValueArrayPointer+AMatrixPtr[pMiddle].count;                  
-	    for (q = 0; q < AMatrixPtr[pMiddle].count; q++)
-	    {
-	      memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	      weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-              TomoInputsWeightArray=TomoInputsWeightArray+distance;	      
-	      memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	      errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-              errorSinoValueArray=errorSinoValueArray+distance;         	      
-	      memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-              selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-              ProjSelectArray=ProjSelectArray+distance;
-	    }
-	  }
-	  else{
-	    if((pMiddle-p)>=0 && (pMiddle+p)<ScannedObjectPtr->ProjNum[i_new]){
-                int32_t i_rBeginning=(AMatrixPtr[pMiddle-p].index[0]);
-            	int32_t size=AMatrixPtr[pMiddle-p].count;	                   
-            	Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+(pMiddle-p)*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            	Real_t* TomoInputsWeightArray2=TomoInputsWeightArray+2*p*NtNrMul;
-            	Real_t* errorSinoValueArray=errorSinoValueArrayBegin+(pMiddle-p)*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            	Real_t* errorSinoValueArray2=errorSinoValueArray+2*p*NtNrMul;
-            	bool* ProjSelectArray=ProjSelectArrayBegin+(pMiddle-p)*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            	bool* ProjSelectArray2=ProjSelectArray+2*p*NtNrMul;
- 
- 	    	memcpy(projectionValueArrayPointer,&(AMatrixPtr[pMiddle-p].values[0]),sizeof(Real_t)*size);
- 	    	projectionValueArrayPointer=projectionValueArrayPointer+size;
- 	    	memcpy(projectionValueArrayPointer,&(AMatrixPtr[pMiddle+p].values[0]),sizeof(Real_t)*size);
- 	    	projectionValueArrayPointer=projectionValueArrayPointer+size; 	                      
-	    	for (q = 0; q < size; q++)
-	    	{
-	      		memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	      		weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-              		TomoInputsWeightArray=TomoInputsWeightArray+distance;
-	      		memcpy(weightValueArrayPointer,TomoInputsWeightArray2,sizeof(Real_t)*z_overlap_num);
-	      		weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-              		TomoInputsWeightArray2=TomoInputsWeightArray2+distance;  
-              
-                          	      
-	      		memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	      		errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-              		errorSinoValueArray=errorSinoValueArray+distance;
-	      		memcpy(errorValueArrayPointer,errorSinoValueArray2,sizeof(Real_t)*z_overlap_num);
-	      		errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-              		errorSinoValueArray2=errorSinoValueArray2+distance;               
-              
-                      	      
-	      		memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-              		selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-              		ProjSelectArray=ProjSelectArray+distance;
-	      		memcpy(selectValueArrayPointer,ProjSelectArray2,sizeof(bool)*z_overlap_num);	      
-              		selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-              		ProjSelectArray2=ProjSelectArray2+distance;
-              	}	              
+      errorValueArrayPointer=&errorValueArray[0];      
+      selectValueArrayPointer=&selectValueArray[0]; 
+      
+            
+      for (slice = slice_begin; slice <= slice_end; slice++) {
+        /*	printf ("Entering slice\n");*/
+        /*For a given (i,j,k) store its 26 point neighborhood*/
+        if (Mask[j_new][k_new][slice] == 1)
+        {
+          if (i_new - 1 >= 0){
+            Time_Nhood[0] = ScannedObjectPtr->Object[i_new-1][slice+1][j_new][k_new];
+            Time_BDFlag[0] = true;
+          }
+          else
+          {
+            Time_Nhood[0] = 0.0;
+            Time_BDFlag[0] = false;
+          }
+          if (i_new + 1 < ScannedObjectPtr->N_time){
+            Time_Nhood[1] = ScannedObjectPtr->Object[i_new+1][slice+1][j_new][k_new];
+            Time_BDFlag[1] = true;
+          }
+          else
+          {
+            Time_Nhood[1] = 0.0;
+            Time_BDFlag[1] = false;
+          }
+          
+          
+          for (p = 0; p < NHOOD_Z_MAXDIM; p++)
+          {
+            idxp = slice + p;
+            if (idxp >= z_min && idxp <= z_max)
+            {
+              for (q = 0; q < NHOOD_Y_MAXDIM; q++)
+              {
+                idxq = j_new + q - 1;
+                if(idxq >= 0 && idxq < ScannedObjectPtr->N_y)
+                {
+                  for (r = 0; r < NHOOD_X_MAXDIM; r++)
+                  {
+                    idxr = k_new + r - 1;
+                    if(idxr >= 0 && idxr < ScannedObjectPtr->N_x){
+                      Spatial_Nhood[p][q][r] = ScannedObjectPtr->Object[i_new][idxp][idxq][idxr];
+                      Spatial_BDFlag[p][q][r] = true;
+                    }
+                    else
+                    {
+                      Spatial_Nhood[p][q][r] = 0.0;
+                      Spatial_BDFlag[p][q][r] = false;
+                    }
+                  }
+                }
+                else
+                {
+                  for (r = 0; r <NHOOD_X_MAXDIM; r++){
+                    Spatial_Nhood[p][q][r] = 0.0;
+                    Spatial_BDFlag[p][q][r] = false;
+                  }
+                }
+              }
             }
-            else if((pMiddle-p)>=0 && (pMiddle+p)>=ScannedObjectPtr->ProjNum[i_new]){
-             	int32_t i_rBeginning=(AMatrixPtr[pMiddle-p].index[0]);
-             	int32_t size=AMatrixPtr[pMiddle-p].count;	                   
-            	Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+(pMiddle-p)*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            	Real_t* errorSinoValueArray=errorSinoValueArrayBegin+(pMiddle-p)*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            	bool* ProjSelectArray=ProjSelectArrayBegin+(pMiddle-p)*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 	    	memcpy(projectionValueArrayPointer,&(AMatrixPtr[pMiddle-p].values[0]),sizeof(Real_t)*size);
- 	    	projectionValueArrayPointer=projectionValueArrayPointer+size;
-	    	for (q = 0; q < size; q++)
-	    	{
-	      		memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	      		weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-              		TomoInputsWeightArray=TomoInputsWeightArray+distance;
-	      		memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	      		errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-              		errorSinoValueArray=errorSinoValueArray+distance; 
-	      		memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-              		selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-              		ProjSelectArray=ProjSelectArray+distance;              		             			    	
-	    	} 	    	            	            	            	             		                              
+            else
+            {
+              for (q = 0; q < NHOOD_Y_MAXDIM; q++){
+                for (r = 0; r < NHOOD_X_MAXDIM; r++){
+                  Spatial_Nhood[p][q][r] = 0.0;
+                  Spatial_BDFlag[p][q][r] = false;
+                }
+              }
             }
-            else if ((pMiddle-p)<0 && (pMiddle+p)<ScannedObjectPtr->ProjNum[i_new]){
-             	int32_t i_rBeginning=(AMatrixPtr[pMiddle+p].index[0]);
-             	int32_t size=AMatrixPtr[pMiddle+p].count;	                   
-            	Real_t* TomoInputsWeightArray=TomoInputsWeightArrayBegin+(pMiddle+p)*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            	Real_t* errorSinoValueArray=errorSinoValueArrayBegin+(pMiddle+p)*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
-            	bool* ProjSelectArray=ProjSelectArrayBegin+(pMiddle+p)*NtNrMul+(i_rBeginning)*SinogramPtr->N_t;
- 	    	memcpy(projectionValueArrayPointer,&(AMatrixPtr[pMiddle+p].values[0]),sizeof(Real_t)*size);
- 	    	projectionValueArrayPointer=projectionValueArrayPointer+size;
-	    	for (q = 0; q < size; q++)
-	    	{
-	      		memcpy(weightValueArrayPointer,TomoInputsWeightArray,sizeof(Real_t)*z_overlap_num);
-	      		weightValueArrayPointer=weightValueArrayPointer+z_overlap_num;
-              		TomoInputsWeightArray=TomoInputsWeightArray+distance;
-	      		memcpy(errorValueArrayPointer,errorSinoValueArray,sizeof(Real_t)*z_overlap_num);
-	      		errorValueArrayPointer=errorValueArrayPointer+z_overlap_num;
-              		errorSinoValueArray=errorSinoValueArray+distance; 
-	      		memcpy(selectValueArrayPointer,ProjSelectArray,sizeof(bool)*z_overlap_num);	      
-              		selectValueArrayPointer=selectValueArrayPointer+z_overlap_num;
-              		ProjSelectArray=ProjSelectArray+distance;              		             			    	
-	    	}             
-            }
-            else{
+          }
+          Spatial_Nhood[(NHOOD_Y_MAXDIM-1)/2][(NHOOD_X_MAXDIM-1)/2][(NHOOD_Z_MAXDIM-1)/2] = 0.0;
+          /*V = ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new];*/ /*Store the present value of the voxel*/
+          #ifdef ZERO_SKIPPING
+          /*Zero Skipping Algorithm*/
+          ZSFlag = true;
+          if(ObjectArray[slice-slice_begin] == 0.0 && Iter > 1) /*Iteration starts from 1. Iteration 0 corresponds to initial cost before ICD*/
+          {
+            
+            if (Time_Nhood[0] > 0.0 || Time_Nhood[1] > 0.0)
+            ZSFlag = false;
+            
+            for(p = 0; p < NHOOD_Y_MAXDIM; p++)
+            for(q = 0; q < NHOOD_X_MAXDIM; q++)
+            for(r = 0; r < NHOOD_Z_MAXDIM; r++)
+            if(Spatial_Nhood[p][q][r] > 0.0)
+            {
+              ZSFlag = false;
               break;
-            }              
-	  }
-	  
+            }
+          }
+          else
+          {
+            ZSFlag = false;
+          }
+          #else
+          ZSFlag = false; /*do ICD on all voxels*/
+          #endif /*#ifdef ZERO_SKIPPING*/
+          if(ZSFlag == false)
+          {
+            zeroSkipping[slice-slice_begin]=1;
+        	UpdatedVoxelValueArray[slice-slice_begin] = CE_FunctionalSubstitution(ObjectArray[slice-slice_begin], THETA1[slice-slice_begin], THETA2[slice-slice_begin], ScannedObjectPtr, TomoInputsPtr, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag);
+          }
+          else
+          (*zero_count)++;
         }
-            for(p=0;p<sum;p++)
-	      projectionValueArray[p]=projectionValueArray[p]*deltar;               
-        
-        fprintf(TomoInputsPtr->debug_file_ptr, "reach 2 \n");        	        	
-
-        
-       
-        weightValueArrayPointer=&weightValueArray[0];
-        errorValueArrayPointer=&errorValueArray[0];
-        selectValueArrayPointer=&selectValueArray[0];
-        projectionValueArrayPointer=&projectionValueArray[0];
-
-	for (q = 0; q < sum; q++)
-	{
-	        Real_t projectionEntry=*projectionValueArrayPointer;
-		for (r = 0; r < z_overlap_num; r++)
-		{
-			if (*selectValueArrayPointer )
-			{
-
-	           		THETA2 += (projectionEntry*projectionEntry*(*weightValueArrayPointer));
-               			THETA1 += -((*errorValueArrayPointer)*projectionEntry*(*weightValueArrayPointer));
-            		}
-			else
-			{
-				THETASelTemp = errorSinoThresh*errorSinoDelta*sqrt(*weightValueArrayPointer)/fabs(*errorValueArrayPointer);
-	            		THETA2 += (projectionEntry*projectionEntry*THETASelTemp);
-            			THETA1 += -((*errorValueArrayPointer)*projectionEntry*THETASelTemp);
-			}
-			weightValueArrayPointer++;
-			errorValueArrayPointer++;
-			selectValueArrayPointer++;
-            	}
-            	projectionValueArrayPointer++;	    
+      }
+      projectionValueArrayPointer=&projectionValueArray[0];
+      weightValueArrayPointer=&weightValueArray[0];
+      errorValueArrayPointer=&errorValueArray[0];            
+      for(p=0;p<(slice_end-slice_begin+1);p++){
+        if(zeroSkipping[p]==1){
+          ScannedObjectPtr->Object[i_new][slice_begin+p+1][j_new][k_new]=UpdatedVoxelValueArray[p];
+          MagUpdateMap[j_new][k_new] += fabs(UpdatedVoxelValueArray[p] - ObjectArray[p]);
+          total_vox_mag += fabs(UpdatedVoxelValueArray[p]);
+        }
+      }
+      sino_viewBegin = ScannedObjectPtr->ProjIdxPtr[i_new][0];
+      int32_t i_tBegin = slice_begin*z_overlap_num;
+      int32_t s=0;            	            
+      for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++){
+        int32_t i_rBegin = (AMatrixPtr[p].index[0]);
+        Real_t* errorSinoValueArray=errorSinoValueArrayBegin+p*NtNrMul+(i_rBegin)*SinogramPtr->N_t;        
+        bool* ProjSelectArray=ProjSelectArrayBegin+p*NtNrMul+(i_rBegin)*SinogramPtr->N_t;        
+        	  
+	for (q = 0; q < AMatrixPtr[p].count; q++)
+        {
+            Real_t ProjectionEntry = (*projectionValueArrayPointer);
+	    for (s=0;s<=(slice_end-slice_begin);s++){
+	      if(zeroSkipping[s]==1){ 	            	   	    
+	        Real_t temp=(ProjectionEntry*(UpdatedVoxelValueArray[s] - ObjectArray[s]));
+	        for (r = 0; r <z_overlap_num; r++)
+	        {
+	            *errorSinoValueArray =(*errorValueArrayPointer)- temp;
+		    *ProjSelectArray = (fabs((*errorValueArrayPointer- temp)*sqrt(*weightValueArrayPointer)) < errorSinoThresh);
+		    weightValueArrayPointer++;
+		    errorValueArrayPointer++;
+		    errorSinoValueArray++;
+		    ProjSelectArray++;	
+	        }
+	      }
+	      else{
+	       weightValueArrayPointer+=z_overlap_num;
+	       errorValueArrayPointer+=z_overlap_num;
+	       errorSinoValueArray+=z_overlap_num;
+	       ProjSelectArray+=z_overlap_num;
+	      }  
+	    }
+	    projectionValueArrayPointer++;
+	    errorSinoValueArray=errorSinoValueArray-z_overlap_num*(slice_end-slice_begin+1)+distance;
+	    ProjSelectArray=ProjSelectArray-z_overlap_num*(slice_end-slice_begin+1)+distance;
 	}
-        fprintf(TomoInputsPtr->debug_file_ptr, "reach 3 \n");               
+      }          
 
-        
-        UpdatedVoxelValue = CE_FunctionalSubstitution(V, THETA1, THETA2, ScannedObjectPtr, TomoInputsPtr, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag);
-              
-
-	
-
-	for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++){
-		int32_t sino_view = ScannedObjectPtr->ProjIdxPtr[i_new][p];
-		for (q = 0; q < AMatrixPtr[p].count; q++)
-        	{
-               	    	int32_t i_r = (AMatrixPtr[p].index[q]);
-        	    	Real_t ProjectionEntry = (AMatrixPtr[p].values[q]*SinogramPtr->delta_r);
-			for (r = 0; r < z_overlap_num; r++)
-			{ 
-				int32_t i_t = slice*z_overlap_num + r;
-	        		ErrorSino[sino_view][i_r][i_t] -= (ProjectionEntry*(UpdatedVoxelValue - V));
-	   			if (fabs(ErrorSino[sino_view][i_r][i_t]*sqrt(TomoInputsPtr->Weight[sino_view][i_r][i_t])) < TomoInputsPtr->ErrorSinoThresh)
-					SinogramPtr->ProjSelect[sino_view][i_r][i_t] = true;
-				else
-					SinogramPtr->ProjSelect[sino_view][i_r][i_t] = false;
-	   		}
-		}
-	}	 	
-	
-	return UpdatedVoxelValue;	
-
-   */
+    }
+  }
+  
+  for (p=0; p<maxview; p++)
+  {
+    free(AMatrixPtr[p].values);
+    free(AMatrixPtr[p].index);
+  }
+  free(AMatrixPtr);
+  return (total_vox_mag);
 }
 
 
@@ -891,12 +431,180 @@ Real_t compute_voxel_update_AMat2D (Sinogram* SinogramPtr, ScannedObject* Scanne
 }
 
 
-
-Real_t compute_voxel_update (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, Real_t Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], Real_t Time_Nhood[NHOOD_TIME_MAXDIM-1], bool Spatial_BDFlag[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], bool Time_BDFlag[NHOOD_TIME_MAXDIM-1], int32_t i_new, int32_t slice, int32_t j_new, int32_t k_new,Real_t* projectionValueArrayPointer,Real_t* weightValueArrayPointer,int32_t slice_begin,int32_t slice_end,bool* selectValueArrayPointer, Real_t* errorValueArrayPointer,Real_t V,Real_t THETA1,Real_t THETA2)
+Real_t updateVoxels_PhCon_Tomo (int32_t time_begin, int32_t time_end, int32_t slice_begin, int32_t slice_end, int32_t xy_begin, int32_t xy_end, int32_t* x_rand_select, int32_t* y_rand_select, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, Real_t** DetectorResponse_XY, AMatrixCol* VoxelLineResponse, int32_t Iter, long int *zero_count, Real_t** MagUpdateMap, uint8_t*** Mask)
 {
-#ifdef PHASE_CONTRAST_TOMOGRAPHY
-	return compute_voxel_update_AMat2D (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, AMatrixPtr, VoxelLineResponse, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag, i_new, slice, j_new, k_new);
+  int32_t p,q,r,slice,i_new,j_new,k_new,idxr,idxq,idxp,index_xy;
+  Real_t V;
+  bool ZSFlag;
+  int32_t sino_view;
+  int32_t z_min, z_max;
+  Real_t total_vox_mag = 0.0;
+
+  z_min = 0;
+  z_max = ScannedObjectPtr->N_z + 1;
+  if (TomoInputsPtr->node_rank == 0)
+	z_min = 1;
+  if (TomoInputsPtr->node_rank == TomoInputsPtr->node_num - 1)
+	z_max = ScannedObjectPtr->N_z;
+
+    Real_t Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM]; 
+    Real_t Time_Nhood[NHOOD_TIME_MAXDIM-1]; 
+    bool Spatial_BDFlag[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM];
+    bool Time_BDFlag[NHOOD_TIME_MAXDIM-1];
+
+  int32_t maxview = find_max(ScannedObjectPtr->ProjNum, ScannedObjectPtr->N_time);
+  AMatrixCol* AMatrixPtr = (AMatrixCol*)get_spc(maxview, sizeof(AMatrixCol));
+  uint8_t AvgNumXElements = (uint8_t)ceil(3*ScannedObjectPtr->delta_xy/SinogramPtr->delta_r);
+  
+  for (p = 0; p < maxview; p++)
+  {
+  	AMatrixPtr[p].values = (Real_t*)get_spc(AvgNumXElements,sizeof(Real_t));
+  	AMatrixPtr[p].index  = (int32_t*)get_spc(AvgNumXElements,sizeof(int32_t));
+  }  
+
+   /*printf ("time_begin = %d, time_end = %d, slice_begin = %d, slice_end = %d\n", time_begin, time_end, slice_begin, slice_end);*/
+   for (i_new = time_begin; i_new <= time_end; i_new++) 
+   {
+      for (index_xy = xy_begin; index_xy <= xy_end; index_xy++) 
+      {
+        /*printf ("Entering index\n"); */
+	k_new = x_rand_select[index_xy];
+        j_new = y_rand_select[index_xy];
+    	MagUpdateMap[j_new][k_new] = 0;  
+           /*	printf ("Entering mask\n");*/ 
+	  for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++)
+    	  {
+		sino_view = ScannedObjectPtr->ProjIdxPtr[i_new][p];
+		calcAMatrixColumnforAngle(SinogramPtr, ScannedObjectPtr, DetectorResponse_XY, &(AMatrixPtr[p]), j_new, k_new, sino_view);
+    	  }
+          for (slice = slice_begin; slice <= slice_end; slice++) {
+           /*	printf ("Entering slice\n"); */
+            /*For a given (i,j,k) store its 26 point neighborhood*/           
+	    if (Mask[j_new][k_new][slice] == 1)
+	    {   
+	 	if (i_new - 1 >= 0){
+			Time_Nhood[0] = ScannedObjectPtr->Object[i_new-1][slice+1][j_new][k_new];
+			Time_BDFlag[0] = true;
+		}
+		else 
+		{
+			Time_Nhood[0] = 0.0;
+			Time_BDFlag[0] = false;
+		}
+
+	    	if (i_new + 1 < ScannedObjectPtr->N_time){
+			Time_Nhood[1] = ScannedObjectPtr->Object[i_new+1][slice+1][j_new][k_new];
+			Time_BDFlag[1] = true;
+		}
+		else
+		{
+			Time_Nhood[1] = 0.0;
+			Time_BDFlag[1] = false;
+		}
+	
+	
+	 for (p = 0; p < NHOOD_Z_MAXDIM; p++)
+	 {
+		idxp = slice + p;
+		if (idxp >= z_min && idxp <= z_max)
+		{
+	 		for (q = 0; q < NHOOD_Y_MAXDIM; q++)
+         		{
+	 			idxq = j_new + q - 1;
+                		if(idxq >= 0 && idxq < ScannedObjectPtr->N_y)
+         			{
+					for (r = 0; r < NHOOD_X_MAXDIM; r++)
+					{
+		    				idxr = k_new + r - 1;
+                    				if(idxr >= 0 && idxr < ScannedObjectPtr->N_x){
+	                				Spatial_Nhood[p][q][r] = ScannedObjectPtr->Object[i_new][idxp][idxq][idxr];
+        	        				Spatial_BDFlag[p][q][r] = true;
+                    				}
+						else
+						{
+	                				Spatial_Nhood[p][q][r] = 0.0;
+                    					Spatial_BDFlag[p][q][r] = false;
+						}
+					}
+				}
+		 		else
+				{
+         				for (r = 0; r < NHOOD_X_MAXDIM; r++){
+	                			Spatial_Nhood[p][q][r] = 0.0;
+                    				Spatial_BDFlag[p][q][r] = false;
+					}
+				}
+                	}
+		}
+		else
+        	{ 
+			for (q = 0; q < NHOOD_Y_MAXDIM; q++){
+				for (r = 0; r < NHOOD_X_MAXDIM; r++){
+	              			Spatial_Nhood[p][q][r] = 0.0;
+                   			Spatial_BDFlag[p][q][r] = false;
+				}
+			}
+               }
+	}
+
+        Spatial_Nhood[(NHOOD_Y_MAXDIM-1)/2][(NHOOD_X_MAXDIM-1)/2][(NHOOD_Z_MAXDIM-1)/2] = 0.0;
+        V = ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new]; /*Store the present value of the voxel*/
+
+#ifdef ZERO_SKIPPING
+			  /*Zero Skipping Algorithm*/
+			 ZSFlag = true;
+			 if(V == 0.0 && Iter > 1) /*Iteration starts from 1. Iteration 0 corresponds to initial cost before ICD*/
+			  {
+					  
+					if (Time_Nhood[0] > 0.0 || Time_Nhood[1] > 0.0)
+						ZSFlag = false;
+			
+					for(p = 0; p < NHOOD_Y_MAXDIM; p++)
+						for(q = 0; q < NHOOD_X_MAXDIM; q++)
+					  		for(r = 0; r < NHOOD_Z_MAXDIM; r++)
+							  	if(Spatial_Nhood[p][q][r] > 0.0)
+							  	{
+									  ZSFlag = false;
+								 	  break;
+							  	}
+			  }
+			  else
+			  {
+				  ZSFlag = false;
+			  }
 #else
-	return compute_voxel_update_AMat1D (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, AMatrixPtr, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag, i_new, slice, j_new, k_new,projectionValueArrayPointer,weightValueArrayPointer,slice_begin,slice_end,selectValueArrayPointer,errorValueArrayPointer,V,THETA1,THETA2);
+			  ZSFlag = false; /*do ICD on all voxels*/
+#endif /*#ifdef ZERO_SKIPPING*/
+	if(ZSFlag == false)
+	{
+		compute_voxel_update_AMat2D (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, AMatrixPtr, VoxelLineResponse, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag, i_new, slice, j_new, k_new);
+	    	MagUpdateMap[j_new][k_new] += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] - V);
+	    	total_vox_mag += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new]);
+ 	}
+		else
+		    (*zero_count)++;
+       }
+       }
+       }
+}
+
+    
+     for (p=0; p<maxview; p++)
+     {
+     	free(AMatrixPtr[p].values);
+     	free(AMatrixPtr[p].index);
+     }
+     free(AMatrixPtr);
+      return (total_vox_mag);
+}
+
+Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, int32_t slice_end, int32_t xy_begin, int32_t xy_end, int32_t* x_rand_select, int32_t* y_rand_select, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, Real_t** DetectorResponse_XY, AMatrixCol* VoxelLineResponse, int32_t Iter, long int *zero_count, Real_t** MagUpdateMap, uint8_t*** Mask)
+{
+	Real_t total_vox_mag;
+#ifdef PHASE_CONTRAST_TOMOGRAPHY
+	total_vox_mag = updateVoxels_PhCon_Tomo (time_begin, time_end, slice_begin, slice_end, xy_begin, xy_end, x_rand_select, y_rand_select, SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse_XY, VoxelLineResponse, Iter, zero_count, MagUpdateMap, Mask);
+#else
+	total_vox_mag = updateVoxels_AttTomo (time_begin, time_end, slice_begin, slice_end, xy_begin, xy_end, x_rand_select, y_rand_select, SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse_XY, VoxelLineResponse, Iter, zero_count, MagUpdateMap, Mask);
 #endif
+	return (total_vox_mag);
 }

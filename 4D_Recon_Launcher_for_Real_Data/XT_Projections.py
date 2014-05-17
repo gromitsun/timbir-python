@@ -2,6 +2,7 @@
 from XT_IOMisc import error_by_flag
 import numpy as np
 import h5py
+from XT_IOMisc import RealData4mBin
 #from mpi4py import MPI
 
 def decimate_count_data_in_r (data, true_length, reduced_length):
@@ -87,19 +88,13 @@ def generate_projections (proj, recon, files, path2launch):
 				
 	if (recon['sinobin'] == 1):
 		projections = recon['BH_Quad_Coef']*(projections*projections) + projections
-		fid = open(path2launch + 'projection_n' + str(rank) + '.bin','wb')
-		projections.tofile(fid)
-		fid.close()
+		RealData2Bin(path2launch + 'projection_n' + str(rank) + '.bin', projections)
 		print "Mean of projections from node " + str(rank) + " is ", np.mean(projections)
 	else:
-		fid = open(path2launch + 'bright_n' + str(rank) + '.bin','wb')
-		bright.tofile(fid)
-		fid.close()
+		RealData2Bin(path2launch + 'bright_n' + str(rank) + '.bin', bright)
 		print "Mean of bright field data from node " + str(rank) + " is ", np.mean(bright)
 
-	fid = open(path2launch + 'weight_n' + str(rank) + '.bin','wb')
-	weight.tofile(fid)
-	fid.close()
+	RealData2Bin(path2launch + 'weight_n' + str(rank) + '.bin', weight)
 	print "Mean of weight data from node " + str(rank) + " is ", np.mean(weight)
 	
 	print "generate_projections: Generated projections for node ", rank

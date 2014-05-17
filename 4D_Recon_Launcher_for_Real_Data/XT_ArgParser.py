@@ -6,10 +6,14 @@ def ArgParser ():
 	parser.add_argument("--gen_outfiles", help="specify whether you want to create HDF and tiff output files", action="store_true")
 	parser.add_argument("--run_setup", help="Specify whether you want to setup the launch folder", action="store_true")
 	parser.add_argument("--run_recon", help="Run reconstruction code", action="store_true")
+	parser.add_argument("--restart", help="Restart the reconstruction", action="store_true")
 	
-	parser.add_argument("--MBIR_ATT_REAL", help="Recon of attenuation modality from real data", action="store_true")
-	parser.add_argument("--MBIR_PHCON_REAL", help="Recon of phase constrast modality from real data", action="store_true")
-	parser.add_argument("--MBIR_ATT_SIM", help="Recon of attenuation modality from simulated phantom", action="store_true")
+	parser.add_argument("--ATT", help="Imaging modality is attenuation contrast tomography", action="store_true")
+	parser.add_argument("--PHCON", help="Imaging modality is phase constrast tomography", action="store_true")
+	parser.add_argument("--REAL_DATA", help="Recon of real data", action="store_true")
+	parser.add_argument("--SIM_DATA", help="Recon of simulated data", action="store_true")
+	parser.add_argument("--MBIR", help="Do MBIR reconstruction", action="store_true")
+	parser.add_argument("--FBP", help="Do FBP reconstruction", action="store_true")
 	
 	parser.add_argument("--Edison", help="Use Edison when running on Edison", action="store_true")
 	parser.add_argument("--Hopper", help="Use Hopper when running on Hopper", action="store_true")
@@ -49,6 +53,7 @@ def ArgParser ():
         parser.add_argument("--ZingerT",help="Zinger threshold beyond which error sinogram measurement is classified as anamalous",type=float,default=4.0) 
         parser.add_argument("--maxHU",help="Maximum value of attenuation",type=float,default=40000) 
         parser.add_argument("--minHU",help="Minimum value of attenuation",type=float,default=0.0) 
+        parser.add_argument("--BH_Quad_Coef",help="Beamhardening quadratic coefficient",type=float,default=0.0) 
 	args = parser.parse_args()
 	
 	if (args.multres_xy < args.multres_z):

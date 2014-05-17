@@ -43,7 +43,7 @@ def proj_init (proj, args):
 	proj['Expected_Counts'] = 29473 
 	proj['phantom_N_xy'] = 1024
 	# phantom_N_z is the resolution of phantom along z
-	proj['phantom_N_z'] = 32
+	proj['phantom_N_z'] = 4
 	proj['rotation_center_r'] = args.rot_center # Same units as recon_N_r	
 	#voxel_size is the side length of each voxel (in micrometer(um))
 	proj['voxel_size'] = args.vox_size
@@ -77,8 +77,8 @@ def proj_init (proj, args):
 	proj['recon_N_p'] = len(proj['angles']) 	
 	print 'proj_init: Total number of projections used for reconstruction is ' + str(proj['recon_N_p'])
 	
-	if (args.MBIR_ATT_SIM and proj['slice_t_start'] + proj['N_t'] > proj['phantom_N_z']):
-		error_by_flag(1, "proj['slice_t_start'] + proj['N_t'] > proj['phantom_N_z']")
+	if (args.SIM_DATA and proj['slice_t_start'] + proj['N_t'] > proj['phantom_N_z']):
+			error_by_flag(1, "proj['slice_t_start'] + proj['N_t'] > proj['phantom_N_z']")
 
 	return proj
 
@@ -152,10 +152,11 @@ def recon_init (proj, recon, args):
 #		recon['ProjNumRMSE'] = proj['recon_N_p'] - 2*proj['N_theta']/proj['K']
 	recon['Proj0RMSE'] = 256
 	recon['ProjNumRMSE'] = 256*2
-	if (args.MBIR_ATT_SIM and recon['Proj0RMSE'] < proj['proj_start']):
-		error_by_flag(1, "ERROR: proj_start is greater than Proj0RMSE")
-	if (args.MBIR_ATT_SIM and recon['Proj0RMSE'] + recon['ProjNumRMSE'] > proj['proj_start'] + proj['proj_num']):
-		error_by_flag(1, "ERROR: proj_start + proj_num is less than Proj0RMSE + ProjNumRMSE")
+	if (args.SIM_DATA):
+		if(recon['Proj0RMSE'] < proj['proj_start']):
+			error_by_flag(1, "ERROR: proj_start is greater than Proj0RMSE")
+		if (recon['Proj0RMSE'] + recon['ProjNumRMSE'] > proj['proj_start'] + proj['proj_num']):
+			error_by_flag(1, "ERROR: proj_start + proj_num is less than Proj0RMSE + ProjNumRMSE")
 
 	recon['delta_xy'] = np.arange(recon['multres_xy']-1, -1, -1)
 	recon['delta_xy'] = 2**recon['delta_xy']
@@ -168,30 +169,50 @@ def recon_init (proj, recon, args):
 	recon['initICD'] = 3*np.ones(recon['multres_z'])
 	recon['initICD'][0] = 2
 	recon['initICD'] = np.concatenate((2*np.ones(recon['multres_xy']-recon['multres_z']), recon['initICD']), axis=0)
-	recon['initICD'][0] = 0 
+	if (args.restart):
+		recon['initICD'][0] = 1
+		args.run_setup = False
+	else:
+		recon['initICD'][0] = 0 
 	recon['WritePerIter'] = 0*np.ones(recon['multres_xy'])
 	recon['updateProjOffset'] = 3*np.ones(recon['multres_xy'])
 	recon['updateProjOffset'][0] = 0
 	recon['updateProjOffset'][1] = 2
 	recon['readSino4mHDF'] = 0*np.ones(recon['multres_xy'])
-	if (args.MBIR_ATT_REAL):
+	if (args.REAL_DATA):
 		recon['readSino4mHDF'][0] = 1
 	recon['iterations'] = args.MaxIter*np.ones(recon['multres_xy'])
 	recon['do_VarEstimate'] = args.do_VarEstimate*np.ones(recon['multres_xy'])
 	recon['Estimate_of_Var'] = 1
-	recon['recon_type'] = 'MBIR'
-	if (args.MBIR_ATT_SIM):
+	
+	if (args.MBIR):
+		recon['recon_type'] = 'MBIR'
+	elif (args.FBP):
+		recon['recon_type'] = 'FBP'
+	else:
+		error_by_flag(1, "Reconstruction algorithm should be either MBIR or FBP")	
+	
+	if (args.ATT):
+		recon['modality'] = 'ATT'
+	elif (args.PHCON):
+		recon['modality'] = 'PHCON'
+	else:
+		error_by_flag(1, "Modality should be either ATT (attenuation contrast tomography) or PHCON (phase contrast tomography)")	
+
+	if (args.REAL_DATA):
+		recon['data_type'] = 'REAL'
+		recon['sinobin'] = 1
+	elif (args.SIM_DATA):
+		recon['data_type'] = 'SIM'
 		recon['sinobin'] = 2
 	else:
-		recon['sinobin'] = 1
+		error_by_flag(1, "Input data type should be either REAL_DATA or SIM_DATA")	
+	
 	recon['initMagUpMap'] = 1*np.ones(recon['multres_xy'])
 	recon['initMagUpMap'][0] = 0
 	recon['only_Edge_Updates'] = 0*np.ones(recon['multres_xy'])
 	recon['writeTiff'] = 1*np.ones(recon['multres_xy'])
-	if (args.MBIR_ATT_REAL):
-		recon['BH_Quad_Coef'] = 0.5
-	else:
-		recon['BH_Quad_Coef'] = 0
+	recon['BH_Quad_Coef'] = args.BH_Quad_Coef
 	recon['init_object4mHDF'] = 0
 	recon['radius_obj'] = proj['voxel_size']*proj['N_r']
 	
@@ -213,7 +234,7 @@ def recon_init (proj, recon, args):
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	recon['zSlice4RMSE'] = recon['N_z']/2
 	
-	recon['calculate_cost'] = 1
+	recon['calculate_cost'] = 0
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1
 
@@ -244,7 +265,7 @@ def files_init (files, args):
 	files['Launch_Folder'] = args.run_folder + '/XT_run/'
 	files['Result_Folder'] = args.run_folder + '/XT_Results/'
 	files['C_Source_Folder'] = "../Source_Code_4D_Fast/"
-	files['Proj_Offset_File'] = "../Source_Code_4D_Fast/proj_offset.bin"
+	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 

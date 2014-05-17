@@ -11,6 +11,7 @@ from XT_Projections import decimate_count_data_in_t
 from XT_IOMisc import *
 import scipy.io as sio
 import os
+
 #import cv2,cv
 
 #def write_array2video (proj,recon,files):
@@ -47,12 +48,8 @@ def compute_RMSE_of_recon (proj, recon, files):
 		obj = np.zeros((recon['Rtime_num'][i], recon['N_xy'], recon['N_xy']), dtype=np.float64, order='C');	
 		for j in range(int(recon['Rtime_num'][i])):	
 			fid = open(path2launch + 'object_n' + str(node) + '_time_' + str(j) + '.bin', 'rb')
-			fid.seek(slice*recon['N_xy']*recon['N_xy']*8, 0)
-			# Multiply above offset by 8 which is size of double in bytes
-			data = fid.read(recon['N_xy']*recon['N_xy']*8)
-			data = struct.unpack(str(recon['N_xy']*recon['N_xy'])+'d',data)	
+			data = RealData4mBin(path2launch + 'object_n' + str(node) + '_time_' + str(j) + '.bin', slice*recon['N_xy']*recon['N_xy'], recon['N_xy']*recon['N_xy'])
 			obj[j,:,:] = np.reshape(data, (recon['N_xy'], recon['N_xy']), order='C')
-			fid.close()
 
 		f_interp = interpolate.interp1d(obj_times, obj, kind='cubic', axis=0, copy=False)
 		proj_times = proj['times'][recon['Proj0RMSE']:recon['Proj0RMSE']+recon['ProjNumRMSE']]

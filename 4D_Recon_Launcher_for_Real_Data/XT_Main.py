@@ -28,10 +28,6 @@ def main():
 	args = ArgParser()
 	recon['node_num'] = args.num_nodes
 	recon, files = CompSys_Init(args, recon, files)
-	
-	recon['modality'] = 'ATT'
-	if (args.MBIR_PHCON_REAL):
-		recon['modality'] = 'PHCON'
 
 	proj = proj_init(proj, args)
 	recon = recon_init(proj, recon, args)
@@ -55,7 +51,7 @@ def main():
 	else:
 		print 'ERROR: main: Reconstruction type not recognized'
 
-	if (args.MBIR_ATT_SIM == 1):
+	if (args.SIM_DATA == 1):
 		compute_RMSE_of_recon (proj, recon, files)
 			
 #	if (args.create_objectHDFtiff):

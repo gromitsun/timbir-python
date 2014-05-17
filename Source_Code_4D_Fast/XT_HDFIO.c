@@ -195,5 +195,6 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 	H5Fclose(data_file_id);
 } 
 
+
 #endif
 
