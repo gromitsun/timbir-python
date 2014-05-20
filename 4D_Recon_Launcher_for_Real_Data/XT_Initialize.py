@@ -59,9 +59,12 @@ def proj_init (proj, args):
 	proj['min_time_btw_views'] = args.min_time_btw_views #a view will be deleted if the time between two consecutive views is less than min_time_btw_views
 	proj['rotation_speed'] = args.rotation_speed #rotation speed in degrees per second
 	
-	proj['use_slice_white'] = -1 
+	proj['use_slice_white'] = -1
 	proj['length_r'] = proj['voxel_size']*proj['N_r']	
 	proj['length_t'] = proj['voxel_size']*proj['N_t']	
+	if (args.SIM_DATA):
+		proj['length_t'] = proj['voxel_size']*proj['N_t']*(proj['N_r']/proj['recon_N_r'])
+	#Above hack is to ensure square voxel sizes during reconstruction. Fix the hack sometime
 	proj['L'] = proj['N_theta']/proj['K']
 	proj['N_p'] = ((proj['proj_start'] + proj['proj_num'])/proj['N_theta'] + 1)*proj['N_theta']
 	
@@ -237,6 +240,9 @@ def recon_init (proj, recon, args):
 	recon['calculate_cost'] = 0
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1
+	recon['RMSE_converged'] = np.zeros(recon['multres_xy'])
+	if (args.RMSE_converged):
+		recon['RMSE_converged'][-1] = 1
 
 	recon['FBP_N_xy'] = proj['recon_N_r']
 	if (recon['init_with_FBP'] == 1):
@@ -246,6 +252,10 @@ def recon_init (proj, recon, args):
 		error_by_flag(1, 'ERROR: recon_init: recon_N_t must divide N_t')
 
 	recon['updateProjOffset'] = np.asarray(recon['updateProjOffset'])	
+
+	if (recon['multres_xy'] < recon['multres_z']):
+		error_by_flag(1, 'ERROR: Number of multiresolution stages in x-y should not be less than along z-axis')
+	
 	if (len(recon['r']) != len(recon['c_s']) or len(recon['r']) != len(recon['c_t']) or len(recon['r']) != len(recon['sigma_s']) or len(recon['r']) != len(recon['sigma_t'])):
 		error_by_flag (1, 'ERROR: recon_init: Lengths of r, c_t, c_s, sigma_s, sigma_t does not match')
 
@@ -266,6 +276,7 @@ def files_init (files, args):
 	files['Result_Folder'] = args.run_folder + '/XT_Results/'
 	files['C_Source_Folder'] = "../Source_Code_4D_Fast/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
+	files['Converged_Object'] = args.converged_object_file
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 

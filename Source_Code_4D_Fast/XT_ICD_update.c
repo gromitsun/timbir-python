@@ -989,10 +989,13 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
     Write2Bin (costfile, 1, 1, 1, 1, &cost, TomoInputsPtr->debug_file_ptr);
     #endif /*Cost calculation endif*/
     
+/*    compute_RMSE_Converged_Object(ScannedObjectPtr, TomoInputPtr, 0);*/
     start=time(NULL);
     for (Iter = 1; Iter <= TomoInputsPtr->NumIter; Iter++)
     {
       flag = updateVoxelsTimeSlices (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, H_r, VoxelLineResponse, ErrorSino, Iter, MagUpdateMap, Mask);
+      /*if (TomoInputsPtr->RMSE_converged == 1)
+	compute_RMSE_Converged_Object(ScannedObjectPtr, TomoInputPtr, Iter);*/
       if (TomoInputsPtr->WritePerIter == 1)
       write_ObjectProjOff2TiffBinPerIter (SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
       #ifndef NO_COST_CALCULATE
@@ -1046,7 +1049,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
     for (i = 0; i < SinogramPtr->N_p; i++)
     for (j = 0; j < SinogramPtr->N_r; j++)
     for (k = 0; k < SinogramPtr->N_t; k++)
-    ErrorSino[i][j][k] *= sqrt(TomoInputsPtr->Weight[i][j][k]);
+    	ErrorSino[i][j][k] *= sqrt(TomoInputsPtr->Weight[i][j][k]);
     if (TomoInputsPtr->Write2Tiff == 1)
     {
       WriteMultiDimArray2Tiff (scaled_error_file, dimTiff, 0, 3, 1, 2, &(ErrorSino[0][0][0]), 0, TomoInputsPtr->debug_file_ptr);

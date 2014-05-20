@@ -126,7 +126,7 @@ void compute_2DAMatrixLine(Sinogram* SinogramPtr, Real_t** AMatrix2DLine, AMatri
 	for (i = 0; i < AMatrixPtr->count; i++)
 	{
 		r_idx = AMatrixPtr->index[i];
-		(*AMatrix2DLine)[r_idx - *r_ax_start] = AMatrixPtr->values[i]*SinogramPtr->delta_r;	
+		(*AMatrix2DLine)[r_idx - *r_ax_start] = AMatrixPtr->values[i]*SinogramPtr->delta_t;	
 	}
 }
 

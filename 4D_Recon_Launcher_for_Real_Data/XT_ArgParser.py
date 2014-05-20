@@ -54,6 +54,8 @@ def ArgParser ():
         parser.add_argument("--maxHU",help="Maximum value of attenuation",type=float,default=40000) 
         parser.add_argument("--minHU",help="Minimum value of attenuation",type=float,default=0.0) 
         parser.add_argument("--BH_Quad_Coef",help="Beamhardening quadratic coefficient",type=float,default=0.0) 
+        parser.add_argument("--RMSE_converged",help="Compute RMSE between the reconstruction and the converged result at the finest resolution", action="store_true") 
+        parser.add_argument("--converged_object_file", help="Full path of the input hdf5 file containing the converged object with which RMSE comparison should be done")
 	args = parser.parse_args()
 	
 	if (args.multres_xy < args.multres_z):

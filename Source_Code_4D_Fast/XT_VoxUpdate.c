@@ -71,7 +71,7 @@ Real_t updateVoxels_AttTomo (int32_t time_begin, int32_t time_end, int32_t slice
       int32_t sino_viewBegin=ScannedObjectPtr->ProjIdxPtr[i_new][0];
       int32_t NtNrMul=SinogramPtr->N_t*SinogramPtr->N_r;
       int32_t distance= SinogramPtr->N_t;
-      Real_t deltar=SinogramPtr->delta_r;
+      Real_t deltat=SinogramPtr->delta_t;
       float errorSinoThresh=(float)TomoInputsPtr->ErrorSinoThresh;
       float errorSinoDelta=(float)TomoInputsPtr->ErrorSinoDelta;
       Real_t projectionValueArray[sum];
@@ -114,7 +114,7 @@ Real_t updateVoxels_AttTomo (int32_t time_begin, int32_t time_end, int32_t slice
       }
       
       for(p=0;p<sum;p++)
-        projectionValueArray[p]=projectionValueArray[p]*deltar;
+        projectionValueArray[p]=projectionValueArray[p]*deltat;
       projectionValueArrayPointer=&projectionValueArray[0];
       weightValueArrayPointer=&weightValueArray[0];
 

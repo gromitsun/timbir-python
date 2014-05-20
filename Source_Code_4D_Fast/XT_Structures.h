@@ -89,6 +89,7 @@
   typedef struct
   {
     Real_t ****Object; /*Stores the reconstructed object*/
+    Real_t ****Conv_Object; /*Stores the reconstructed object*/
     Real_t Length_X;/*maximum possible length of the object along x*/
     Real_t Length_Y;/*max length of object along y*/
     Real_t Length_Z;/*max length of object along z*/
@@ -194,6 +195,8 @@ typedef struct
     Real_t ErrorSino_Cost;
     Real_t Forward_Cost;
     Real_t Prior_Cost;
+
+    uint8_t RMSE_converged;
   } TomoInputs;
 
 #endif /*#define XT_STRUCTURES_H*/

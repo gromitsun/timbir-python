@@ -121,5 +121,3 @@ void MPI_Wait_Z_Slices (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsP
 }
 			
 
-
-      

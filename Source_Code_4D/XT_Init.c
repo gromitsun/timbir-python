@@ -211,7 +211,7 @@ void initFilter (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	uint8_t i,j,k;
 	Real_t temp1,sum=0,prior_const=0;
-	prior_const = ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_z*ScannedObjectPtr->delta_Rtime;
+	prior_const = ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_Rtime;
 /*Filter coefficients of neighboring pixels are inversely proportional to the distance from the center pixel*/
 	TomoInputsPtr->Time_Filter[0] = 1.0/distance2node(0,1,1,1);
 	sum += 2.0*TomoInputsPtr->Time_Filter[0];
