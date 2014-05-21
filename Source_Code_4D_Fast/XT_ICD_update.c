@@ -988,14 +988,16 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
     fprintf(TomoInputsPtr->debug_file_ptr, "-------------ICD_BackProject: ICD Iter=Before ICD, cost=%f------------\n",cost);
     Write2Bin (costfile, 1, 1, 1, 1, &cost, TomoInputsPtr->debug_file_ptr);
     #endif /*Cost calculation endif*/
-    
-/*    compute_RMSE_Converged_Object(ScannedObjectPtr, TomoInputPtr, 0);*/
+   
+
+    if (TomoInputsPtr->RMSE_converged == 1)
+    	compute_RMSE_Converged_Object(ScannedObjectPtr, TomoInputsPtr, 0);
     start=time(NULL);
     for (Iter = 1; Iter <= TomoInputsPtr->NumIter; Iter++)
     {
       flag = updateVoxelsTimeSlices (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, H_r, VoxelLineResponse, ErrorSino, Iter, MagUpdateMap, Mask);
-      /*if (TomoInputsPtr->RMSE_converged == 1)
-	compute_RMSE_Converged_Object(ScannedObjectPtr, TomoInputPtr, Iter);*/
+      if (TomoInputsPtr->RMSE_converged == 1)
+	compute_RMSE_Converged_Object(ScannedObjectPtr, TomoInputsPtr, Iter);
       if (TomoInputsPtr->WritePerIter == 1)
       write_ObjectProjOff2TiffBinPerIter (SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
       #ifndef NO_COST_CALCULATE

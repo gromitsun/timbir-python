@@ -77,8 +77,8 @@ def do_MBIR_reconstruction(proj, recon, files):
 			if (recon['positivity_constraint'] == 1):
 				macros = macros + ' -DPOSITIVITY_CONSTRAINT'
 
-			if (any(recon['readSino4mHDF'])):
-				macros = macros + ' -DREAD_PROJECTION_DATA_4M_HDF'
+#			if (any(recon['readSino4mHDF'])):
+			macros = macros + ' -DREAD_PROJECTION_DATA_4M_HDF'
 			if (recon['modality'] == 'PHCON'):
 				macros = macros + ' -DPHASE_CONTRAST_TOMOGRAPHY'
 

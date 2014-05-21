@@ -196,5 +196,89 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 } 
 
 
+void read_4m_HDF (TomoInputs* TomoInputsPtr, char filename[], Real_t* object, hsize_t start[], hsize_t num[])
+{
+	hid_t file_id, dataset;
+	hid_t dataspace, memspace;
+   	herr_t status;
+	int32_t rank, i;
+
+	/*HDF file pointers*/
+	file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+	/*dataset pointers*/
+	dataset = H5Dopen(file_id, HDFPATH, H5P_DEFAULT);
+	dataspace = H5Dget_space (dataset);    /* dataspace handle */
+	/*Gives the number of dimensions in a dataset*/
+    	rank = H5Sget_simple_extent_ndims (dataspace);
+	
+	hsize_t dims[rank];
+	status = H5Sget_simple_extent_dims (dataspace, dims, NULL);
+	for (i=0; i<rank; i++)
+		if (dims[i] < start[i] + num[i])
+			fprintf(TomoInputsPtr->debug_file_ptr, "read_4m_HDF: The size of dimension %d in %s is %zu and is less than the required %zu\n", i, HDFPATH, dims[i], start[i] + num[i]);
+
+    	status = H5Sselect_hyperslab (dataspace, H5S_SELECT_SET, start, NULL, num, NULL);
+    	status = H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, dataspace, H5P_DEFAULT, object);
+
+	H5Sclose(dataspace);
+	H5Dclose(dataset);
+	H5Fclose(file_id);
+} 
+
+void write_2_existHDF (TomoInputs* TomoInputsPtr, char filename[], Real_t* object, hsize_t start[], hsize_t num[])
+{
+	hid_t file_id, dataset;
+	hid_t dataspace;
+   	herr_t status;
+	int32_t rank, i;
+
+	/*HDF file pointers*/
+	file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+	/*dataset pointers*/
+	dataset = H5Dopen(file_id, HDFPATH, H5P_DEFAULT);
+	dataspace = H5Dget_space (dataset);    /* dataspace handle */
+	/*Gives the number of dimensions in a dataset*/
+    	rank = H5Sget_simple_extent_ndims (dataspace);
+	
+	hsize_t dims[rank];
+	status = H5Sget_simple_extent_dims (dataspace, dims, NULL);
+	for (i=0; i<rank; i++)
+		if (dims[i] < start[i] + num[i])
+			fprintf(TomoInputsPtr->debug_file_ptr, "read_4m_HDF: The size of dimension %d in %s is %zu and is less than the required %zu\n", i, HDFPATH, dims[i], start[i] + num[i]);
+
+    	status = H5Sselect_hyperslab (dataspace, H5S_SELECT_SET, start, NULL, num, NULL);
+    	status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, dataspace, H5P_DEFAULT, object);
+
+	H5Sclose(dataspace);
+	H5Dclose(dataset);
+	H5Fclose(file_id);
+} 
+
+
+
+void write_2_newHDF (TomoInputs* TomoInputsPtr, char filename[], Real_t* object, hsize_t start[], hsize_t num[], int32_t rank, hsize_t dims[])
+{
+	hid_t file_id, dataset;
+	hid_t dataspace;
+   	herr_t status;
+
+	/*HDF file pointers*/
+	/* Create a new file using default properties. */
+	file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+	/*dataset pointers*/
+	/* Create the data space for the dataset. */
+	dataspace = H5Screate_simple(rank, dims, NULL);
+	  /* Create the dataset. */
+	dataset = H5Dcreate1(file_id, HDFPATH, H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT);	
+
+    	status = H5Sselect_hyperslab (dataspace, H5S_SELECT_SET, start, NULL, num, NULL);
+    	status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, dataspace, H5P_DEFAULT, object);
+
+	H5Sclose(dataspace);
+	H5Dclose(dataset);
+	H5Fclose(file_id);
+} 
+
+
 #endif
 
