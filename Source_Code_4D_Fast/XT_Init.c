@@ -211,7 +211,8 @@ void initFilter (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
 	uint8_t i,j,k;
 	Real_t temp1,sum=0,prior_const=0;
-	prior_const = ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_Rtime;
+/*	prior_const = ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_xy*ScannedObjectPtr->delta_Rtime;*/
+	prior_const = ScannedObjectPtr->mult_xy*ScannedObjectPtr->mult_xy*ScannedObjectPtr->mult_xy*ScannedObjectPtr->delta_Rtime;
 /*Filter coefficients of neighboring pixels are inversely proportional to the distance from the center pixel*/
 	TomoInputsPtr->Time_Filter[0] = 1.0/distance2node(0,1,1,1);
 	sum += 2.0*TomoInputsPtr->Time_Filter[0];
@@ -387,8 +388,8 @@ void initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tom
 	SinogramPtr->OffsetT = ((ScannedObjectPtr->delta_z/2) + SinogramPtr->delta_t/2)/DETECTOR_RESPONSE_BINS;
 
 	/*TomoInputs holds the input parameters and some miscellaneous variables*/
-	TomoInputsPtr->Sigma_S_Q = pow((ScannedObjectPtr->Sigma_S*ScannedObjectPtr->delta_xy),MRF_Q);
-	TomoInputsPtr->Sigma_S_Q_P = pow(ScannedObjectPtr->Sigma_S*ScannedObjectPtr->delta_xy,MRF_Q-ScannedObjectPtr->MRF_P);	
+	TomoInputsPtr->Sigma_S_Q = pow((ScannedObjectPtr->Sigma_S*ScannedObjectPtr->mult_xy),MRF_Q);
+	TomoInputsPtr->Sigma_S_Q_P = pow(ScannedObjectPtr->Sigma_S*ScannedObjectPtr->mult_xy,MRF_Q-ScannedObjectPtr->MRF_P);	
 	TomoInputsPtr->Sigma_T_Q = pow((ScannedObjectPtr->Sigma_T*ScannedObjectPtr->delta_Rtime),MRF_Q);
 	TomoInputsPtr->Sigma_T_Q_P = pow(ScannedObjectPtr->Sigma_T*ScannedObjectPtr->delta_Rtime,MRF_Q-ScannedObjectPtr->MRF_P);	
 
