@@ -76,6 +76,7 @@ typedef float Real_t;
 #define BRIGHT_FIELD_FILENAME "bright"
 #define OBJECT_FILENAME "object"
 #define PROJ_OFFSET_FILENAME "proj_offset"
+#define HDFPATH "/object"
 
 #ifndef SPARSE_ANGLES_LIST_FILE
 	#define SPARSE_ANGLES_LIST_FILE "view_info.txt"

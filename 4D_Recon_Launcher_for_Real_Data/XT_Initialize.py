@@ -41,9 +41,10 @@ def proj_init (proj, args):
 	proj['Path2Mask'] = args.Path2Mask
 	
 	proj['Expected_Counts'] = 29473 
-	proj['phantom_N_xy'] = 1024
+#	proj['phantom_N_xy'] = 1024
+	proj['phantom_N_xy'] = args.phantom_xy_width
 	# phantom_N_z is the resolution of phantom along z
-	proj['phantom_N_z'] = 4
+	proj['phantom_N_z'] = args.phantom_z_width
 	proj['rotation_center_r'] = args.rot_center # Same units as recon_N_r	
 	#voxel_size is the side length of each voxel (in micrometer(um))
 	proj['voxel_size'] = args.vox_size
@@ -153,8 +154,10 @@ def recon_init (proj, recon, args):
 #	else:
 #		recon['Proj0RMSE'] = proj['N_theta']/proj['K'] 
 #		recon['ProjNumRMSE'] = proj['recon_N_p'] - 2*proj['N_theta']/proj['K']
-	recon['Proj0RMSE'] = 256
-	recon['ProjNumRMSE'] = 256*2
+	#recon['Proj0RMSE'] = 256
+	#recon['ProjNumRMSE'] = 256*2
+	recon['Proj0RMSE'] = args.proj_start_4_RMSE
+	recon['ProjNumRMSE'] = args.proj_num_4_RMSE
 	if (args.SIM_DATA):
 		if(recon['Proj0RMSE'] < proj['proj_start']):
 			error_by_flag(1, "ERROR: proj_start is greater than Proj0RMSE")
@@ -178,9 +181,11 @@ def recon_init (proj, recon, args):
 	else:
 		recon['initICD'][0] = 0 
 	recon['WritePerIter'] = 0*np.ones(recon['multres_xy'])
+	recon['WritePerIter'][-1] = 1
 	recon['updateProjOffset'] = 3*np.ones(recon['multres_xy'])
 	recon['updateProjOffset'][0] = 0
-	recon['updateProjOffset'][1] = 2
+	if (recon['multres_xy'] > 1):
+		recon['updateProjOffset'][1] = 2
 	recon['readSino4mHDF'] = 0*np.ones(recon['multres_xy'])
 	if (args.REAL_DATA):
 		recon['readSino4mHDF'][0] = 1
@@ -237,7 +242,7 @@ def recon_init (proj, recon, args):
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	recon['zSlice4RMSE'] = recon['N_z']/2
 	
-	recon['calculate_cost'] = 0
+	recon['calculate_cost'] = 1
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1
 	recon['RMSE_converged'] = np.zeros(recon['multres_xy'])
