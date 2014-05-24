@@ -416,13 +416,19 @@ void initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tom
 		unsigned long long start[4] = {0, 0, 0, 0};
 		unsigned long long num[4] = {0, 0, 0, 0};
 		start[1] = (unsigned long long)TomoInputsPtr->node_rank*ScannedObjectPtr->N_z;
+		/*num[0] = 1;*/
 		num[0] = ScannedObjectPtr->N_time;
 		num[1] = ScannedObjectPtr->N_z;
 		num[2] = ScannedObjectPtr->N_y;
 		num[3] = ScannedObjectPtr->N_x;
-		ScannedObjectPtr->Conv_Object = (Real_t****)get_spc(ScannedObjectPtr->N_time, sizeof(Real_t***));
+		/*ScannedObjectPtr->Conv_Object = (Real_t****)get_spc(ScannedObjectPtr->N_time, sizeof(Real_t***));
 		for (i = 0; i < ScannedObjectPtr->N_time; i++)
+		{
 			ScannedObjectPtr->Conv_Object[i] = (Real_t***)multialloc(sizeof(Real_t), 3, ScannedObjectPtr->N_z, ScannedObjectPtr->N_y, ScannedObjectPtr->N_x);
+			start[0] = i;
+			read_4m_HDF (TomoInputsPtr, CONVERGED_OBJECT_FILE, &(ScannedObjectPtr->Conv_Object[i][0][0][0]), start, num);
+		}*/
+		ScannedObjectPtr->Conv_Object = (Real_t****)multialloc(sizeof(Real_t), 4, ScannedObjectPtr->N_time, ScannedObjectPtr->N_z, ScannedObjectPtr->N_y, ScannedObjectPtr->N_x);
 		read_4m_HDF (TomoInputsPtr, CONVERGED_OBJECT_FILE, &(ScannedObjectPtr->Conv_Object[0][0][0][0]), start, num);
 		
 	}		

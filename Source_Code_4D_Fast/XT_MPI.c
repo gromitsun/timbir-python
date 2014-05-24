@@ -133,7 +133,8 @@ void compute_RMSE_Converged_Object(ScannedObject* ScannedObjectPtr, TomoInputs* 
 			for (k = 0; k < ScannedObjectPtr->N_y; k++)
 				for (l = 0; l < ScannedObjectPtr->N_x; l++)
 				{
-					RMSE += pow((ScannedObjectPtr->Object[i][j+1][k][l] - ScannedObjectPtr->Conv_Object[i][j][k][l]), 2);
+					/*RMSE += pow((ScannedObjectPtr->Object[i][j+1][k][l] - ScannedObjectPtr->Conv_Object[i][j][k][l]), 2);*/
+					RMSE += (ScannedObjectPtr->Object[i][j+1][k][l] - ScannedObjectPtr->Conv_Object[i][j][k][l])*(ScannedObjectPtr->Object[i][j+1][k][l] - ScannedObjectPtr->Conv_Object[i][j][k][l]);
 					avg_conv += ScannedObjectPtr->Conv_Object[i][j][k][l];
 					avg_obj += ScannedObjectPtr->Object[i][j+1][k][l];
 				}
@@ -141,9 +142,9 @@ void compute_RMSE_Converged_Object(ScannedObject* ScannedObjectPtr, TomoInputs* 
   	MPI_Reduce(&RMSE, &RMSE_ALL, 1, MPI_TEMP_DATATYPE, MPI_SUM, 0, MPI_COMM_WORLD);
   	if (TomoInputsPtr->node_rank == 0)
 	{
-		RMSE_ALL = sqrt(RMSE_ALL/(ScannedObjectPtr->N_time*ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x));
-		avg_conv = avg_conv/(ScannedObjectPtr->N_time*ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x);
-		avg_obj = avg_obj/(ScannedObjectPtr->N_time*ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x);
+		RMSE_ALL = sqrt(RMSE_ALL/(TomoInputsPtr->node_num*ScannedObjectPtr->N_time*ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x));
+		avg_conv = avg_conv/(TomoInputsPtr->node_num*ScannedObjectPtr->N_time*ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x);
+		avg_obj = avg_obj/(TomoInputsPtr->node_num*ScannedObjectPtr->N_time*ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x);
 		fprintf(TomoInputsPtr->debug_file_ptr, "compute_RMSE_Converged_Object: The RMSE between the reconstruction and converged result is %fHU, average of converged object is %f, average of reconstruction is %f\n", convert_um2HU(RMSE_ALL), avg_conv, avg_obj);
 		if (Iter == 0)
     			Write2Bin(rmse_filename, 1, 1, 1, 1, &RMSE_ALL, TomoInputsPtr->debug_file_ptr);	

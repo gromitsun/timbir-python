@@ -227,13 +227,13 @@ void write_ObjectProjOff2TiffBinPerIter (Sinogram* SinogramPtr, ScannedObject* S
 	char object_file[100];
 	char scaled_object_file[100];
 	char projOffset_file[100] = PROJ_OFFSET_FILENAME;
-	char conv_file[100] = "converged_object";
+	char conv_file[100];
 
 	sprintf(projOffset_file, "%s_n%d", projOffset_file, TomoInputsPtr->node_rank);
 	for (i = 0; i < ScannedObjectPtr->N_time; i++)
 	{
 		sprintf (object_file, "%s_n%d_time_%d", OBJECT_FILENAME, TomoInputsPtr->node_rank, i);
-		sprintf (conv_file, "%s_n%d_time_%d", conv_file, TomoInputsPtr->node_rank, i);
+		sprintf (conv_file, "converged_object_n%d_time_%d", TomoInputsPtr->node_rank, i);
 		sprintf (scaled_object_file, "scaled_%s_n%d_time_%d", OBJECT_FILENAME, TomoInputsPtr->node_rank, i);
 		Write2Bin (object_file, 1, ScannedObjectPtr->N_z, ScannedObjectPtr->N_y, ScannedObjectPtr->N_x, &(ScannedObjectPtr->Object[i][1][0][0]), TomoInputsPtr->debug_file_ptr);
 		dim[0] = 1; dim[1] = ScannedObjectPtr->N_z; dim[2] = ScannedObjectPtr->N_y; dim[3] = ScannedObjectPtr->N_x;
