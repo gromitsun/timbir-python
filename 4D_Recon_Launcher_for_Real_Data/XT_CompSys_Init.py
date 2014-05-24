@@ -31,7 +31,7 @@ def CompSys_Init(args, recon, files):
 		if (args.Edison):
 			recon['num_threads'] = 32
 			recon['run_command'] = 'aprun -j 2 -n ' + str(recon['node_num']) + ' -N 1 -d ' + str(recon['num_threads']) + ' -cc none '
-			recon['compile_command'] = 'cc -Wall -ansi -openmp '
+			recon['compile_command'] = 'cc -Wall -ansi -openmp -O3 '
 		else:
 			recon['num_threads'] = 16
 			#recon['run_command'] = 'aprun -n ' + str(recon['node_num']) + ' -N 1 -d ' + str(recon['num_threads']) + ' -cc none valgrind --leak-check=yes --num-callers=500 --track-origins=yes '
