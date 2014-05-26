@@ -63,8 +63,8 @@ def proj_init (proj, args):
 	proj['use_slice_white'] = -1
 	proj['length_r'] = proj['voxel_size']*proj['N_r']	
 	proj['length_t'] = proj['voxel_size']*proj['N_t']	
-	if (args.SIM_DATA):
-		proj['length_t'] = proj['voxel_size']*proj['N_t']*(proj['N_r']/proj['recon_N_r'])
+	#if (args.SIM_DATA):
+	#	proj['length_t'] = proj['voxel_size']*proj['N_t']*(proj['N_r']/proj['recon_N_r'])
 	#Above hack is to ensure square voxel sizes during reconstruction. Fix the hack sometime
 	proj['L'] = proj['N_theta']/proj['K']
 	proj['N_p'] = ((proj['proj_start'] + proj['proj_num'])/proj['N_theta'] + 1)*proj['N_theta']

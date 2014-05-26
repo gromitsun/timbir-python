@@ -2,7 +2,7 @@
 # FILENAME:  Conte_SimData_Submit.sh
 
 #PBS -V
-#PBS -q bouman
+#PBS -q standby
 #PBS -l nodes=1:ppn=16
 #PBS -l walltime=8:00:00
 

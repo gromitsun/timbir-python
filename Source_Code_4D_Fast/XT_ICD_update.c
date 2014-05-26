@@ -536,7 +536,7 @@ void initObject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInpu
   }
 }
 /*'initErrorSinogram' is used to initialize the error sinogram before start of ICD. It computes e = y - Ax - d. Ax is computed by forward projecting the obkject x.*/
-void initErrorSinogam (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t** DetectorResponse, Real_t*** ErrorSino, AMatrixCol* VoxelLineResponse)
+void initErrorSinogam (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t** DetectorResponse, Real_t*** ErrorSino/*, AMatrixCol* VoxelLineResponse*/)
 {
   Real_t pixel, avg=0;
   int32_t dimTiff[4], i, j, k, p, sino_idx, slice;
@@ -562,7 +562,7 @@ void initErrorSinogam (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, T
           for (slice=0; slice<ScannedObjectPtr->N_z; slice++){
             /*	printf("count = %d, idx = %d, val = %f\n", VoxelLineResponse[slice].count, VoxelLineResponse[slice].index[0], VoxelLineResponse[slice].values[0]);*/
             pixel = ScannedObjectPtr->Object[i][slice+1][j][k]; /*slice+1 to account for extra z slices required for MPI*/
-            forward_project_voxel (SinogramPtr, pixel, ErrorSino, &(AMatrixPtr[i]), &(VoxelLineResponse[slice]), sino_idx, slice);
+            forward_project_voxel (SinogramPtr, pixel, ErrorSino, &(AMatrixPtr[i])/*, &(VoxelLineResponse[slice])*/, sino_idx, slice);
           }
         }
       }
@@ -746,7 +746,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
   Iter - Present iteration number
   MagUpdateMap - Magnitude update map containing the magnitude of update of each voxel
   Mask - If a certain element is true then the corresponding voxel is updated*/
-  int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t** DetectorResponse, AMatrixCol* VoxelLineResponse, Real_t*** ErrorSino, int32_t Iter, Real_t**** MagUpdateMap, uint8_t**** Mask)
+  int updateVoxelsTimeSlices(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t** DetectorResponse, /*AMatrixCol* VoxelLineResponse,*/ Real_t*** ErrorSino, int32_t Iter, Real_t**** MagUpdateMap, uint8_t**** Mask)
   {
     Real_t AverageUpdate = 0, tempUpdate, avg_update_percentage, total_vox_mag = 0.0, vox_mag = 0.0;
     int32_t xy_start, xy_end, i, j, K, block, idx, **z_start, **z_stop;
@@ -790,7 +790,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
         xy_end = (j + 1)*floor(TomoInputsPtr->UpdateSelectNum[i][idx]/K) - 1;
         xy_end = (j == K - 1) ? TomoInputsPtr->UpdateSelectNum[i][idx] - 1: xy_end;
         /*	printf ("Loop 1 Start - j = %d, i = %d, idx = %d, z_start = %d, z_stop = %d, xy_start = %d, xy_end = %d\n", j, i, idx, z_start[i][idx], z_stop[i][idx], xy_start, xy_end);*/
-        total_vox_mag += updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], xy_start, xy_end, TomoInputsPtr->x_rand_select[i][idx], TomoInputsPtr->y_rand_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, VoxelLineResponse, Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
+        total_vox_mag += updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], xy_start, xy_end, TomoInputsPtr->x_rand_select[i][idx], TomoInputsPtr->y_rand_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, /*VoxelLineResponse,*/ Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
         thread_num[i][idx] = omp_get_thread_num();
       }
       
@@ -812,7 +812,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
         xy_start = j*floor(TomoInputsPtr->UpdateSelectNum[i][idx]/K);
         xy_end = (j + 1)*floor(TomoInputsPtr->UpdateSelectNum[i][idx]/K) - 1;
         xy_end = (j == K - 1) ? TomoInputsPtr->UpdateSelectNum[i][idx] - 1: xy_end;
-        total_vox_mag += updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], xy_start, xy_end, TomoInputsPtr->x_rand_select[i][idx], TomoInputsPtr->y_rand_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, VoxelLineResponse, Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
+        total_vox_mag += updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], xy_start, xy_end, TomoInputsPtr->x_rand_select[i][idx], TomoInputsPtr->y_rand_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, /*VoxelLineResponse,*/ Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
         thread_num[i][idx] = omp_get_thread_num();
         /*	printf ("Loop 2 - i = %d, idx = %d, z_start = %d, z_stop = %d, xy_start = %d, xy_end = %d\n", i, idx, z_start[i][idx], z_stop[i][idx], xy_start, xy_end);*/
       }
@@ -833,7 +833,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
           z_start[i][idx] = idx*floor(ScannedObjectPtr->N_z/TomoInputsPtr->num_z_blocks);
           z_stop[i][idx] = (idx + 1)*floor(ScannedObjectPtr->N_z/TomoInputsPtr->num_z_blocks) - 1;
           z_stop[i][idx] = (idx >= TomoInputsPtr->num_z_blocks - 1) ? ScannedObjectPtr->N_z - 1: z_stop[i][idx];
-          updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], 0, TomoInputsPtr->NHICDSelectNum[i][idx]-1, TomoInputsPtr->x_NHICD_select[i][idx], TomoInputsPtr->y_NHICD_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, VoxelLineResponse, Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
+          updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], 0, TomoInputsPtr->NHICDSelectNum[i][idx]-1, TomoInputsPtr->x_NHICD_select[i][idx], TomoInputsPtr->y_NHICD_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, /*VoxelLineResponse,*/ Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
           thread_num[i][idx] = omp_get_thread_num();
           /*	printf ("Loop 1 NHICD - i = %d, idx = %d, z_start = %d, z_stop = %d\n", i, idx, z_start[i][idx], z_stop[i][idx]);*/
         }
@@ -851,7 +851,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
           z_start[i][idx] = idx*floor(ScannedObjectPtr->N_z/TomoInputsPtr->num_z_blocks);
           z_stop[i][idx] = (idx + 1)*floor(ScannedObjectPtr->N_z/TomoInputsPtr->num_z_blocks) - 1;
           z_stop[i][idx] = (idx >= TomoInputsPtr->num_z_blocks - 1) ? ScannedObjectPtr->N_z - 1: z_stop[i][idx];
-          updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], 0, TomoInputsPtr->NHICDSelectNum[i][idx]-1, TomoInputsPtr->x_NHICD_select[i][idx], TomoInputsPtr->y_NHICD_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, VoxelLineResponse, Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
+          updateVoxels (i, i, z_start[i][idx], z_stop[i][idx], 0, TomoInputsPtr->NHICDSelectNum[i][idx]-1, TomoInputsPtr->x_NHICD_select[i][idx], TomoInputsPtr->y_NHICD_select[i][idx], SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse, /*VoxelLineResponse,*/ Iter, &(zero_count[i][idx]), MagUpdateMap[i][idx], Mask[i]);
           thread_num[i][idx] = omp_get_thread_num();
           /*	printf ("Loop 2 NHICD - i = %d, idx = %d, z_start = %d, z_stop = %d\n", i, idx, z_start[i][idx], z_stop[i][idx]);*/
         }
@@ -923,7 +923,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
     char detect_file[100]="DetectorResponse";
     char projselect_file[100] = "ProjSelect";
     uint8_t ****Mask, AvgNumZElements;
-    AMatrixCol *VoxelLineResponse;
+    /*AMatrixCol *VoxelLineResponse;*/
     #ifdef POSITIVITY_CONSTRAINT
     fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Enforcing positivity constraint\n");
     #endif
@@ -977,7 +977,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
     fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Time taken to read object = %fmins\n", difftime(time(NULL),start)/60.0);
     if (TomoInputsPtr->only_Edge_Updates == 1)
     select_edge_voxels (ScannedObjectPtr, TomoInputsPtr, MagUpdateMap, Mask);
-    initErrorSinogam(SinogramPtr, ScannedObjectPtr, TomoInputsPtr, H_r, ErrorSino, VoxelLineResponse);
+    initErrorSinogam(SinogramPtr, ScannedObjectPtr, TomoInputsPtr, H_r, ErrorSino/*, VoxelLineResponse*/);
     multifree(SinogramPtr->Projection,3);
     fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Time taken to initialize object and compute error sinogram = %fmins\n", difftime(time(NULL),start)/60.0);
     #ifndef NO_COST_CALCULATE
@@ -995,7 +995,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
     start=time(NULL);
     for (Iter = 1; Iter <= TomoInputsPtr->NumIter; Iter++)
     {
-      flag = updateVoxelsTimeSlices (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, H_r, VoxelLineResponse, ErrorSino, Iter, MagUpdateMap, Mask);
+      flag = updateVoxelsTimeSlices (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, H_r, /*VoxelLineResponse,*/ ErrorSino, Iter, MagUpdateMap, Mask);
       if (TomoInputsPtr->RMSE_converged == 1)
 	compute_RMSE_Converged_Object(ScannedObjectPtr, TomoInputsPtr, Iter);
       if (TomoInputsPtr->WritePerIter == 1)
