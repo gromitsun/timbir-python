@@ -61,6 +61,7 @@ def ArgParser ():
         parser.add_argument("--phantom_z_width", help="Number of detector elements along x-direction",type=int, default=4)
         parser.add_argument("--proj_start_4_RMSE", help="Number of detector elements along x-direction",type=int, default=256)
         parser.add_argument("--proj_num_4_RMSE", help="Number of detector elements along x-direction",type=int, default=512)
+	parser.add_argument("--real_is_double", help="Do all reconstruction using double type as 'real' variable", action="store_true")
 	args = parser.parse_args()
 	
 	if (args.multres_xy < args.multres_z):

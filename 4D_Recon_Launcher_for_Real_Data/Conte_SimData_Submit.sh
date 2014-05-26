@@ -23,7 +23,7 @@ export OMP_NUM_THREADS=32
 #declare -a sigma_s=(50000 100000 250000 500000)
 #declare -a sigma_t=(125 250 500 1000 2000)
 declare -a sigma_s=(100000 200000 400000)
-declare -a sigma_t=(1000, 2000, 4000, 8000)
+declare -a sigma_t=(1000 2000 4000 8000)
 
 s_idx=`expr $PARAM_INDEX / 4`
 t_idx=`expr $PARAM_INDEX % 4`
