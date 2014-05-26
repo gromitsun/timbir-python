@@ -88,13 +88,13 @@ def generate_projections (proj, recon, files, path2launch):
 				
 	if (recon['sinobin'] == 1):
 		projections = recon['BH_Quad_Coef']*(projections*projections) + projections
-		RealData2Bin(path2launch + 'projection_n' + str(rank) + '.bin', projections)
+		RealData2Bin(path2launch + 'projection_n' + str(rank) + '.bin', projections, recon['real_var_type'])
 		print "Mean of projections from node " + str(rank) + " is ", np.mean(projections)
 	else:
-		RealData2Bin(path2launch + 'bright_n' + str(rank) + '.bin', bright)
+		RealData2Bin(path2launch + 'bright_n' + str(rank) + '.bin', bright, recon['real_var_type'])
 		print "Mean of bright field data from node " + str(rank) + " is ", np.mean(bright)
 
-	RealData2Bin(path2launch + 'weight_n' + str(rank) + '.bin', weight)
+	RealData2Bin(path2launch + 'weight_n' + str(rank) + '.bin', weight, recon['real_var_type'])
 	print "Mean of weight data from node " + str(rank) + " is ", np.mean(weight)
 	
 	print "generate_projections: Generated projections for node ", rank

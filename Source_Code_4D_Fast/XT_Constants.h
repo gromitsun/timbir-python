@@ -42,9 +42,15 @@
 	#define DEBUG_LOW
 #endif
 
-typedef float Real_t;
-#define MPI_TEMP_DATATYPE MPI_FLOAT
-#define MPI_OBJECT_DATATYPE MPI_FLOAT
+#ifdef REAL_IS_DOUBLE
+	typedef double Real_t;
+	#define MPI_TEMP_DATATYPE MPI_DOUBLE
+	#define MPI_OBJECT_DATATYPE MPI_DOUBLE
+#else	
+	typedef float Real_t;
+	#define MPI_TEMP_DATATYPE MPI_FLOAT
+	#define MPI_OBJECT_DATATYPE MPI_FLOAT
+#endif
 
 #define ZERO_SKIPPING
 #define INIT_SPARSE_ANGLES_FROM_FILE

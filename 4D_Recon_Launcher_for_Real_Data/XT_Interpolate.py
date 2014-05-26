@@ -48,7 +48,7 @@ def compute_RMSE_of_recon (proj, recon, files):
 		obj = np.zeros((recon['Rtime_num'][i], recon['N_xy'], recon['N_xy']), dtype=np.float64, order='C');	
 		for j in range(int(recon['Rtime_num'][i])):	
 			fid = open(path2launch + 'object_n' + str(node) + '_time_' + str(j) + '.bin', 'rb')
-			data = RealData4mBin(path2launch + 'object_n' + str(node) + '_time_' + str(j) + '.bin', slice*recon['N_xy']*recon['N_xy'], recon['N_xy']*recon['N_xy'])
+			data = RealData4mBin(path2launch + 'object_n' + str(node) + '_time_' + str(j) + '.bin', slice*recon['N_xy']*recon['N_xy'], recon['N_xy']*recon['N_xy'], recon['real_var_type'])
 			obj[j,:,:] = np.reshape(data, (recon['N_xy'], recon['N_xy']), order='C')
 
 		f_interp = interpolate.interp1d(obj_times, obj, kind='cubic', axis=0, copy=False)

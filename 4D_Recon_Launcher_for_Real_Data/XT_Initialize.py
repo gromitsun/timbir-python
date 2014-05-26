@@ -119,6 +119,8 @@ def proj_init (proj, args):
 """ r, c_s, c_t, sigma_s, sigma_t are lists. Each corresponding item in the lists will be used to run a instance of reconstruction. """
 
 def recon_init (proj, recon, args):
+	recon['real_var_type'] = 'double'
+
 	recon['r'] = [args.r]
 	recon['c_s'] = [10**-6]
 	recon['c_t'] = [10**-6]

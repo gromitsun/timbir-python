@@ -67,6 +67,8 @@ def do_MBIR_reconstruction(proj, recon, files):
 			macros = macros + ' -DPATH_TO_PHANTOM="\\"' + proj['Path2Phantom'] + '\\""'
 			macros = macros + ' -DEXPECTED_COUNTS_FOR_PHANTOM_DATA="' + str(proj['Expected_Counts']) + '"'
 			macros = macros + ' -DCONVERGED_OBJECT_FILE="\\"' + files['Converged_Object'] + '\\""'
+			if (recon['real_var_type'] == 'double'):
+				macros = macros + ' -DREAL_IS_DOUBLE'
 
 			if (recon['calculate_cost'] == 0):
 				macros = macros + ' -DNO_COST_CALCULATE'
