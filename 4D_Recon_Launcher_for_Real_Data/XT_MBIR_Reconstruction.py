@@ -98,11 +98,12 @@ def do_MBIR_reconstruction(proj, recon, files):
 			if (recon['init_object4mHDF'] == 1):
 				initpar_object4mHDF (proj, recon, files, i)
 
-		if (recon['reconstruct'] == 1):	
+		if (recon['reconstruct'] == 1):
 			if (recon['HPC'] == 'Purdue' and recon['node_num'] > 1):
 				flag = system('cp nodefile ' + path2launch + '.')
 				error_by_flag(flag, 'ERROR: Cannot copy nodefile to launch folder')
-			for multidx in range(len(recon['delta_xy'])):
+
+			for multidx in range(recon['multstart'],len(recon['delta_xy'])):
 				ZingerT = recon['ZingerT'][i]
 				if (recon['ZingerDel'][i] == 0 and multidx == 0):
 					ZingerT = 100000

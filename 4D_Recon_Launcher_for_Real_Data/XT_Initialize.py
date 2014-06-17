@@ -62,11 +62,11 @@ def proj_init (proj, args):
 	proj['use_slice_white'] = -1
 	proj['length_r'] = proj['voxel_size']*proj['N_r']	
 	proj['length_t'] = proj['voxel_size']*proj['N_t']	
-	if (args.SIM_DATA):
-		proj['length_t'] = proj['voxel_size']*proj['N_t']*(proj['N_r']/proj['recon_N_r'])
+#	if (args.SIM_DATA):
+#		proj['length_t'] = proj['voxel_size']*proj['N_t']*(proj['N_r']/proj['recon_N_r'])
 	#Above hack is to ensure square voxel sizes during reconstruction. Fix the hack sometime
 	proj['L'] = proj['N_theta']/proj['K']
-	proj['N_p'] = ((proj['proj_start'] + proj['proj_num'])/proj['N_theta'] + 1)*proj['N_theta']
+	proj['N_p'] = proj['N_theta']*args.num_cycles
 	
 	fps_of_camera = proj['L']/(180.0/proj['rotation_speed'])
 	angles, times = gen_interlaced_views_0_to_Inf(proj['K'], proj['N_theta'], proj['N_p'])
@@ -76,7 +76,7 @@ def proj_init (proj, args):
 
 	proj['angles'] = angles_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
 	proj['times'] = times_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
-	
+
 	proj['recon_N_p'] = len(proj['angles']) 	
 	print 'proj_init: Total number of projections used for reconstruction is ' + str(proj['recon_N_p'])
 	
@@ -172,11 +172,13 @@ def recon_init (proj, recon, args):
 	recon['initICD'] = 3*np.ones(recon['multres_z'])
 	recon['initICD'][0] = 2
 	recon['initICD'] = np.concatenate((2*np.ones(recon['multres_xy']-recon['multres_z']), recon['initICD']), axis=0)
+	recon['initICD'][0] = 0
 	if (args.restart):
-		recon['initICD'][0] = 1
 		args.run_setup = False
+		recon['multstart'] = args.restart_stage - 1
 	else:
-		recon['initICD'][0] = 0 
+		recon['multstart'] = 0
+		
 	recon['WritePerIter'] = 0*np.ones(recon['multres_xy'])
 	recon['updateProjOffset'] = 3*np.ones(recon['multres_xy'])
 	recon['updateProjOffset'][0] = 0
@@ -274,7 +276,10 @@ def recon_init (proj, recon, args):
 def files_init (files, args):
 	files['Launch_Folder'] = args.run_folder + '/XT_run/'
 	files['Result_Folder'] = args.run_folder + '/XT_Results/'
-	files['C_Source_Folder'] = "../Source_Code_4D_Fast/"
+	if (args.REAL_DATA):
+		files['C_Source_Folder'] = "../Source_Code_4D_APS2014/"
+	else:
+		files['C_Source_Folder'] = "../Source_Code_4D_Fast/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
 	files['Converged_Object'] = args.converged_object_file
 	files['copy_executables'] = 0

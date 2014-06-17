@@ -7,6 +7,7 @@ def ArgParser ():
 	parser.add_argument("--run_setup", help="Specify whether you want to setup the launch folder", action="store_true")
 	parser.add_argument("--run_recon", help="Run reconstruction code", action="store_true")
 	parser.add_argument("--restart", help="Restart the reconstruction", action="store_true")
+        parser.add_argument("--restart_stage", help="Multi-resolution stage number from where to restart the reconstruction",type=int)
 	
 	parser.add_argument("--ATT", help="Imaging modality is attenuation contrast tomography", action="store_true")
 	parser.add_argument("--PHCON", help="Imaging modality is phase constrast tomography", action="store_true")
@@ -43,6 +44,7 @@ def ArgParser ():
 	parser.add_argument("--K",help="K is the number of sub-frames",type=int)
         parser.add_argument("--N_theta",help="N_theta is the number of frames",type=int)       
         parser.add_argument("--r",help="r is the number of reconstructions per frame",type=int)       
+	parser.add_argument("--num_cycles", help="Number of full frames of data (or cycles)",type=int)
         parser.add_argument("--multres_xy",help="The number of multiresolution stages in x-y plane",type=int)       
         parser.add_argument("--multres_z",help="The number of multiresolution stages along z-axis",type=int)       
         parser.add_argument("--do_VarEstimate",help="Do variance estimate",type=int)       
@@ -55,7 +57,7 @@ def ArgParser ():
         parser.add_argument("--minHU",help="Minimum value of attenuation",type=float,default=0.0) 
         parser.add_argument("--BH_Quad_Coef",help="Beamhardening quadratic coefficient",type=float,default=0.0) 
         parser.add_argument("--RMSE_converged",help="Compute RMSE between the reconstruction and the converged result at the finest resolution", action="store_true") 
-        parser.add_argument("--converged_object_file", help="Full path of the input hdf5 file containing the converged object with which RMSE comparison should be done")
+        parser.add_argument("--converged_object_file", help="Full path of the input hdf5 file containing the converged object with which RMSE comparison should be done", default="/dummy_path/")
 	args = parser.parse_args()
 	
 	if (args.multres_xy < args.multres_z):
