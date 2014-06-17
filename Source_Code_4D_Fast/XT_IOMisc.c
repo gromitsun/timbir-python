@@ -47,6 +47,13 @@ Real_t convert_HU2um (Real_t val)
        return((val-c_HU)/slope_HU);
 }
 
+Real_t convert_um2HU (Real_t val)
+{
+       Real_t slope_HU=(HOUNSFIELD_WATER_MAP-HOUNSFIELD_AIR_MAP)/(WATER_MASS_ATT_COEFF*WATER_DENSITY-AIR_MASS_ATT_COEFF*AIR_DENSITY)/HFIELD_UNIT_CONV_CONST;
+       Real_t c_HU=-slope_HU*(AIR_MASS_ATT_COEFF*AIR_DENSITY*HFIELD_UNIT_CONV_CONST);
+
+       return(val*slope_HU+c_HU);
+}
 /*Appends values in 'img' to a binary file with name filename. dimensions of img are specified by dim1, dim2, dim3 and dim4*/
 void Append2Bin (char *filename, int dim1, int dim2, int dim3, int dim4, Real_t* img, FILE *debug_file_ptr)
 {
@@ -220,17 +227,21 @@ void write_ObjectProjOff2TiffBinPerIter (Sinogram* SinogramPtr, ScannedObject* S
 	char object_file[100];
 	char scaled_object_file[100];
 	char projOffset_file[100] = PROJ_OFFSET_FILENAME;
+	char conv_file[100];
 
 	sprintf(projOffset_file, "%s_n%d", projOffset_file, TomoInputsPtr->node_rank);
 	for (i = 0; i < ScannedObjectPtr->N_time; i++)
 	{
 		sprintf (object_file, "%s_n%d_time_%d", OBJECT_FILENAME, TomoInputsPtr->node_rank, i);
+		sprintf (conv_file, "converged_object_n%d_time_%d", TomoInputsPtr->node_rank, i);
 		sprintf (scaled_object_file, "scaled_%s_n%d_time_%d", OBJECT_FILENAME, TomoInputsPtr->node_rank, i);
 		Write2Bin (object_file, 1, ScannedObjectPtr->N_z, ScannedObjectPtr->N_y, ScannedObjectPtr->N_x, &(ScannedObjectPtr->Object[i][1][0][0]), TomoInputsPtr->debug_file_ptr);
 		dim[0] = 1; dim[1] = ScannedObjectPtr->N_z; dim[2] = ScannedObjectPtr->N_y; dim[3] = ScannedObjectPtr->N_x;
 		if (TomoInputsPtr->Write2Tiff == 1)
 		{
 			WriteMultiDimArray2Tiff (object_file, dim, 0, 1, 2, 3, &(ScannedObjectPtr->Object[i][1][0][0]), 0, TomoInputsPtr->debug_file_ptr);
+      			if (TomoInputsPtr->RMSE_converged == 1)
+				WriteMultiDimArray2Tiff (conv_file, dim, 0, 1, 2, 3, &(ScannedObjectPtr->Conv_Object[i][0][0][0]), 0, TomoInputsPtr->debug_file_ptr);
 			WriteMultiDimArray2Tiff (scaled_object_file, dim, 0, 1, 2, 3, &(ScannedObjectPtr->Object[i][1][0][0]), 1, TomoInputsPtr->debug_file_ptr);
 		}
 			/*Changed above line so that output image is scaled from min to max*/

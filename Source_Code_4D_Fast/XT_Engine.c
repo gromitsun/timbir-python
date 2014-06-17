@@ -59,6 +59,14 @@ void freeMemory(Sinogram* SinogramPtr, ScannedObject *ScannedObjectPtr, TomoInpu
 	free(ScannedObjectPtr->Object);
 /*	multifree(ScannedObjectPtr->Object,4);*/
 
+	if (TomoInputsPtr->RMSE_converged == 1)
+	{
+	/*	for (i = 0; i < ScannedObjectPtr->N_time; i++)
+			multifree(ScannedObjectPtr->Conv_Object[i],3);
+		free(ScannedObjectPtr->Conv_Object);*/
+		multifree(ScannedObjectPtr->Conv_Object, 4);
+	}
+
 	multifree(TomoInputsPtr->x_rand_select,3);
 	multifree(TomoInputsPtr->y_rand_select,3);
 	multifree(TomoInputsPtr->x_NHICD_select,3);

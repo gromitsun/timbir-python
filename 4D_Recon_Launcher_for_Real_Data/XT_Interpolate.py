@@ -48,7 +48,7 @@ def compute_RMSE_of_recon (proj, recon, files):
 		obj = np.zeros((recon['Rtime_num'][i], recon['N_xy'], recon['N_xy']), dtype=np.float64, order='C');	
 		for j in range(int(recon['Rtime_num'][i])):	
 			fid = open(path2launch + 'object_n' + str(node) + '_time_' + str(j) + '.bin', 'rb')
-			data = RealData4mBin(path2launch + 'object_n' + str(node) + '_time_' + str(j) + '.bin', slice*recon['N_xy']*recon['N_xy'], recon['N_xy']*recon['N_xy'])
+			data = RealData4mBin(path2launch + 'object_n' + str(node) + '_time_' + str(j) + '.bin', slice*recon['N_xy']*recon['N_xy'], recon['N_xy']*recon['N_xy'], recon['real_var_type'])
 			obj[j,:,:] = np.reshape(data, (recon['N_xy'], recon['N_xy']), order='C')
 
 		f_interp = interpolate.interp1d(obj_times, obj, kind='cubic', axis=0, copy=False)
@@ -132,6 +132,7 @@ def compute_RMSE_of_recon (proj, recon, files):
 		text_file.write('ZingerDel = ' + str(recon['ZingerDel'][i]) + '\n')
 		text_file.write('Proj0RMSE = ' + str(recon['Proj0RMSE']) + '\n')
 		text_file.write('ProjNumRMSE = ' + str(recon['ProjNumRMSE']) + '\n')
+		text_file.write('Real Variable Type = ' + str(recon['real_var_type']) + '\n')
 		text_file.close()
 		
 		fid = open(path2results + 'Reconstruction.bin', 'wb')
@@ -158,6 +159,7 @@ def compute_RMSE_of_recon (proj, recon, files):
 		Data2Mat['ZingerDel'] = recon['ZingerDel'][i]
 		Data2Mat['Proj0RMSE'] = recon['Proj0RMSE']
 		Data2Mat['ProjNumRMSE'] = recon['ProjNumRMSE']
+		Data2Mat['real_var_type'] = recon['real_var_type']
 		Data2Mat['fineres_voxthresh'] = recon['voxel_thresh'][-1]
 		#create_param_sweep_file (Data2Mat,files)
 		

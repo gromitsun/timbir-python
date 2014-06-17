@@ -71,7 +71,7 @@ def write_tiff_from_object_bin_file (proj, recon, files):
 		for j in range(int(recon['Rtime_num'][i])):
 			for k in range(recon['node_num']):
 				zpernode = recon['N_z']/recon['node_num']	
-				temp = RealData4mBin(path2launch + 'object_n' + str(k) + '_time_' + str(j) + '.bin', 0, recon['N_xy']*recon['N_xy']*zpernode)
+				temp = RealData4mBin(path2launch + 'object_n' + str(k) + '_time_' + str(j) + '.bin', 0, recon['N_xy']*recon['N_xy']*zpernode, recon['real_var_type'])
 				Object[k*zpernode:(k+1)*zpernode,:,:] = temp.reshape((zpernode, recon['N_xy'], recon['N_xy']), order = 'C')
 			for k in range(recon['N_z']):
 				slice_object = convert_um2HU(Object[k,:,:])
@@ -85,7 +85,7 @@ def write_object2HDF (proj, recon, files):
                 path2results = files['Result_Folder'] + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
                 path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
 		for k in range(recon['node_num']):
-			temp = RealData4mBin(path2launch + 'proj_offset_n' + str(k) + '.bin', 0, proj['recon_N_r']*proj['recon_N_t']/recon['node_num'])
+			temp = RealData4mBin(path2launch + 'proj_offset_n' + str(k) + '.bin', 0, proj['recon_N_r']*proj['recon_N_t']/recon['node_num'], recon['real_var_type'])
                 	proj_offset = temp.reshape((proj['recon_N_r'], proj['recon_N_t']/recon['node_num']), order = 'C')
                 	offset[:,k*proj['recon_N_t']/recon['node_num']:(k+1)*proj['recon_N_t']/recon['node_num']] = proj_offset.astype(np.float32)
                 for j in range(int(recon['Rtime_num'][i])):
@@ -94,7 +94,7 @@ def write_object2HDF (proj, recon, files):
                 	dset = file.create_dataset('object', (recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True);
 			zpernode = recon['N_z']/recon['node_num']	
 			for k in range(recon['node_num']):
-				temp = RealData4mBin(path2launch + 'object_n' + str(k) + '_time_' + str(j) + '.bin', 0, recon['N_xy']*recon['N_xy']*zpernode)
+				temp = RealData4mBin(path2launch + 'object_n' + str(k) + '_time_' + str(j) + '.bin', 0, recon['N_xy']*recon['N_xy']*zpernode, recon['real_var_type'])
                         	Object[k*zpernode:(k+1)*zpernode,:,:] = temp.reshape((zpernode, recon['N_xy'], recon['N_xy']), order = 'C')
 
                         Object[Object < 0] = 0
@@ -125,21 +125,26 @@ def write_Video4mArray(filename, rows, cols, fps, array):
 	rgb_array.tofile(pipe.proc.stdin)
 
 
-def RealData2Bin(filename, data):
+def RealData2Bin(filename, data, real_var_type):
 	fid = open(filename, 'wb')
-	data = data.astype(np.float64)
-	#data = data.astype(np.float32)
+	if (real_var_type == 'double'):
+		data = data.astype(np.float64)
+	else:
+		data = data.astype(np.float32)
 	data.tofile(fid)
 	fid.close()
 		
-def RealData4mBin(filename, offset, size):
+def RealData4mBin(filename, offset, size, real_var_type):
 	fid = open(filename, 'rb')
-	#fid.seek(offset*4, 0)
-	fid.seek(offset*8, 0)
-	# Multiply above offset by 8 which is size of double in bytes
-	#data = fid.read(size*4)
-	data = fid.read(size*8)
-	#data = np.array(struct.unpack(str(size)+'f',data))	
-	data = np.array(struct.unpack(str(size)+'d',data))	
+	if (real_var_type == 'double'):
+		fid.seek(offset*8, 0)
+		# Multiply above offset by 8 which is size of double in bytes
+		data = fid.read(size*8)
+		data = np.array(struct.unpack(str(size)+'d',data))	
+	else:
+		fid.seek(offset*4, 0)
+		data = fid.read(size*4)
+		data = np.array(struct.unpack(str(size)+'f',data))
+	
 	fid.close()
 	return data

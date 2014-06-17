@@ -67,6 +67,8 @@ def do_MBIR_reconstruction(proj, recon, files):
 			macros = macros + ' -DPATH_TO_PHANTOM="\\"' + proj['Path2Phantom'] + '\\""'
 			macros = macros + ' -DEXPECTED_COUNTS_FOR_PHANTOM_DATA="' + str(proj['Expected_Counts']) + '"'
 			macros = macros + ' -DCONVERGED_OBJECT_FILE="\\"' + files['Converged_Object'] + '\\""'
+			if (recon['real_var_type'] == 'double'):
+				macros = macros + ' -DREAL_IS_DOUBLE'
 
 			if (recon['calculate_cost'] == 0):
 				macros = macros + ' -DNO_COST_CALCULATE'
@@ -77,8 +79,8 @@ def do_MBIR_reconstruction(proj, recon, files):
 			if (recon['positivity_constraint'] == 1):
 				macros = macros + ' -DPOSITIVITY_CONSTRAINT'
 
-			if (any(recon['readSino4mHDF'])):
-				macros = macros + ' -DREAD_PROJECTION_DATA_4M_HDF'
+#			if (any(recon['readSino4mHDF'])):
+			macros = macros + ' -DREAD_PROJECTION_DATA_4M_HDF'
 			if (recon['modality'] == 'PHCON'):
 				macros = macros + ' -DPHASE_CONTRAST_TOMOGRAPHY'
 
