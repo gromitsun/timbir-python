@@ -303,7 +303,6 @@ Real_t computeCost(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoI
     forward += (Real_t)TomoInputsPtr->node_num*(Real_t)SinogramPtr->N_p*(Real_t)SinogramPtr->N_r*(Real_t)SinogramPtr->N_t*log(TomoInputsPtr->var_est)/2;
     fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: forward cost=%f\n",forward);
     fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: prior cost =%f\n",prior);
-    fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: variance parameter estimate =%f\n",TomoInputsPtr->var_est);
     TomoInputsPtr->Forward_Cost = forward;
     TomoInputsPtr->Prior_Cost = prior;
     cost = forward + prior;
@@ -686,13 +685,13 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
     for (i = 0; i < SinogramPtr->N_r; i++)
     for (j = 0; j < SinogramPtr->N_t; j++)
     ErrorSino[k][i][j] -= SinogramPtr->ProjOffset[i][j]; */
-    Real_t numerator, temp, denominator;
+    Real_t sign, numerator, temp, denominator;
     int32_t i, j, k;
     #ifdef DEBUG_HIGH
     fprintf(TomoInputsPtr->debug_file_ptr, "update_Sinogram_Offset: Will compute projection offset error\n");
     #endif
     
-    #pragma omp parallel for private(j, k, numerator, denominator, temp)
+    #pragma omp parallel for private(j, k, numerator, denominator, temp, sign)
     for (i = 0; i < SinogramPtr->N_r; i++)
     for (j = 0; j < SinogramPtr->N_t; j++)
     {
@@ -700,7 +699,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
       denominator = 0;
       for (k = 0; k < SinogramPtr->N_p; k++)
       {
-        temp = TomoInputsPtr->ErrorSinoThresh*TomoInputsPtr->ErrorSinoDelta*sqrt(TomoInputsPtr->Weight[k][i][j])/fabs(ErrorSino[k][i][j]);
+        temp = TomoInputsPtr->ErrorSinoThresh*TomoInputsPtr->ErrorSinoDelta*sqrt(TomoInputsPtr->Weight[k][i][j]);
         ErrorSino[k][i][j] += SinogramPtr->ProjOffset[i][j];
         if (SinogramPtr->ProjSelect[k][i][j] == true)
         {
@@ -709,8 +708,9 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
         }
         else
         {
-          numerator += temp*ErrorSino[k][i][j];
-          denominator += temp;
+	  sign = (ErrorSino[k][i][j] > 0) - (ErrorSino[k][i][j] < 0);
+          numerator += temp*sign;
+          denominator += temp/fabs(ErrorSino[k][i][j]);
         }
       }
       
@@ -1004,6 +1004,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
       cost = computeCost(SinogramPtr,ScannedObjectPtr,TomoInputsPtr,ErrorSino);
       percentage_change_in_cost = ((cost - cost_last_iter)/(cost - cost_0_iter))*100.0;
       fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Percentage change in cost is %f\n", percentage_change_in_cost);
+      fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: variance parameter estimate =%f\n",TomoInputsPtr->var_est);
       fprintf(TomoInputsPtr->debug_file_ptr, "-------------ICD_BackProject: ICD Iter=%d, cost=%f, time since start of ICD = %fmins------------\n",Iter,cost,difftime(time(NULL),start)/60.0);
       Append2Bin (costfile, 1, 1, 1, 1, &cost, TomoInputsPtr->debug_file_ptr);
       if(cost > cost_last_iter){
@@ -1018,6 +1019,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
         break;
       }
       #else
+      fprintf(TomoInputsPtr->debug_file_ptr, "costCompute: variance parameter estimate =%f\n",TomoInputsPtr->var_est);
       fprintf(TomoInputsPtr->debug_file_ptr, "-------------ICD_BackProject: ICD Iter=%d, time since start of ICD = %fmins------------\n",Iter,difftime(time(NULL),start)/60.0);
       if (flag != 0 && Iter > 1){
         fprintf(TomoInputsPtr->debug_file_ptr, "ICD_BackProject: Convergence criteria is met\n");

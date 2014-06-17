@@ -40,7 +40,7 @@ def proj_init (proj, args):
 	proj['Path2Phantom'] = args.Path2Phantom
 	proj['Path2Mask'] = args.Path2Mask
 	
-	proj['Expected_Counts'] = 29473 
+	proj['Expected_Counts'] = 29473.0 
 #	proj['phantom_N_xy'] = 1024
 	proj['phantom_N_xy'] = args.phantom_xy_width
 	# phantom_N_z is the resolution of phantom along z
@@ -196,6 +196,7 @@ def recon_init (proj, recon, args):
 		recon['readSino4mHDF'][0] = 1
 	recon['iterations'] = args.MaxIter*np.ones(recon['multres_xy'])
 	recon['do_VarEstimate'] = args.do_VarEstimate*np.ones(recon['multres_xy'])
+	recon['do_VarEstimate'][0] = 0
 	recon['Estimate_of_Var'] = 1
 	
 	if (args.MBIR):
@@ -247,7 +248,7 @@ def recon_init (proj, recon, args):
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	recon['zSlice4RMSE'] = recon['N_z']/2
 	
-	recon['calculate_cost'] = 1
+	recon['calculate_cost'] = 0
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1
 	recon['RMSE_converged'] = np.zeros(recon['multres_xy'])

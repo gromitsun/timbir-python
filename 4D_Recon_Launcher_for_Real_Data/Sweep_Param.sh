@@ -1,4 +1,4 @@
-param_idx=`seq 0 11`
+param_idx=`seq 0 0`
 for i in $param_idx; do
 	export PARAM_INDEX=$i
 	qsub -N sweep_$i -v PARAM_INDEX Conte_SimData_Submit.sh
