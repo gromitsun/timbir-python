@@ -10,7 +10,7 @@ rotation_center = 131;
 node_num = 1;
 length_r = 0.65*1024;
 path2result = '../../Recon_Runs/Att_Recon_Sim_256/XT_Result_Repository/FBP_r_1_K_1_N_theta_256_N_p_1024/';
-path2launch = '../../Recon_Runs/Att_Recon_Sim_256/XT_run/run_sigs_1000000_sigt_500_r_1_K_1_N_theta_256_N_p_1024/';
+path2launch = '../../Recon_Runs/Att_Recon_Sim_256/XT_run/run_sigs_10000.0_sigt_10000.0_r_1_K_1_N_theta_256_N_p_1024const_z/';
 L = N_theta/K;
 [views, buf1, buf2] = gen_interlaced_views_0_to_inf (L, K, N_p);
 

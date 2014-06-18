@@ -47,7 +47,7 @@ def main():
 	elif (recon['recon_type'] == 'FBP'):
 #		do_MBIR_reconstruction(proj, recon, files)
 		print 'main: Will do FBP reconstruction'
-		do_FBP_reconstruction(proj, recon, files)
+#		do_FBP_reconstruction(proj, recon, files)
 	else:
 		print 'ERROR: main: Reconstruction type not recognized'
 

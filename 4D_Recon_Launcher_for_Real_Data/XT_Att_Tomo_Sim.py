@@ -38,8 +38,8 @@ def attenuation_tomo_sim_init (proj, recon, files):
 	recon['c_t'] = 10**-6
 	recon['ZingerT'] = 4
 	recon['ZingerDel'] = 0.1
-	recon['maxHU'] = 43000
-	recon['minHU'] = 5000
+	recon['maxHU'] = 40000
+	recon['minHU'] = 0
 	
 	recon['voxel_thresh'] = [0.05, 0.05, 0.05]
         recon['cost_thresh'] = [0.1, 0.1, 0.1]
