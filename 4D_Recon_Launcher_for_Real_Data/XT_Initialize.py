@@ -40,10 +40,11 @@ def proj_init (proj, args):
 	proj['Path2Phantom'] = args.Path2Phantom
 	proj['Path2Mask'] = args.Path2Mask
 	
-	proj['Expected_Counts'] = 29473 
-	proj['phantom_N_xy'] = 1024
+	proj['Expected_Counts'] = 29473.0 
+#	proj['phantom_N_xy'] = 1024
+	proj['phantom_N_xy'] = args.phantom_xy_width
 	# phantom_N_z is the resolution of phantom along z
-	proj['phantom_N_z'] = 4
+	proj['phantom_N_z'] = args.phantom_z_width
 	proj['rotation_center_r'] = args.rot_center # Same units as recon_N_r	
 	#voxel_size is the side length of each voxel (in micrometer(um))
 	proj['voxel_size'] = args.vox_size
@@ -59,11 +60,11 @@ def proj_init (proj, args):
 	proj['min_time_btw_views'] = args.min_time_btw_views #a view will be deleted if the time between two consecutive views is less than min_time_btw_views
 	proj['rotation_speed'] = args.rotation_speed #rotation speed in degrees per second
 	
-	proj['use_slice_white'] = -1 
+	proj['use_slice_white'] = -1
 	proj['length_r'] = proj['voxel_size']*proj['N_r']	
 	proj['length_t'] = proj['voxel_size']*proj['N_t']	
 	proj['L'] = proj['N_theta']/proj['K']
-	proj['N_p'] = ((proj['proj_start'] + proj['proj_num'])/proj['N_theta'] + 1)*proj['N_theta']
+	proj['N_p'] = proj['N_theta']*args.num_cycles
 	
 	fps_of_camera = proj['L']/(180.0/proj['rotation_speed'])
 	angles, times = gen_interlaced_views_0_to_Inf(proj['K'], proj['N_theta'], proj['N_p'])
@@ -73,7 +74,7 @@ def proj_init (proj, args):
 
 	proj['angles'] = angles_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
 	proj['times'] = times_clip[proj['proj_start'] : proj['proj_start'] + proj['proj_num']]
-	
+
 	proj['recon_N_p'] = len(proj['angles']) 	
 	print 'proj_init: Total number of projections used for reconstruction is ' + str(proj['recon_N_p'])
 	
@@ -115,6 +116,11 @@ def proj_init (proj, args):
 """ r, c_s, c_t, sigma_s, sigma_t are lists. Each corresponding item in the lists will be used to run a instance of reconstruction. """
 
 def recon_init (proj, recon, args):
+	if (args.real_is_double):
+		recon['real_var_type'] = 'double'
+	else:
+		recon['real_var_type'] = 'float'
+	
 	recon['r'] = [args.r]
 	recon['c_s'] = [10**-6]
 	recon['c_t'] = [10**-6]
@@ -150,8 +156,10 @@ def recon_init (proj, recon, args):
 #	else:
 #		recon['Proj0RMSE'] = proj['N_theta']/proj['K'] 
 #		recon['ProjNumRMSE'] = proj['recon_N_p'] - 2*proj['N_theta']/proj['K']
-	recon['Proj0RMSE'] = 256
-	recon['ProjNumRMSE'] = 256*2
+	#recon['Proj0RMSE'] = 256
+	#recon['ProjNumRMSE'] = 256*2
+	recon['Proj0RMSE'] = args.proj_start_4_RMSE
+	recon['ProjNumRMSE'] = args.proj_num_4_RMSE
 	if (args.SIM_DATA):
 		if(recon['Proj0RMSE'] < proj['proj_start']):
 			error_by_flag(1, "ERROR: proj_start is greater than Proj0RMSE")
@@ -169,16 +177,25 @@ def recon_init (proj, recon, args):
 	recon['initICD'] = 3*np.ones(recon['multres_z'])
 	recon['initICD'][0] = 2
 	recon['initICD'] = np.concatenate((2*np.ones(recon['multres_xy']-recon['multres_z']), recon['initICD']), axis=0)
-	recon['initICD'][0] = 0 
+	recon['initICD'][0] = 0
+	if (args.restart):
+		args.run_setup = False
+		recon['multstart'] = args.restart_stage - 1
+	else:
+		recon['multstart'] = 0
+		
 	recon['WritePerIter'] = 0*np.ones(recon['multres_xy'])
+	recon['WritePerIter'][-1] = 1
 	recon['updateProjOffset'] = 3*np.ones(recon['multres_xy'])
 	recon['updateProjOffset'][0] = 0
-	recon['updateProjOffset'][1] = 2
+	if (recon['multres_xy'] > 1):
+		recon['updateProjOffset'][1] = 2
 	recon['readSino4mHDF'] = 0*np.ones(recon['multres_xy'])
 	if (args.REAL_DATA):
 		recon['readSino4mHDF'][0] = 1
 	recon['iterations'] = args.MaxIter*np.ones(recon['multres_xy'])
 	recon['do_VarEstimate'] = args.do_VarEstimate*np.ones(recon['multres_xy'])
+	recon['do_VarEstimate'][0] = 0
 	recon['Estimate_of_Var'] = 1
 	
 	if (args.MBIR):
@@ -208,10 +225,7 @@ def recon_init (proj, recon, args):
 	recon['initMagUpMap'][0] = 0
 	recon['only_Edge_Updates'] = 0*np.ones(recon['multres_xy'])
 	recon['writeTiff'] = 1*np.ones(recon['multres_xy'])
-	if (args.REAL_DATA):
-		recon['BH_Quad_Coef'] = 0.5
-	else:
-		recon['BH_Quad_Coef'] = 0
+	recon['BH_Quad_Coef'] = args.BH_Quad_Coef
 	recon['init_object4mHDF'] = 0
 	recon['radius_obj'] = proj['voxel_size']*proj['N_r']
 	
@@ -233,9 +247,12 @@ def recon_init (proj, recon, args):
 	recon['N_z'] = proj['recon_N_t']/recon['delta_z'][-1]
 	recon['zSlice4RMSE'] = recon['N_z']/2
 	
-	recon['calculate_cost'] = 1
+	recon['calculate_cost'] = 0
 	recon['set_up_launch_folder'] = 0
 	recon['NHICD'] = 1
+	recon['RMSE_converged'] = np.zeros(recon['multres_xy'])
+	if (args.RMSE_converged):
+		recon['RMSE_converged'][-1] = 1
 
 	recon['FBP_N_xy'] = proj['recon_N_r']
 	if (recon['init_with_FBP'] == 1):
@@ -245,6 +262,10 @@ def recon_init (proj, recon, args):
 		error_by_flag(1, 'ERROR: recon_init: recon_N_t must divide N_t')
 
 	recon['updateProjOffset'] = np.asarray(recon['updateProjOffset'])	
+
+	if (recon['multres_xy'] < recon['multres_z']):
+		error_by_flag(1, 'ERROR: Number of multiresolution stages in x-y should not be less than along z-axis')
+	
 	if (len(recon['r']) != len(recon['c_s']) or len(recon['r']) != len(recon['c_t']) or len(recon['r']) != len(recon['sigma_s']) or len(recon['r']) != len(recon['sigma_t'])):
 		error_by_flag (1, 'ERROR: recon_init: Lengths of r, c_t, c_s, sigma_s, sigma_t does not match')
 
@@ -263,8 +284,12 @@ def recon_init (proj, recon, args):
 def files_init (files, args):
 	files['Launch_Folder'] = args.run_folder + '/XT_run/'
 	files['Result_Folder'] = args.run_folder + '/XT_Results/'
-	files['C_Source_Folder'] = "../Source_Code_4D/"
+	if (args.REAL_DATA):
+		files['C_Source_Folder'] = "../Source_Code_4D_APS2014/"
+	else:
+		files['C_Source_Folder'] = "../Source_Code_4D_Fast/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"
+	files['Converged_Object'] = args.converged_object_file
 	files['copy_executables'] = 0
 	files['copy_projections'] = 0
 

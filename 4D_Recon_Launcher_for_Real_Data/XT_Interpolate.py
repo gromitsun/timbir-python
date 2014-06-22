@@ -11,6 +11,7 @@ from XT_Projections import decimate_count_data_in_t
 from XT_IOMisc import *
 import scipy.io as sio
 import os
+
 #import cv2,cv
 
 #def write_array2video (proj,recon,files):
@@ -33,12 +34,8 @@ def compute_RMSE_of_recon (proj, recon, files):
 		obj_times = np.linspace(start, stop, recon['Rtime_num'][i], endpoint=True)
 
 		#path2results = files['Results_Folder'] + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_L_' + str(proj['L']) + '_K_' + str(proj['K']) + '_N_p_' + str(proj['N_p']) + '/'
-		if (recon['recon_type'] == 'MBIR'):
-			path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
-			path2results = files['Result_Folder'] + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
-		elif (recon['recon_type'] == 'FBP'):	
-			path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
-			path2results = files['Result_Folder'] + 'FBP' + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
+		path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta'])  + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
+		path2results = files['Result_Folder'] + recon['recon_type'] + '_sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
 
 		node = recon['zSlice4RMSE']/(recon['N_z']/recon['node_num'])
 		slice = recon['zSlice4RMSE'] % (recon['N_z']/recon['node_num'])
@@ -47,12 +44,8 @@ def compute_RMSE_of_recon (proj, recon, files):
 		obj = np.zeros((recon['Rtime_num'][i], recon['N_xy'], recon['N_xy']), dtype=np.float64, order='C');	
 		for j in range(int(recon['Rtime_num'][i])):	
 			fid = open(path2launch + 'object_n' + str(node) + '_time_' + str(j) + '.bin', 'rb')
-			fid.seek(slice*recon['N_xy']*recon['N_xy']*8, 0)
-			# Multiply above offset by 8 which is size of double in bytes
-			data = fid.read(recon['N_xy']*recon['N_xy']*8)
-			data = struct.unpack(str(recon['N_xy']*recon['N_xy'])+'d',data)	
+			data = RealData4mBin(path2launch + 'object_n' + str(node) + '_time_' + str(j) + '.bin', slice*recon['N_xy']*recon['N_xy'], recon['N_xy']*recon['N_xy'], recon['real_var_type'])
 			obj[j,:,:] = np.reshape(data, (recon['N_xy'], recon['N_xy']), order='C')
-			fid.close()
 
 		f_interp = interpolate.interp1d(obj_times, obj, kind='cubic', axis=0, copy=False)
 		proj_times = proj['times'][recon['Proj0RMSE']:recon['Proj0RMSE']+recon['ProjNumRMSE']]
@@ -135,6 +128,7 @@ def compute_RMSE_of_recon (proj, recon, files):
 		text_file.write('ZingerDel = ' + str(recon['ZingerDel'][i]) + '\n')
 		text_file.write('Proj0RMSE = ' + str(recon['Proj0RMSE']) + '\n')
 		text_file.write('ProjNumRMSE = ' + str(recon['ProjNumRMSE']) + '\n')
+		text_file.write('Real Variable Type = ' + str(recon['real_var_type']) + '\n')
 		text_file.close()
 		
 		fid = open(path2results + 'Reconstruction.bin', 'wb')
@@ -161,6 +155,7 @@ def compute_RMSE_of_recon (proj, recon, files):
 		Data2Mat['ZingerDel'] = recon['ZingerDel'][i]
 		Data2Mat['Proj0RMSE'] = recon['Proj0RMSE']
 		Data2Mat['ProjNumRMSE'] = recon['ProjNumRMSE']
+		Data2Mat['real_var_type'] = recon['real_var_type']
 		Data2Mat['fineres_voxthresh'] = recon['voxel_thresh'][-1]
 		#create_param_sweep_file (Data2Mat,files)
 		

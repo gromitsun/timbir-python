@@ -42,9 +42,15 @@
 	#define DEBUG_LOW
 #endif
 
-typedef float Real_t;
-#define MPI_TEMP_DATATYPE MPI_FLOAT
-#define MPI_OBJECT_DATATYPE MPI_FLOAT
+#ifdef REAL_IS_DOUBLE
+	typedef double Real_t;
+	#define MPI_TEMP_DATATYPE MPI_DOUBLE
+	#define MPI_OBJECT_DATATYPE MPI_DOUBLE
+#else	
+	typedef float Real_t;
+	#define MPI_TEMP_DATATYPE MPI_FLOAT
+	#define MPI_OBJECT_DATATYPE MPI_FLOAT
+#endif
 
 #define ZERO_SKIPPING
 #define INIT_SPARSE_ANGLES_FROM_FILE
@@ -76,6 +82,7 @@ typedef float Real_t;
 #define BRIGHT_FIELD_FILENAME "bright"
 #define OBJECT_FILENAME "object"
 #define PROJ_OFFSET_FILENAME "proj_offset"
+#define HDFPATH "/object"
 
 #ifndef SPARSE_ANGLES_LIST_FILE
 	#define SPARSE_ANGLES_LIST_FILE "view_info.txt"
@@ -145,7 +152,7 @@ typedef float Real_t;
 #ifndef PATH_TO_PHANTOM
 	#define PATH_TO_PHANTOM "phantom_shrinking_sphere"
 #endif
-
+#define VAR_PARAM_4_SIM_DATA 1.0
 /*#define PHANTOM_IN_HU*/
 
 #endif /*#ifndef XT_CONSTANTS_H*/

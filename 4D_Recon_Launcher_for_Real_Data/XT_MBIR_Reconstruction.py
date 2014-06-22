@@ -66,6 +66,9 @@ def do_MBIR_reconstruction(proj, recon, files):
 			macros = macros + ' -DPROJECTION_HDF_START="' + str(proj['proj_start']) + '"'
 			macros = macros + ' -DPATH_TO_PHANTOM="\\"' + proj['Path2Phantom'] + '\\""'
 			macros = macros + ' -DEXPECTED_COUNTS_FOR_PHANTOM_DATA="' + str(proj['Expected_Counts']) + '"'
+			macros = macros + ' -DCONVERGED_OBJECT_FILE="\\"' + files['Converged_Object'] + '\\""'
+			if (recon['real_var_type'] == 'double'):
+				macros = macros + ' -DREAL_IS_DOUBLE'
 
 			if (recon['calculate_cost'] == 0):
 				macros = macros + ' -DNO_COST_CALCULATE'
@@ -76,8 +79,8 @@ def do_MBIR_reconstruction(proj, recon, files):
 			if (recon['positivity_constraint'] == 1):
 				macros = macros + ' -DPOSITIVITY_CONSTRAINT'
 
-			if (any(recon['readSino4mHDF'])):
-				macros = macros + ' -DREAD_PROJECTION_DATA_4M_HDF'
+#			if (any(recon['readSino4mHDF'])):
+			macros = macros + ' -DREAD_PROJECTION_DATA_4M_HDF'
 			if (recon['modality'] == 'PHCON'):
 				macros = macros + ' -DPHASE_CONTRAST_TOMOGRAPHY'
 
@@ -97,11 +100,12 @@ def do_MBIR_reconstruction(proj, recon, files):
 			if (recon['init_object4mHDF'] == 1):
 				initpar_object4mHDF (proj, recon, files, i)
 
-		if (recon['reconstruct'] == 1):	
+		if (recon['reconstruct'] == 1):
 			if (recon['HPC'] == 'Purdue' and recon['node_num'] > 1):
 				flag = system('cp nodefile ' + path2launch + '.')
 				error_by_flag(flag, 'ERROR: Cannot copy nodefile to launch folder')
-			for multidx in range(len(recon['delta_xy'])):
+
+			for multidx in range(recon['multstart'],len(recon['delta_xy'])):
 				ZingerT = recon['ZingerT'][i]
 				if (recon['ZingerDel'][i] == 0 and multidx == 0):
 					ZingerT = 100000
@@ -113,7 +117,9 @@ def do_MBIR_reconstruction(proj, recon, files):
 				command = recon['run_command'] + ' ./XT_Engine --p ' + str(recon['p']) + ' --sigma_s ' + str(recon['sigma_s'][i]) + ' --sigma_t ' + str(recon['sigma_t'][i]) + ' --c_s ' + str(recon['c_s'][i]) + ' --c_t ' + str(recon['c_t'][i]) + ' --delta_xy ' + str(recon['delta_xy'][multidx]) + ' --delta_z ' + str(recon['delta_z'][multidx]) + ' --length_r ' + str(proj['length_r']) + ' --length_t ' + str(proj['length_t']) + ' --voxel_thresh ' + str(recon['voxel_thresh'][multidx]) + ' --cost_thresh ' + str(recon['cost_thresh'][multidx]) + ' --iter ' + str(recon['iterations'][multidx]) + ' --rotation_center ' + str(proj['rotation_center_r']) + ' --alpha ' + str(recon['alpha']) + ' --sinobin ' + str(sinobin) + ' --initICD ' + str(recon['initICD'][multidx]) + ' --Rtime0 ' + str(recon['Rtime0']) + ' --Rtime_delta ' + str(recon['Rtime_delta'][i]) + ' --Rtime_num ' + str(recon['Rtime_num'][i]) + ' --num_projections ' + str(proj['recon_N_p']) + ' --N_r ' + str(proj['recon_N_r']) + ' --N_t ' + str(proj['recon_N_t']) + ' --detector_slice_begin ' + str(proj['slice_t_start']) + ' --detector_slice_num ' + str(proj['N_t']) + ' --num_threads ' + str(recon['num_threads']) + ' --radius_obj ' + str(recon['radius_obj']) + ' --updateProjOffset ' + str(recon['updateProjOffset'][multidx]) + ' --writeTiff ' + str(recon['writeTiff'][multidx]) + ' --zingerT ' + str(ZingerT) + ' --zingerDel ' + str(recon['ZingerDel'][i]) + ' --Est_of_Var ' + str(recon['Estimate_of_Var']) + ' --phantom_N_xy ' + str(proj['phantom_N_xy']) + ' --phantom_N_z ' + str(proj['phantom_N_z'])	
 				if (recon['time_reg'] == 1):
 					command = command + ' --time_reg'
-	
+
+				if (recon['RMSE_converged'][multidx] == 1):
+					command = command + ' --RMSE_converged'			
 				if (recon['WritePerIter'][multidx] == 1):
 					command = command + ' --WritePerIter'
 				
