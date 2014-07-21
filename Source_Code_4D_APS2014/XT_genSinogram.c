@@ -169,7 +169,7 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
 #ifdef PHANTOM_IN_HU
 			    	pixel = convert_HU2um((Real_t)object[slice][j][k]);
 #else
-			    	pixel = (Real_t)object[slice][j][k];
+			    	pixel = (Real_t)(object[slice][j][k]);
 #endif
 	     	          	for (m=0; m<AMatrixPtr->count; m++){
                             		idx=AMatrixPtr->index[m];
@@ -203,6 +203,9 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
 	multifree(object,3);
 
 	proj_avg = 0; weight_avg = 0;
+	if (TomoInputsPtr->No_Projection_Noise == 0)
+		fprintf(TomoInputsPtr->debug_file_ptr, "The variance parameter, sigma^2, used to add noise is %f\n", VAR_PARAM_4_SIM_DATA);	
+	fprintf(TomoInputsPtr->debug_file_ptr,"The expected count is %f\n", EXPECTED_COUNTS_FOR_PHANTOM_DATA);	
 	for (i=0; i < SinogramPtr->N_p; i++)
 	for (j=0; j < SinogramPtr->N_r; j++)
 	for (slice=0; slice < SinogramPtr->N_t; slice++)
@@ -217,9 +220,11 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
 		if (TomoInputsPtr->No_Projection_Noise == 1)
 			TomoInputsPtr->Weight[i][j][slice] = fabs(val);
 		else
-			TomoInputsPtr->Weight[i][j][slice] = fabs(val + sqrt(val)*normal());
+			TomoInputsPtr->Weight[i][j][slice] = fabs(val + sqrt(VAR_PARAM_4_SIM_DATA*val)*normal());
+		/*Scaling noise S.D. this way, is equivalent to using a incident photon count of EXPECTED_COUNTS_FOR_PHANTOM_DATA/VAR_PARAM_4_SIM_DATA,
+ 		adding Poisson noise (mean = standard deviation) and then scaling the result by a multiplicative factor of VAR_PARAM_4_SIM_DATA*/
 		
-		SinogramPtr->Projection[i][j][slice] = fabs(log(EXPECTED_COUNTS_FOR_PHANTOM_DATA/TomoInputsPtr->Weight[i][j][slice]));
+		SinogramPtr->Projection[i][j][slice] = log(EXPECTED_COUNTS_FOR_PHANTOM_DATA/TomoInputsPtr->Weight[i][j][slice]);
 		weight_avg += TomoInputsPtr->Weight[i][j][slice];	
 		proj_avg += SinogramPtr->Projection[i][j][slice];	
 	}

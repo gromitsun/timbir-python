@@ -6,8 +6,9 @@ def ArgParser ():
 	parser.add_argument("--gen_outfiles", help="specify whether you want to create HDF and tiff output files", action="store_true")
 	parser.add_argument("--run_setup", help="Specify whether you want to setup the launch folder", action="store_true")
 	parser.add_argument("--run_recon", help="Run reconstruction code", action="store_true")
-	parser.add_argument("--restart", help="Restart the reconstruction", action="store_true")
         parser.add_argument("--restart_stage", help="Multi-resolution stage number from where to restart the reconstruction",type=int)
+	parser.add_argument("--restart", help="Restart the reconstruction", action="store_true")
+	parser.add_argument("--same_stage", help="Restart the reconstruction from the last running stage if output files were written by setting write_per_iter = 1", action="store_true")
 	
 	parser.add_argument("--ATT", help="Imaging modality is attenuation contrast tomography", action="store_true")
 	parser.add_argument("--PHCON", help="Imaging modality is phase constrast tomography", action="store_true")

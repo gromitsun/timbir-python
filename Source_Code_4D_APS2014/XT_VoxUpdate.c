@@ -18,7 +18,7 @@ Iter - The iteration number
 zero_count - the number of zero attenuation coefficients
 MagUpdateMap - contains the magnitude of each voxel update in the previous iteration which updated that voxel
 Mask - All voxels contained in the 'Mask' (contains true or false values for each voxel) are updated*/
-Real_t updateVoxels_AttTomo (int32_t time_begin, int32_t time_end, int32_t slice_begin, int32_t slice_end, int32_t xy_begin, int32_t xy_end, int32_t* x_rand_select, int32_t* y_rand_select, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, Real_t** DetectorResponse_XY, AMatrixCol* VoxelLineResponse, int32_t Iter, long int *zero_count, Real_t** MagUpdateMap, uint8_t*** Mask)
+Real_t updateVoxels_AttTomo (int32_t time_begin, int32_t time_end, int32_t slice_begin, int32_t slice_end, int32_t xy_begin, int32_t xy_end, int32_t* x_rand_select, int32_t* y_rand_select, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, Real_t** DetectorResponse_XY, /*AMatrixCol* VoxelLineResponse,*/ int32_t Iter, long int *zero_count, Real_t** MagUpdateMap, uint8_t*** Mask)
 {
   int32_t p,q,r,slice,i_new,j_new,k_new,idxr,idxq,idxp,index_xy;
   Real_t V;
@@ -71,7 +71,7 @@ Real_t updateVoxels_AttTomo (int32_t time_begin, int32_t time_end, int32_t slice
       int32_t sino_viewBegin=ScannedObjectPtr->ProjIdxPtr[i_new][0];
       int32_t NtNrMul=SinogramPtr->N_t*SinogramPtr->N_r;
       int32_t distance= SinogramPtr->N_t;
-      Real_t deltat=SinogramPtr->delta_t;
+/*      Real_t deltat=SinogramPtr->delta_t;*/
       float errorSinoThresh=(float)TomoInputsPtr->ErrorSinoThresh;
       float errorSinoDelta=(float)TomoInputsPtr->ErrorSinoDelta;
       Real_t projectionValueArray[sum];
@@ -113,8 +113,9 @@ Real_t updateVoxels_AttTomo (int32_t time_begin, int32_t time_end, int32_t slice
         }
       }
       
-      for(p=0;p<sum;p++)
-        projectionValueArray[p]=projectionValueArray[p]*deltat;
+      /*for(p=0;p<sum;p++)
+        projectionValueArray[p]=projectionValueArray[p];*/
+        /*projectionValueArray[p]=projectionValueArray[p]*deltat;*/
       projectionValueArrayPointer=&projectionValueArray[0];
       weightValueArrayPointer=&weightValueArray[0];
 
@@ -341,7 +342,7 @@ Real_t updateVoxels_AttTomo (int32_t time_begin, int32_t time_end, int32_t slice
 
 
 
-Real_t compute_voxel_update_AMat2D (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, AMatrixCol* AMatrixPtr, AMatrixCol* VoxelLineResponse, Real_t Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], Real_t Time_Nhood[NHOOD_TIME_MAXDIM-1], bool Spatial_BDFlag[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], bool Time_BDFlag[NHOOD_TIME_MAXDIM-1], int32_t i_new, int32_t slice, int32_t j_new, int32_t k_new)
+Real_t compute_voxel_update_AMat2D (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, AMatrixCol* AMatrixPtr, /*AMatrixCol* VoxelLineResponse,*/ Real_t Spatial_Nhood[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], Real_t Time_Nhood[NHOOD_TIME_MAXDIM-1], bool Spatial_BDFlag[NHOOD_Y_MAXDIM][NHOOD_X_MAXDIM][NHOOD_Z_MAXDIM], bool Time_BDFlag[NHOOD_TIME_MAXDIM-1], int32_t i_new, int32_t slice, int32_t j_new, int32_t k_new)
 {
   	int32_t p, q, r, sino_view;
 	Real_t V,THETA1,THETA2,THETASelTemp,***AMatrix2D, *AMatrix2DLine;
@@ -431,7 +432,7 @@ Real_t compute_voxel_update_AMat2D (Sinogram* SinogramPtr, ScannedObject* Scanne
 }
 
 
-Real_t updateVoxels_PhCon_Tomo (int32_t time_begin, int32_t time_end, int32_t slice_begin, int32_t slice_end, int32_t xy_begin, int32_t xy_end, int32_t* x_rand_select, int32_t* y_rand_select, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, Real_t** DetectorResponse_XY, AMatrixCol* VoxelLineResponse, int32_t Iter, long int *zero_count, Real_t** MagUpdateMap, uint8_t*** Mask)
+Real_t updateVoxels_PhCon_Tomo (int32_t time_begin, int32_t time_end, int32_t slice_begin, int32_t slice_end, int32_t xy_begin, int32_t xy_end, int32_t* x_rand_select, int32_t* y_rand_select, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, Real_t** DetectorResponse_XY, /*AMatrixCol* VoxelLineResponse,*/ int32_t Iter, long int *zero_count, Real_t** MagUpdateMap, uint8_t*** Mask)
 {
   int32_t p,q,r,slice,i_new,j_new,k_new,idxr,idxq,idxp,index_xy;
   Real_t V;
@@ -577,7 +578,7 @@ Real_t updateVoxels_PhCon_Tomo (int32_t time_begin, int32_t time_end, int32_t sl
 #endif /*#ifdef ZERO_SKIPPING*/
 	if(ZSFlag == false)
 	{
-		compute_voxel_update_AMat2D (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, AMatrixPtr, VoxelLineResponse, Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag, i_new, slice, j_new, k_new);
+		compute_voxel_update_AMat2D (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, AMatrixPtr, /*VoxelLineResponse,*/ Spatial_Nhood, Time_Nhood, Spatial_BDFlag, Time_BDFlag, i_new, slice, j_new, k_new);
 	    	MagUpdateMap[j_new][k_new] += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new] - V);
 	    	total_vox_mag += fabs(ScannedObjectPtr->Object[i_new][slice+1][j_new][k_new]);
  	}
@@ -598,13 +599,13 @@ Real_t updateVoxels_PhCon_Tomo (int32_t time_begin, int32_t time_end, int32_t sl
       return (total_vox_mag);
 }
 
-Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, int32_t slice_end, int32_t xy_begin, int32_t xy_end, int32_t* x_rand_select, int32_t* y_rand_select, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, Real_t** DetectorResponse_XY, AMatrixCol* VoxelLineResponse, int32_t Iter, long int *zero_count, Real_t** MagUpdateMap, uint8_t*** Mask)
+Real_t updateVoxels (int32_t time_begin, int32_t time_end, int32_t slice_begin, int32_t slice_end, int32_t xy_begin, int32_t xy_end, int32_t* x_rand_select, int32_t* y_rand_select, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, Real_t*** ErrorSino, Real_t** DetectorResponse_XY, /*AMatrixCol* VoxelLineResponse,*/ int32_t Iter, long int *zero_count, Real_t** MagUpdateMap, uint8_t*** Mask)
 {
 	Real_t total_vox_mag;
 #ifdef PHASE_CONTRAST_TOMOGRAPHY
-	total_vox_mag = updateVoxels_PhCon_Tomo (time_begin, time_end, slice_begin, slice_end, xy_begin, xy_end, x_rand_select, y_rand_select, SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse_XY, VoxelLineResponse, Iter, zero_count, MagUpdateMap, Mask);
+	total_vox_mag = updateVoxels_PhCon_Tomo (time_begin, time_end, slice_begin, slice_end, xy_begin, xy_end, x_rand_select, y_rand_select, SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse_XY, /*VoxelLineResponse,*/ Iter, zero_count, MagUpdateMap, Mask);
 #else
-	total_vox_mag = updateVoxels_AttTomo (time_begin, time_end, slice_begin, slice_end, xy_begin, xy_end, x_rand_select, y_rand_select, SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse_XY, VoxelLineResponse, Iter, zero_count, MagUpdateMap, Mask);
+	total_vox_mag = updateVoxels_AttTomo (time_begin, time_end, slice_begin, slice_end, xy_begin, xy_end, x_rand_select, y_rand_select, SinogramPtr, ScannedObjectPtr, TomoInputsPtr, ErrorSino, DetectorResponse_XY, /*VoxelLineResponse,*/ Iter, zero_count, MagUpdateMap, Mask);
 #endif
 	return (total_vox_mag);
 }

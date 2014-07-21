@@ -64,12 +64,15 @@ void calculateVoxelProfile(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 
 		if(angle <= M_PI_4)
 		{
-			MaxValLineIntegral = ScannedObjectPtr->delta_xy/cos(angle)/SinogramPtr->delta_t;
+			/*MaxValLineIntegral = ScannedObjectPtr->delta_xy/cos(angle)/SinogramPtr->delta_t;*/
+			MaxValLineIntegral = ScannedObjectPtr->delta_xy/cos(angle);
 		}
 		else
 		{
-			MaxValLineIntegral = ScannedObjectPtr->delta_xy/cos(M_PI_2-angle)/SinogramPtr->delta_t;
+			/*MaxValLineIntegral = ScannedObjectPtr->delta_xy/cos(M_PI_2-angle)/SinogramPtr->delta_t;*/
+			MaxValLineIntegral = ScannedObjectPtr->delta_xy/cos(M_PI_2-angle);
 		}
+/*MaxValLineIntegral gives the line integral through a voxel at a given angle*/
 /*Divide by delta_t because it will be appropriately scaled by VoxelLineResponse*/
 		temp=cos(M_PI_4);
 		dist1 = temp * cos((M_PI_4 - angle));
@@ -207,6 +210,7 @@ void DetectorResponseProfile (Real_t** H_r, Real_t* H_t, Sinogram* SinogramPtr, 
         }
 
       }
+      H_t[i] = H_t[i]/SinogramPtr->delta_t;/*Normalization*/
     }
 	H_t[DETECTOR_RESPONSE_BINS] = 0;
 
@@ -270,7 +274,7 @@ void storeVoxelLineResponse(Real_t* H_t,  AMatrixCol* VoxelLineResponse, Scanned
 
       if(ProfileThickness != 0) /*Store the response of this slice */
       {
-        VoxelLineResponse[i].values[VoxelLineResponse[i].count] = ProfileThickness;
+        VoxelLineResponse[i].values[VoxelLineResponse[i].count] = ProfileThickness;/*VoxelLineResponse is normalized value*/
         VoxelLineResponse[i].index[VoxelLineResponse[i].count++] = i_t;
 /*	printf ("i = %d, i_t = %d, value = %f\n", i, i_t, ProfileThickness);*/
       }

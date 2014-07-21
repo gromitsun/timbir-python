@@ -184,12 +184,15 @@ def recon_init (proj, recon, args):
 	else:
 		recon['multstart'] = 0
 		
+	if (args.same_stage):
+		recon['initICD'][recon['multstart']] = 1		
 	recon['WritePerIter'] = 0*np.ones(recon['multres_xy'])
-	recon['WritePerIter'][-1] = 1
+	recon['WritePerIter'][-1] = 0
 	recon['updateProjOffset'] = 3*np.ones(recon['multres_xy'])
 	recon['updateProjOffset'][0] = 0
 	if (recon['multres_xy'] > 1):
 		recon['updateProjOffset'][1] = 2
+
 	recon['readSino4mHDF'] = 0*np.ones(recon['multres_xy'])
 	if (args.REAL_DATA):
 		recon['readSino4mHDF'][0] = 1
@@ -227,7 +230,7 @@ def recon_init (proj, recon, args):
 	recon['writeTiff'] = 1*np.ones(recon['multres_xy'])
 	recon['BH_Quad_Coef'] = args.BH_Quad_Coef
 	recon['init_object4mHDF'] = 0
-	recon['radius_obj'] = proj['voxel_size']*proj['N_r']
+	recon['radius_obj'] = proj['voxel_size']*proj['N_r']/2.0
 	
 	recon['init_with_FBP'] = 0
 	#recon['num_threads'] = 1
@@ -285,7 +288,7 @@ def files_init (files, args):
 	files['Launch_Folder'] = args.run_folder + '/XT_run/'
 	files['Result_Folder'] = args.run_folder + '/XT_Results/'
 	if (args.REAL_DATA):
-		files['C_Source_Folder'] = "../Source_Code_4D_APS2014/"
+		files['C_Source_Folder'] = "../Source_Code_4D/"
 	else:
 		files['C_Source_Folder'] = "../Source_Code_4D_Fast/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"

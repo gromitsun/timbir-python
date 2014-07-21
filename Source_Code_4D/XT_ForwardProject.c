@@ -14,7 +14,7 @@ void forward_project_voxel_AMat1D (Sinogram* SinogramPtr, Real_t voxel_val, Real
 	for (m = 0; m < AMatrixPtr->count; m++)
 	{
 		idx = AMatrixPtr->index[m];
-		val = AMatrixPtr->values[m]*SinogramPtr->delta_r;
+		val = AMatrixPtr->values[m]*SinogramPtr->delta_t;
 		/*val = AMatrixPtr->values[m];
 		for (n = 0; n < VoxelLineResponse->count; n++){*/
 		for (n = 0; n < z_overlap_num; n++){
