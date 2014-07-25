@@ -429,9 +429,10 @@ void initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tom
 			start[0] = i;
 			read_4m_HDF (TomoInputsPtr, CONVERGED_OBJECT_FILE, &(ScannedObjectPtr->Conv_Object[i][0][0][0]), start, num);
 		}*/
-		ScannedObjectPtr->Conv_Object = (Real_t****)multialloc(sizeof(Real_t), 4, ScannedObjectPtr->N_time, ScannedObjectPtr->N_z, ScannedObjectPtr->N_y, ScannedObjectPtr->N_x);
-		read_4m_HDF (TomoInputsPtr, CONVERGED_OBJECT_FILE, &(ScannedObjectPtr->Conv_Object[0][0][0][0]), start, num);
-		
+		ScannedObjectPtr->Conv_Object = (Real_t****)multialloc(sizeof(Real_t), 4, ScannedObjectPtr->N_time, ScannedObjectPtr->N_z, ScannedObjectPtr->N_y, ScannedObjectPtr->N_x);   
+                #ifdef READ_PROJECTION_DATA_4M_HDF  /*Read from HDF should be enabled to compare with converged object*/
+                read_4m_HDF (TomoInputsPtr, CONVERGED_OBJECT_FILE, &(ScannedObjectPtr->Conv_Object[0][0][0][0]), start, num);
+                #endif
 	}		
 
 	ScannedObjectPtr->NHICD_Iterations = 10;
