@@ -40,8 +40,8 @@ from XT_MBIR_Reconstruction import do_MBIR_reconstruction
 #from XT_FBP_Reconstruction import do_FBP_reconstruction
 from XT_IOMisc import error_by_flag
 from XT_IOMisc import write_object2HDF
-from XT_ObjectHDFIO import writepar_object2HDF
-from XT_ObjectHDFIO import writepar_tiff_from_object_bin_file
+#from XT_ObjectHDFIO import writepar_object2HDF
+#from XT_ObjectHDFIO import writepar_tiff_from_object_bin_file
 from XT_IOMisc import write_tiff_from_object_bin_file
 import argparse
 import time
