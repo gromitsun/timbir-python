@@ -21,7 +21,7 @@ export OMP_NUM_THREADS=32
 #uniq < $PBS_NODEFILE > nodefile
 
 declare -a sigma_s=(200000 300000)
-declare -a sigma_t=(2000)
+declare -a sigma_t=(3000)
 
 s_idx=`expr $PARAM_INDEX / 1`
 t_idx=`expr $PARAM_INDEX % 1`
