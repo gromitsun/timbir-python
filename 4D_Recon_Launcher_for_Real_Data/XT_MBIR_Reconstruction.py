@@ -39,13 +39,14 @@ def do_MBIR_reconstruction(proj, recon, files):
 				if (recon['updateProjOffset'][0] == 1 or recon['updateProjOffset'][0] == 3):
 					print ('do_reconstruction: Copying proj_offset.bin')
 					flag = system('cp ' + path2source + 'proj_offset*.bin ' + path2launch + '.')
-
+				
+				flag = system('cp ' + path2source + 'proj_offset_sim.bin ' + path2launch + '.')
 			if (files['copy_projections'] == 1 and recon['rank'] == 0):
 				if (recon['sinobin'] == 1):
 					print ('do_reconstruction: Copying projection.bin and weight.bin')
 					flag = system('cp ' + path2source + 'projection*.bin ' + path2source + 'weight*.bin ' + path2launch + '.')
 				elif (recon['sinobin'] == 3):
-					print ('do_reconstruction: Copying bright.bin and weight.bin')
+					print ('do_reconstruction: Copying proj_offset_sim.bin, bright.bin and weight.bin')
 					flag = system('cp ' + path2source + 'bright*.bin ' + path2source + 'weight*.bin ' + path2launch + '.')
 				error_by_flag(flag, 'ERROR: cannot copy projection.bin/weight.bin')
 			elif (recon['readSino4mHDF'][0] == 0 and recon['sinobin'] != 2):
@@ -114,7 +115,11 @@ def do_MBIR_reconstruction(proj, recon, files):
 				if (multidx > 0 and recon['sinobin'] == 2):
 					sinobin = 1
 				 
-				command = recon['run_command'] + ' ./XT_Engine --p ' + str(recon['p']) + ' --sigma_s ' + str(recon['sigma_s'][i]) + ' --sigma_t ' + str(recon['sigma_t'][i]) + ' --c_s ' + str(recon['c_s'][i]) + ' --c_t ' + str(recon['c_t'][i]) + ' --delta_xy ' + str(recon['delta_xy'][multidx]) + ' --delta_z ' + str(recon['delta_z'][multidx]) + ' --length_r ' + str(proj['length_r']) + ' --length_t ' + str(proj['length_t']) + ' --voxel_thresh ' + str(recon['voxel_thresh'][multidx]) + ' --cost_thresh ' + str(recon['cost_thresh'][multidx]) + ' --iter ' + str(recon['iterations'][multidx]) + ' --rotation_center ' + str(proj['rotation_center_r']) + ' --alpha ' + str(recon['alpha']) + ' --sinobin ' + str(sinobin) + ' --initICD ' + str(recon['initICD'][multidx]) + ' --Rtime0 ' + str(recon['Rtime0']) + ' --Rtime_delta ' + str(recon['Rtime_delta'][i]) + ' --Rtime_num ' + str(recon['Rtime_num'][i]) + ' --num_projections ' + str(proj['recon_N_p']) + ' --N_r ' + str(proj['recon_N_r']) + ' --N_t ' + str(proj['recon_N_t']) + ' --detector_slice_begin ' + str(proj['slice_t_start']) + ' --detector_slice_num ' + str(proj['N_t']) + ' --num_threads ' + str(recon['num_threads']) + ' --radius_obj ' + str(recon['radius_obj']) + ' --updateProjOffset ' + str(recon['updateProjOffset'][multidx]) + ' --writeTiff ' + str(recon['writeTiff'][multidx]) + ' --zingerT ' + str(ZingerT) + ' --zingerDel ' + str(recon['ZingerDel'][i]) + ' --Est_of_Var ' + str(recon['Estimate_of_Var']) + ' --phantom_N_xy ' + str(proj['phantom_N_xy']) + ' --phantom_N_z ' + str(proj['phantom_N_z'])	
+				command = recon['run_command'] + ' ./XT_Engine --p ' + str(recon['p']) + ' --sigma_s ' + str(recon['sigma_s'][i]) + ' --sigma_t ' + str(recon['sigma_t'][i]) + ' --c_s ' + str(recon['c_s'][i]) + ' --c_t ' + str(recon['c_t'][i]) + ' --delta_xy ' + str(recon['delta_xy'][multidx]) + ' --delta_z ' + str(recon['delta_z'][multidx]) + ' --length_r ' + str(proj['length_r']) + ' --length_t ' + str(proj['length_t']) + ' --voxel_thresh ' + str(recon['voxel_thresh'][multidx]) + ' --cost_thresh ' + str(recon['cost_thresh'][multidx]) + ' --iter ' + str(recon['iterations'][multidx]) + ' --rotation_center ' + str(proj['rotation_center_r']) + ' --alpha ' + str(recon['alpha']) + ' --sinobin ' + str(sinobin) + ' --initICD ' + str(recon['initICD'][multidx]) + ' --Rtime0 ' + str(recon['Rtime0']) + ' --Rtime_delta ' + str(recon['Rtime_delta'][i]) + ' --Rtime_num ' + str(recon['Rtime_num'][i]) + ' --num_projections ' + str(proj['recon_N_p']) + ' --N_r ' + str(proj['recon_N_r']) + ' --N_t ' + str(proj['recon_N_t']) + ' --detector_slice_begin ' + str(proj['slice_t_start']) + ' --detector_slice_num ' + str(proj['N_t']) + ' --num_threads ' + str(recon['num_threads']) + ' --radius_obj ' + str(recon['radius_obj']) + ' --updateProjOffset ' + str(recon['updateProjOffset'][multidx]) + ' --writeTiff ' + str(recon['writeTiff'][multidx]) + ' --zingerT ' + str(ZingerT) + ' --zingerDel ' + str(recon['ZingerDel'][i]) + ' --Est_of_Var ' + str(recon['Estimate_of_Var']) + ' --phantom_N_xy ' + str(proj['phantom_N_xy']) + ' --phantom_N_z ' + str(proj['phantom_N_z'])
+
+				if (recon['zero_mean_offset'][multidx] == 1):
+					command = command + ' --EnforceZeroMeanOffset'
+					
 				if (recon['time_reg'] == 1):
 					command = command + ' --time_reg'
 

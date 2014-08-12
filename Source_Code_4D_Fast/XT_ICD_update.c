@@ -685,37 +685,51 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
     for (i = 0; i < SinogramPtr->N_r; i++)
     for (j = 0; j < SinogramPtr->N_t; j++)
     ErrorSino[k][i][j] -= SinogramPtr->ProjOffset[i][j]; */
-    Real_t sign, numerator, temp, denominator;
+    Real_t sign, **numerator, num_sum = 0, temp, **denominator, den_sum = 0, gamma = 0;
     int32_t i, j, k;
     #ifdef DEBUG_HIGH
     fprintf(TomoInputsPtr->debug_file_ptr, "update_Sinogram_Offset: Will compute projection offset error\n");
     #endif
-    
-    #pragma omp parallel for private(j, k, numerator, denominator, temp, sign)
+   
+    numerator = (Real_t**)multialloc(sizeof(Real_t), 2, SinogramPtr->N_r, SinogramPtr->N_t);
+    denominator = (Real_t**)multialloc(sizeof(Real_t), 2, SinogramPtr->N_r, SinogramPtr->N_t);
+    /*#pragma omp parallel for private(j, k, numerator, denominator, temp, sign)*/
+    #pragma omp parallel for private(j, k, temp, sign) reduction(+:num_sum, den_sum)
     for (i = 0; i < SinogramPtr->N_r; i++)
     for (j = 0; j < SinogramPtr->N_t; j++)
     {
-      numerator = 0;
-      denominator = 0;
+      numerator[i][j] = 0;
+      denominator[i][j] = 0;
       for (k = 0; k < SinogramPtr->N_p; k++)
       {
         temp = TomoInputsPtr->ErrorSinoThresh*TomoInputsPtr->ErrorSinoDelta*sqrt(TomoInputsPtr->Weight[k][i][j]);
-        ErrorSino[k][i][j] += SinogramPtr->ProjOffset[i][j];
+/*        ErrorSino[k][i][j] += SinogramPtr->ProjOffset[i][j];*/
         if (SinogramPtr->ProjSelect[k][i][j] == true)
         {
-          numerator += ErrorSino[k][i][j]*TomoInputsPtr->Weight[k][i][j];
-          denominator += TomoInputsPtr->Weight[k][i][j];
+          numerator[i][j] += ErrorSino[k][i][j]*TomoInputsPtr->Weight[k][i][j];
+          denominator[i][j] += TomoInputsPtr->Weight[k][i][j];
         }
         else
         {
 	  sign = (ErrorSino[k][i][j] > 0) - (ErrorSino[k][i][j] < 0);
-          numerator += temp*sign;
-          denominator += temp/fabs(ErrorSino[k][i][j]);
+          numerator[i][j] += temp*sign;
+          denominator[i][j] += temp/fabs(ErrorSino[k][i][j]);
         }
       }
-      
-      /*if (denominator != 0)	*/
-      SinogramPtr->ProjOffset[i][j] = numerator/denominator;
+      num_sum += SinogramPtr->ProjOffset[i][j] + (numerator[i][j]/denominator[i][j]);
+      den_sum += 1.0/denominator[i][j];
+    }
+      /*if (denominator[i][j] != 0)	*/
+    if (TomoInputsPtr->EnforceZeroMeanOffset == 1) 
+	    gamma = num_sum/den_sum;
+    else
+	    gamma = 0;
+
+    #pragma omp parallel for private(j, k)
+    for (i = 0; i < SinogramPtr->N_r; i++)
+    for (j = 0; j < SinogramPtr->N_t; j++)
+    {
+      SinogramPtr->ProjOffset[i][j] = SinogramPtr->ProjOffset[i][j] + (numerator[i][j]-gamma)/denominator[i][j];
       /*else
       {
         int32_t dimTiff[4];
@@ -731,13 +745,17 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
       #endif
       for (k = 0; k < SinogramPtr->N_p; k++)
       {
-        ErrorSino[k][i][j] -= SinogramPtr->ProjOffset[i][j];
+	ErrorSino[k][i][j] -= (numerator[i][j]-gamma)/denominator[i][j];
+/*        ErrorSino[k][i][j] -= SinogramPtr->ProjOffset[i][j];*/
         if (fabs(ErrorSino[k][i][j]*sqrt(TomoInputsPtr->Weight[k][i][j])) < TomoInputsPtr->ErrorSinoThresh)
         SinogramPtr->ProjSelect[k][i][j] = true;
         else
         SinogramPtr->ProjSelect[k][i][j] = false;
       }
     }
+    
+   multifree(numerator,2);
+   multifree(denominator,2);
   }
   /*Implements mutithreaded shared memory parallelization using OpenMP and splits work among
   threads. Each thread gets a certain time slice and z block to update.

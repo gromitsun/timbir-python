@@ -173,6 +173,10 @@ def recon_init (proj, recon, args):
 	multres_extras = recon['delta_z'][0]*np.ones(recon['multres_xy']-recon['multres_z'],dtype=np.int)
 	recon['delta_z'] = np.concatenate((multres_extras,recon['delta_z']), axis=0)
 	recon['voxel_thresh'] = args.vox_stop_thresh*np.ones(recon['multres_xy'])
+	if (args.SIM_DATA):
+		recon['voxel_thresh'] = np.arange(recon['multres_xy'] - 1, -1.0, -1)
+		recon['voxel_thresh'] = [0.1, 0.1, 0.1, 0.1]
+	print 'Convg. threshold is ', recon['voxel_thresh']
 	recon['cost_thresh'] = args.cost_stop_thresh*np.ones(recon['multres_xy'])
 	recon['initICD'] = 3*np.ones(recon['multres_z'])
 	recon['initICD'][0] = 2
@@ -189,10 +193,18 @@ def recon_init (proj, recon, args):
 	recon['WritePerIter'] = 0*np.ones(recon['multres_xy'])
 	recon['WritePerIter'][-1] = 0
 	recon['updateProjOffset'] = 3*np.ones(recon['multres_xy'])
+	
 	recon['updateProjOffset'][0] = 0
 	if (recon['multres_xy'] > 1):
 		recon['updateProjOffset'][1] = 2
+	if (args.no_offset_est):
+		recon['updateProjOffset'] = np.zeros(recon['multres_xy'])
 
+	if (args.no_zero_mean_offset):
+		recon['zero_mean_offset'] = np.zeros(recon['multres_xy'])
+	else:
+		recon['zero_mean_offset'] = np.ones(recon['multres_xy'])
+		
 	recon['readSino4mHDF'] = 0*np.ones(recon['multres_xy'])
 	if (args.REAL_DATA):
 		recon['readSino4mHDF'][0] = 1
@@ -230,7 +242,7 @@ def recon_init (proj, recon, args):
 	recon['writeTiff'] = 1*np.ones(recon['multres_xy'])
 	recon['BH_Quad_Coef'] = args.BH_Quad_Coef
 	recon['init_object4mHDF'] = 0
-	recon['radius_obj'] = proj['voxel_size']*proj['N_r']/2.0
+	recon['radius_obj'] = proj['voxel_size']*proj['N_r']
 	
 	recon['init_with_FBP'] = 0
 	#recon['num_threads'] = 1
@@ -288,7 +300,7 @@ def files_init (files, args):
 	files['Launch_Folder'] = args.run_folder + '/XT_run/'
 	files['Result_Folder'] = args.run_folder + '/XT_Results/'
 	if (args.REAL_DATA):
-		files['C_Source_Folder'] = "../Source_Code_4D/"
+		files['C_Source_Folder'] = "../Source_Code_4D_Fast/"
 	else:
 		files['C_Source_Folder'] = "../Source_Code_4D_Fast/"
 	files['Proj_Offset_File'] = "../Source_Code_4D/proj_offset.bin"

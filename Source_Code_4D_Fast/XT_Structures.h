@@ -168,6 +168,7 @@ typedef struct
     uint8_t reconstruct; /*If 0, no reconstruction is done*/ 
     int32_t num_threads; /*Number of threads to be used for shared mem parallelization*/
     uint8_t updateProjOffset; /*If set, updates the addivitive projection offset error 'd'*/
+    uint8_t EnforceZeroMeanOffset; /*If set, updates the addivitive projection offset error 'd'*/
     uint8_t no_NHICD; /*If set, reconstruction goes not use NHICD*/
     uint8_t WritePerIter; /*If set, object and projection offset are written to bin and tiff files after every ICD iteration*/
     int32_t num_z_blocks; /*z axis slices are split to num_z_blocks which are then used for multithreading*/

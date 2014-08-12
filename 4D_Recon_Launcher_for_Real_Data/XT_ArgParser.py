@@ -65,6 +65,8 @@ def ArgParser ():
         parser.add_argument("--proj_start_4_RMSE", help="Number of detector elements along x-direction",type=int, default=256)
         parser.add_argument("--proj_num_4_RMSE", help="Number of detector elements along x-direction",type=int, default=512)
 	parser.add_argument("--real_is_double", help="Do all reconstruction using double type as 'real' variable", action="store_true")
+	parser.add_argument("--no_offset_est", help="If set will not estimate the offset error used to correct ring artifact", action="store_true")
+	parser.add_argument("--no_zero_mean_offset", help="If set, will not enforce zero mean constraint on offset error, d, used to correct ring artifacts", action="store_true")
 	args = parser.parse_args()
 	
 	if (args.multres_xy < args.multres_z):

@@ -152,7 +152,7 @@
 #ifndef PATH_TO_PHANTOM
 	#define PATH_TO_PHANTOM "phantom_shrinking_sphere"
 #endif
-#define VAR_PARAM_4_SIM_DATA 1.0
+#define VAR_PARAM_4_SIM_DATA 10.0
 /*#define PHANTOM_IN_HU*/
 
 #endif /*#ifndef XT_CONSTANTS_H*/
