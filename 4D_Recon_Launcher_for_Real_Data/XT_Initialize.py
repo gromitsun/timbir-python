@@ -173,9 +173,9 @@ def recon_init (proj, recon, args):
 	multres_extras = recon['delta_z'][0]*np.ones(recon['multres_xy']-recon['multres_z'],dtype=np.int)
 	recon['delta_z'] = np.concatenate((multres_extras,recon['delta_z']), axis=0)
 	recon['voxel_thresh'] = args.vox_stop_thresh*np.ones(recon['multres_xy'])
-	if (args.SIM_DATA):
-		recon['voxel_thresh'] = np.arange(recon['multres_xy'] - 1, -1.0, -1)
-		recon['voxel_thresh'] = [0.1, 0.1, 0.1, 0.1]
+#	if (args.SIM_DATA):
+#		recon['voxel_thresh'] = np.arange(recon['multres_xy'] - 1, -1.0, -1)
+#		recon['voxel_thresh'] = [0.1, 0.1, 0.1, 0.1]
 	print 'Convg. threshold is ', recon['voxel_thresh']
 	recon['cost_thresh'] = args.cost_stop_thresh*np.ones(recon['multres_xy'])
 	recon['initICD'] = 3*np.ones(recon['multres_z'])
