@@ -3,7 +3,7 @@
 
 #PBS -V
 #PBS -q standby
-#PBS -l nodes=4:ppn=16
+#PBS -l nodes=1:ppn=16
 #PBS -l walltime=4:00:00
 
 # start top in batch mode, 30 sec interval between reports, in background
@@ -20,8 +20,8 @@ export PARALLEL=1
 export OMP_NUM_THREADS=32
 uniq < $PBS_NODEFILE > nodefile
 
-declare -a sigma_s=(500000 1000000 2000000)
-declare -a sigma_t=(5000 10000 20000)
+declare -a sigma_s=(100000 200000 400000)
+declare -a sigma_t=(1000 2000 4000)
 #declare -a sigma_s=(500000 1000000 2000000)
 #declare -a sigma_t=(5000 10000 20000)
 s_idx=`expr $PARAM_INDEX / 3`
@@ -33,7 +33,11 @@ t_idx=`expr $PARAM_INDEX % 3`
 
 #python XT_Main.py --run_setup --run_recon --gen_outfiles --MBIR --ATT --REAL_DATA --num_nodes 45 --Purdue --Path2Data $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_AlCu_12.hdf --Path2WhitesDarks $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_AlCu_19.hdf --Path2Phantom $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard.bin --Path2Mask $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin --run_folder $RCAC_SCRATCH/Recon_Runs/APS_032014_AlCu/ --rot_center 257 --vox_size 1.3 --proj_start 23500 --proj_num 1536 --x_width 1600 --recon_x_width 512 --z_start 0 --z_width 1080 --recon_z_width 360 --vox_stop_thresh 0.5 --cost_stop_thresh 1 --sigma_s 1000000 --sigma_t 20000 --K 16 --N_theta 1536 --r 16 --multres_xy 3 --multres_z 2 --do_VarEstimate 1 --MaxIter 1000 --msg_string _data_12 --min_time_btw_views 0.0047 --rotation_speed 360 --ZingerT 4 --maxHU 30000 --minHU 0 --BH_Quad_Coef 0.5 --num_cycles 25 --real_is_double 
 
+<<<<<<< HEAD
 python XT_Main.py --run_setup --run_recon --gen_outfiles --MBIR --ATT --REAL_DATA --num_nodes 1 --Purdue --Path2Data $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_AlCu_14.hdf --Path2WhitesDarks $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_AlCu_19.hdf --Path2Phantom $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard.bin --Path2Mask $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin --run_folder $RCAC_SCRATCH/Recon_Runs/TIP_Real_Recons/ --rot_center 771 --vox_size 1.3 --proj_start 33000 --proj_num 1536 --x_width 1600 --recon_x_width 1536 --z_start 4 --z_width 4 --recon_z_width 4 --vox_stop_thresh 1 --cost_stop_thresh 1 --sigma_s ${sigma_s[$s_idx]} --sigma_t ${sigma_t[$t_idx]} --K 32 --N_theta 1536 --r 32 --multres_xy 3 --multres_z 1 --do_VarEstimate 1 --MaxIter 1000 --msg_string _N_r_1536_zeromeand --min_time_btw_views 0.0047 --rotation_speed 720 --ZingerT 4 --maxHU 30000 --minHU 0 --BH_Quad_Coef 0.5 --num_cycles 25 
+=======
+python XT_Main.py --run_setup --run_recon --gen_outfiles --MBIR --ATT --REAL_DATA --num_nodes 1 --Purdue --Path2Data $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_AlCu_14.hdf --Path2WhitesDarks $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_AlCu_19.hdf --Path2Phantom $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard.bin --Path2Mask $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin --run_folder $RCAC_SCRATCH/Recon_Runs/TIP_Real_Recons/ --rot_center 192.75 --vox_size 1.3 --proj_start 33000 --proj_num 1536 --x_width 1600 --recon_x_width 384 --z_start 4 --z_width 16 --recon_z_width 4 --vox_stop_thresh 1 --cost_stop_thresh 1 --sigma_s ${sigma_s[$s_idx]} --sigma_t ${sigma_t[$t_idx]} --K 32 --N_theta 1536 --r 32 --multres_xy 3 --multres_z 1 --do_VarEstimate 1 --MaxIter 1000 --msg_string _N_r_384_zeromeand --min_time_btw_views 0.0047 --rotation_speed 720 --ZingerT 4 --maxHU 30000 --minHU 0 --BH_Quad_Coef 0.5 --num_cycles 25 
+>>>>>>> 98b92d1dcabd4f1e6134655619a0b1f107739b79
 
 #python XT_Main.py --run_setup --run_recon --gen_outfiles --MBIR --ATT --REAL_DATA --num_nodes 1 --Purdue --Path2Data $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_AlCu_20.hdf --Path2WhitesDarks $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_AlCu_19.hdf --Path2Phantom $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard.bin --Path2Mask $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin --run_folder $RCAC_SCRATCH/Recon_Runs/APS_032014_AlCu/ --rot_center 257 --vox_size 1.3 --proj_start 22000 --proj_num 6144 --x_width 1600 --recon_x_width 512 --z_start 4 --z_width 12 --recon_z_width 4 --vox_stop_thresh 0.5 --cost_stop_thresh 1 --sigma_s 300000 --sigma_t 10000 --K 1 --N_theta 1536 --r 1 --multres_xy 6 --multres_z 1 --do_VarEstimate 1 --MaxIter 1000 --msg_string _$MSG --min_time_btw_views 0.0047 --rotation_speed 22.5 --ZingerT 4 --maxHU 20000 --minHU 0 --BH_Quad_Coef 0.5           
 
@@ -64,7 +68,7 @@ python XT_Main.py --run_setup --run_recon --gen_outfiles --MBIR --ATT --REAL_DAT
 
 #python XT_Main.py --run_setup --run_recon --gen_outfiles --MBIR --ATT --REAL_DATA --num_nodes 1 --Purdue --Path2Data $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_60_AlSi.hdf --Path2WhitesDarks $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_60_AlSi.hdf --Path2Phantom $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard.bin --Path2Mask $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin --run_folder $RCAC_SCRATCH/Recon_Runs/APS_Dataset_60/ --rot_center 1043.59 --vox_size 0.65 --proj_start 117688 --proj_num 3072 --x_width 2080 --recon_x_width 2048 --z_start 466 --z_width 4 --recon_z_width 4 --vox_stop_thresh 0.5 --cost_stop_thresh 1 --sigma_s 1500000 --sigma_t 800 --K 16 --N_theta 3072 --r 16 --multres_xy 6 --multres_z 2 --do_VarEstimate 1 --MaxIter 1000 --msg_string _data_60 --min_time_btw_views 0.00868 --rotation_speed 108 --ZingerT 4 --maxHU 40000 --minHU 0 --BH_Quad_Coef 0.0 --num_cycles 55
 
-#python XT_Main.py --run_setup --run_recon --gen_outfiles --MBIR --ATT --REAL_DATA --num_nodes 1 --Purdue --Path2Data $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_60_AlSi.hdf --Path2WhitesDarks $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_60_AlSi.hdf --Path2Phantom $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard.bin --Path2Mask $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin --run_folder $RCAC_SCRATCH/Recon_Runs/APS_Dataset_60/ --rot_center 529.95 --vox_size 0.65 --proj_start 150000 --proj_num 3072 --x_width 2080 --recon_x_width 1040 --z_start 300 --z_width 8 --recon_z_width 4 --vox_stop_thresh 1 --cost_stop_thresh 1 --sigma_s ${sigma_s[$s_idx]} --sigma_t ${sigma_t[$t_idx]} --K 16 --N_theta 3072 --r 16 --multres_xy 4 --multres_z 1 --do_VarEstimate 1 --MaxIter 1000 --msg_string _sweep --min_time_btw_views 0.00868 --rotation_speed 108 --ZingerT 4 --maxHU 10000 --minHU 0 --BH_Quad_Coef 0.0
+#python XT_Main.py --run_setup --run_recon --gen_outfiles --MBIR --ATT --REAL_DATA --num_nodes 1 --Purdue --Path2Data $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_60_AlSi.hdf --Path2WhitesDarks $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_60_AlSi.hdf --Path2Phantom $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard.bin --Path2Mask $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin --run_folder $RCAC_SCRATCH/Recon_Runs/APS_Dataset_60/ --rot_center 529.950 --vox_size 0.65 --proj_start 150000 --proj_num 3072 --x_width 2080 --recon_x_width 1040 --z_start 300 --z_width 8 --recon_z_width 4 --vox_stop_thresh 1 --cost_stop_thresh 1 --sigma_s ${sigma_s[$s_idx]} --sigma_t ${sigma_t[$t_idx]} --K 16 --N_theta 3072 --r 16 --multres_xy 4 --multres_z 1 --do_VarEstimate 1 --MaxIter 1000 --msg_string _sweep --min_time_btw_views 0.00868 --rotation_speed 108 --ZingerT 4 --maxHU 10000 --minHU 0 --BH_Quad_Coef 0.0
 
 ### SLS Dataset ###
 
