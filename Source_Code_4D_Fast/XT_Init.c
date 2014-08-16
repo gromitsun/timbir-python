@@ -571,7 +571,7 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
 		case '5': TomoInputsPtr->phantom_N_z = (int32_t)atoi(optarg); 		break;	
 		case '6': SinogramPtr->total_t_slices = (int32_t)atoi(optarg); 		break;	
 		case '7': TomoInputsPtr->updateProjOffset = (int32_t)atoi(optarg); 	break;	
-		case '#': TomoInputsPtr->EnforceZeroMeanOffset = (int32_t)atoi(optarg); break;	
+		case '#': TomoInputsPtr->EnforceZeroMeanOffset = 1; break;	
 		case '8': TomoInputsPtr->no_NHICD = 1; 		break;	
 		case '+': TomoInputsPtr->WritePerIter = 1;	break;
 		case '-': TomoInputsPtr->only_Edge_Updates = 1;	break;
