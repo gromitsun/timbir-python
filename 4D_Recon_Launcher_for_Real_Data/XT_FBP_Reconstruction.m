@@ -1,7 +1,7 @@
 clear; close all;
 
-K = 1;
-r = 1;
+K = 8;
+r = 8;
 N_theta = 256;
 N_p = 256*4;
 N_r = 256;
@@ -9,8 +9,8 @@ N_t = 4;
 rotation_center = 131;
 node_num = 1;
 length_r = 0.65*1024;
-path2result = '../../Recon_Runs/Att_Recon_Sim_256/XT_Result_Repository/FBP_r_1_K_1_N_theta_256_N_p_1024/';
-path2launch = '../../Recon_Runs/Att_Recon_Sim_256/XT_run/run_sigs_10000.0_sigt_10000.0_r_1_K_1_N_theta_256_N_p_1024const_z/';
+path2result = '../../Recon_Runs/Att_Recon_Sim_256/XT_Result_Repository/FBP_r_8_K_8_N_theta_256_N_p_1024/';
+path2launch = '../../Recon_Runs/Att_Recon_Sim_256/XT_run/run_sigs_300000.0_sigt_3000.0_r_8_K_8_N_theta_256_N_p_1024_sig2_10_th0.1/';
 L = N_theta/K;
 [views, buf1, buf2] = gen_interlaced_views_0_to_inf (L, K, N_p);
 

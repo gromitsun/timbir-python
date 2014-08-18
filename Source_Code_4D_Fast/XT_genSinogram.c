@@ -100,12 +100,14 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
 	long int stream_offset, size, result;
 	int32_t i, j, k, m, n, idx, t, slice; 
         float ***object;
-	Real_t proj_avg, weight_avg, pixel, val, **H_r, *H_t;
-  	uint8_t AvgNumXElements, AvgNumZElements;
+	Real_t proj_avg, weight_avg, pixel, val, **H_r, *H_t, **offset_sim;
+  	uint8_t AvgNumXElements, AvgNumZElements, zinger_added = 0;
 	char projection_file[100] = PROJECTION_FILENAME;
+	char offgndtruth_file[100] = "proj_offset_truth";
 	char weight_file[100] = WEIGHT_MATRIX_FILENAME;
 	char phantom_file[1000];
 	char detect_file[] = "detector_forwardproj";
+	char offset_sim_file[100] = "proj_offset_sim";
 	int dimTiff[4];
 
 	sprintf(projection_file, "%s_n%d", projection_file, TomoInputsPtr->node_rank);
@@ -114,10 +116,9 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
 		printf("ERROR: genSinogramFromPhantom: N_r = %d does not divide phantom_N_xy = %d or number of slices = %d is more than phantom_N_z = %d\n", SinogramPtr->N_r, TomoInputsPtr->phantom_N_xy, SinogramPtr->slice_num, TomoInputsPtr->phantom_N_z);
 		exit (1);
 	}
-
 	
 	/*printf("\nsizes = %d, %d, %d, %d\n", sizeof(int), sizeof(int64_t), sizeof(long int), sizeof(long long));*/
-
+	
 	initPhantomStructures(&Phantom_Sino, &Phantom_ScanObj, SinogramPtr, ScannedObjectPtr, TomoInputsPtr);	
 
 	AMatrixCol* AMatrixPtr = (AMatrixCol*)get_spc(1,sizeof(AMatrixCol));
@@ -190,7 +191,7 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
 	dimTiff[0] = 1; dimTiff[1] = 1; dimTiff[2] = SinogramPtr->N_p; dimTiff[3] = DETECTOR_RESPONSE_BINS+1;
 	if (TomoInputsPtr->Write2Tiff == 1)
 		WriteMultiDimArray2Tiff (detect_file, dimTiff, 0, 1, 2, 3, &(H_r[0][0]), 0, TomoInputsPtr->debug_file_ptr);
-        
+       
 	free(AMatrixPtr->values);
 	free(AMatrixPtr->index);
         free(VoxelLineResponse->values);
@@ -201,6 +202,12 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
         free(VoxelLineResponse);
 	fclose(fp);	
 	multifree(object,3);
+
+	offset_sim = (Real_t**)multialloc(sizeof(Real_t), 2, SinogramPtr->N_r, SinogramPtr->N_t);
+	Read4mBin(offset_sim_file, 1, 1, SinogramPtr->N_r, SinogramPtr->N_t, &(offset_sim[0][0]), TomoInputsPtr->debug_file_ptr);
+	dimTiff[0] = 1; dimTiff[1] = 1; dimTiff[2] = SinogramPtr->N_r; dimTiff[3] = SinogramPtr->N_t;
+	if (TomoInputsPtr->Write2Tiff == 1)
+		WriteMultiDimArray2Tiff (offgndtruth_file, dimTiff, 0, 1, 2, 3, &(offset_sim[0][0]), 0, TomoInputsPtr->debug_file_ptr);
 
 	proj_avg = 0; weight_avg = 0;
 	if (TomoInputsPtr->No_Projection_Noise == 0)
@@ -224,7 +231,12 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
 		/*Scaling noise S.D. this way, is equivalent to using a incident photon count of EXPECTED_COUNTS_FOR_PHANTOM_DATA/VAR_PARAM_4_SIM_DATA,
  		adding Poisson noise (mean = standard deviation) and then scaling the result by a multiplicative factor of VAR_PARAM_4_SIM_DATA*/
 		
-		SinogramPtr->Projection[i][j][slice] = log(EXPECTED_COUNTS_FOR_PHANTOM_DATA/TomoInputsPtr->Weight[i][j][slice]);
+		SinogramPtr->Projection[i][j][slice] = log(EXPECTED_COUNTS_FOR_PHANTOM_DATA/TomoInputsPtr->Weight[i][j][slice]) - offset_sim[j][slice];
+		if (random2() > 0.999)
+		{
+			zinger_added = 1;
+			SinogramPtr->Projection[i][j][slice] = 0;
+		}	
 		weight_avg += TomoInputsPtr->Weight[i][j][slice];	
 		proj_avg += SinogramPtr->Projection[i][j][slice];	
 	}
@@ -241,8 +253,11 @@ void genSinogramFromPhantom (Sinogram* SinogramPtr, ScannedObject* ScannedObject
 		WriteMultiDimArray2Tiff (projection_file, dimTiff, 0, 3, 1, 2, &(SinogramPtr->Projection[0][0][0]), 0, TomoInputsPtr->debug_file_ptr);
 		WriteMultiDimArray2Tiff (weight_file, dimTiff, 0, 3, 1, 2, &(TomoInputsPtr->Weight[0][0][0]), 0, TomoInputsPtr->debug_file_ptr);
 	}
-
+	
+	if (zinger_added == 1)
+		fprintf(TomoInputsPtr->debug_file_ptr, "genSinogramFromPhantom: Zingers were added\n");
 	Write2Bin (weight_file, 1, SinogramPtr->N_p, SinogramPtr->N_r, SinogramPtr->N_t, &(TomoInputsPtr->Weight[0][0][0]), TomoInputsPtr->debug_file_ptr);
+	multifree(offset_sim, 2); 
 }
 
 /*'genSinogram_fromBin' initializes the sinogram and forward model weights from a bin file generated in a previous run. */

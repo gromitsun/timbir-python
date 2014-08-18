@@ -12,9 +12,6 @@ from XT_IOMisc import write_tiff_from_object_bin_file
 from XT_Interpolate import compute_RMSE_of_recon
 import argparse
 import time
-from XT_Att_Tomo_Sim import attenuation_tomo_sim_init
-from XT_Att_Tomo_Real import attenuation_tomo_real_init
-from XT_PhCon_Tomo_Real import phase_contrast_tomo_real_init
 from XT_CompSys_Init import CompSys_Init
 #from mpi4py import MPI
 from XT_ArgParser import ArgParser

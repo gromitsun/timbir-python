@@ -36,7 +36,6 @@
 #include <stdlib.h>
 #include <mpi.h>
 #include "XT_Structures.h"
-#include "XT_IOMisc.h"
 
 /*Sends the x-y slices in from each z-block assigned to each node to the neighboring node's (in terms of rank) z-blocks.
 This ensures that when each node does ICD on the assigned blocks they have information about the neighboring 
@@ -122,30 +121,22 @@ void MPI_Wait_Z_Slices (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsP
 }
 			
 
-void compute_RMSE_Converged_Object(ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, int32_t Iter)
+void compute_RMSE_Converged_Object(ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputPtr, int32_t Iter)
 {
 	int32_t i, j, k, l;
-	Real_t RMSE = 0, RMSE_ALL = 0, avg_conv = 0, avg_obj = 0;
+	Real_t RMSE = 0;
 	char rmse_filename[100] = "rmse_converged";
 
 	for (i = 0; i < ScannedObjectPtr->N_time; i++)
 		for (j = 0; j < ScannedObjectPtr->N_z; j++)
 			for (k = 0; k < ScannedObjectPtr->N_y; k++)
 				for (l = 0; l < ScannedObjectPtr->N_x; l++)
-				{
-					/*RMSE += pow((ScannedObjectPtr->Object[i][j+1][k][l] - ScannedObjectPtr->Conv_Object[i][j][k][l]), 2);*/
-					RMSE += (ScannedObjectPtr->Object[i][j+1][k][l] - ScannedObjectPtr->Conv_Object[i][j][k][l])*(ScannedObjectPtr->Object[i][j+1][k][l] - ScannedObjectPtr->Conv_Object[i][j][k][l]);
-					avg_conv += ScannedObjectPtr->Conv_Object[i][j][k][l];
-					avg_obj += ScannedObjectPtr->Object[i][j+1][k][l];
-				}
+					RMSE += pow((ScannedObjectPtr->Object[i][j][k][l] - ScannedObjectPtr->Conv_Object[i][j][k][l]), 2);
 		
   	MPI_Reduce(&RMSE, &RMSE_ALL, 1, MPI_TEMP_DATATYPE, MPI_SUM, 0, MPI_COMM_WORLD);
   	if (TomoInputsPtr->node_rank == 0)
 	{
-		RMSE_ALL = sqrt(RMSE_ALL/(TomoInputsPtr->node_num*ScannedObjectPtr->N_time*ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x));
-		avg_conv = avg_conv/(TomoInputsPtr->node_num*ScannedObjectPtr->N_time*ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x);
-		avg_obj = avg_obj/(TomoInputsPtr->node_num*ScannedObjectPtr->N_time*ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x);
-		fprintf(TomoInputsPtr->debug_file_ptr, "compute_RMSE_Converged_Object: The RMSE between the reconstruction and converged result is %fHU, average of converged object is %f, average of reconstruction is %f\n", convert_um2HU(RMSE_ALL), avg_conv, avg_obj);
+		RMSE_ALL = sqrt(RMSE_ALL/(ScannedObjectPtr->N_time*ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x));
 		if (Iter == 0)
     			Write2Bin(rmse_filename, 1, 1, 1, 1, &RMSE_ALL, TomoInputsPtr->debug_file_ptr);	
 		else

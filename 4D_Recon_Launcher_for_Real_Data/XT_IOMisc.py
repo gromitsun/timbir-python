@@ -84,27 +84,50 @@ def write_object2HDF (proj, recon, files):
         for i in range(len(recon['r'])):
                 path2results = files['Result_Folder'] + recon['recon_type']  + '_sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
                 path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
-		offset = np.zeros((proj['recon_N_r'],proj['recon_N_t']), dtype = np.float32, order = 'C')
+                file = h5py.File(path2results + 'object.hdf5', 'w');
+#               dset = file.create_dataset('object', (recon['Rtime_num'][i], recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True, compression='lzf');
+                dset = file.create_dataset('object', (recon['Rtime_num'][i], recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True);
+                dset_off = file.create_dataset('proj_offset', (proj['recon_N_r'], proj['recon_N_t']), dtype=np.float32, chunks=True)
 		for k in range(recon['node_num']):
-			if (os.path.isfile(path2launch + 'proj_offset_n' + str(k) + '.bin')):
-				temp = RealData4mBin(path2launch + 'proj_offset_n' + str(k) + '.bin', 0, proj['recon_N_r']*proj['recon_N_t']/recon['node_num'], recon['real_var_type'])
-        		       	proj_offset = temp.reshape((proj['recon_N_r'], proj['recon_N_t']/recon['node_num']), order = 'C')
-          		 	offset[:,k*proj['recon_N_t']/recon['node_num']:(k+1)*proj['recon_N_t']/recon['node_num']] = proj_offset.astype(np.float32)
+			temp = RealData4mBin(path2launch + 'proj_offset_n' + str(k) + '.bin', 0, proj['recon_N_r']*proj['recon_N_t']/recon['node_num'], recon['real_var_type'])
+                	proj_offset = temp.reshape((proj['recon_N_r'], proj['recon_N_t']/recon['node_num']), order = 'C')
+                	dset_off[:,k*proj['recon_N_t']/recon['node_num']:(k+1)*proj['recon_N_t']/recon['node_num']] = proj_offset.astype(np.float32)
                 for j in range(int(recon['Rtime_num'][i])):
-                	file = h5py.File(path2results + 'object_time_' + str(j) + '.hdf5', 'w');
-#               	dset = file.create_dataset('object', (recon['Rtime_num'][i], recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True, compression='lzf');
-                	dset = file.create_dataset('object', (recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True);
 			zpernode = recon['N_z']/recon['node_num']	
 			for k in range(recon['node_num']):
 				temp = RealData4mBin(path2launch + 'object_n' + str(k) + '_time_' + str(j) + '.bin', 0, recon['N_xy']*recon['N_xy']*zpernode, recon['real_var_type'])
                         	Object[k*zpernode:(k+1)*zpernode,:,:] = temp.reshape((zpernode, recon['N_xy'], recon['N_xy']), order = 'C')
 
                         Object[Object < 0] = 0
-                        dset = Object.astype(np.float32)
-                	if (j == 0):
-				dset_off = file.create_dataset('proj_offset', (proj['recon_N_r'], proj['recon_N_t']), dtype=np.float32, chunks=True)
-				dset_off = offset.astype(np.float32)
-                	file.close
+                        dset[j,:,:,:] = Object.astype(np.float32)
+                file.close
+
+#def write_object2HDF (proj, recon, files):
+#	Object = np.zeros((recon['N_z'], recon['N_xy'], recon['N_xy']), dtype = np.float64, order = 'C')
+ #       for i in range(len(recon['r'])):
+  #              path2results = files['Result_Folder'] + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
+#                path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
+#		offset = np.zeros((proj['recon_N_r'], proj['recon_N_t']), dtype = np.float32, order = 'C')
+#		for k in range(recon['node_num']):
+#			temp = RealData4mBin(path2launch + 'proj_offset_n' + str(k) + '.bin', 0, proj['recon_N_r']*proj['recon_N_t']/recon['node_num'], recon['real_var_type'])
+#                	proj_offset = temp.reshape((proj['recon_N_r'], proj['recon_N_t']/recon['node_num']), order = 'C')
+#                	offset[:,k*proj['recon_N_t']/recon['node_num']:(k+1)*proj['recon_N_t']/recon['node_num']] = proj_offset.astype(np.float32)
+#                for j in range(int(recon['Rtime_num'][i])):
+#                	print 'Writing recon data at time ' + str(j)
+#			file = h5py.File(path2results + 'object_time_' + str(j) + '.hdf5', 'w');
+#               	dset = file.create_dataset('object', (recon['Rtime_num'][i], recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True, compression='lzf');
+#                	dset = file.create_dataset('object', (recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True);
+#			zpernode = recon['N_z']/recon['node_num']	
+#			for k in range(recon['node_num']):
+#				temp = RealData4mBin(path2launch + 'object_n' + str(k) + '_time_' + str(j) + '.bin', 0, recon['N_xy']*recon['N_xy']*zpernode, recon['real_var_type'])
+ #                       	Object[k*zpernode:(k+1)*zpernode,:,:] = temp.reshape((zpernode, recon['N_xy'], recon['N_xy']), order = 'C')
+#
+ #                       Object[Object < 0] = 0
+  #                      dset = Object.astype(np.float32)
+  #              	if (j == 0):
+#				dset_off = file.create_dataset('proj_offset', (proj['recon_N_r'], proj['recon_N_t']), dtype=np.float32, chunks=True)
+#				dset_off = offset.astype(np.float32)
+ #               	file.close
 
 def write_Video4mArray(filename, rows, cols, fps, array):
 	sz = array.shape

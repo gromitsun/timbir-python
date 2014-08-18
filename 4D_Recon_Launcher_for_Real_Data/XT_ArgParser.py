@@ -6,8 +6,9 @@ def ArgParser ():
 	parser.add_argument("--gen_outfiles", help="specify whether you want to create HDF and tiff output files", action="store_true")
 	parser.add_argument("--run_setup", help="Specify whether you want to setup the launch folder", action="store_true")
 	parser.add_argument("--run_recon", help="Run reconstruction code", action="store_true")
-	parser.add_argument("--restart", help="Restart the reconstruction", action="store_true")
         parser.add_argument("--restart_stage", help="Multi-resolution stage number from where to restart the reconstruction",type=int)
+	parser.add_argument("--restart", help="Restart the reconstruction", action="store_true")
+	parser.add_argument("--same_stage", help="Restart the reconstruction from the last running stage if output files were written by setting write_per_iter = 1", action="store_true")
 	
 	parser.add_argument("--ATT", help="Imaging modality is attenuation contrast tomography", action="store_true")
 	parser.add_argument("--PHCON", help="Imaging modality is phase constrast tomography", action="store_true")
@@ -64,6 +65,8 @@ def ArgParser ():
         parser.add_argument("--proj_start_4_RMSE", help="Number of detector elements along x-direction",type=int, default=256)
         parser.add_argument("--proj_num_4_RMSE", help="Number of detector elements along x-direction",type=int, default=512)
 	parser.add_argument("--real_is_double", help="Do all reconstruction using double type as 'real' variable", action="store_true")
+	parser.add_argument("--no_offset_est", help="If set will not estimate the offset error used to correct ring artifact", action="store_true")
+	parser.add_argument("--no_zero_mean_offset", help="If set, will not enforce zero mean constraint on offset error, d, used to correct ring artifacts", action="store_true")
 	args = parser.parse_args()
 	
 	if (args.multres_xy < args.multres_z):

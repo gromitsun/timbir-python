@@ -40,8 +40,8 @@ from XT_MBIR_Reconstruction import do_MBIR_reconstruction
 #from XT_FBP_Reconstruction import do_FBP_reconstruction
 from XT_IOMisc import error_by_flag
 from XT_IOMisc import write_object2HDF
-from XT_ObjectHDFIO import writepar_object2HDF
-from XT_ObjectHDFIO import writepar_tiff_from_object_bin_file
+#from XT_ObjectHDFIO import writepar_object2HDF
+#from XT_ObjectHDFIO import writepar_tiff_from_object_bin_file
 from XT_IOMisc import write_tiff_from_object_bin_file
 import argparse
 import time
@@ -93,6 +93,7 @@ def main():
         parser.add_argument("--Carver", help="Used to indicate HPC", action="store_true")
         parser.add_argument("--PC", help="Used to indicate code run is on a PC", action="store_true")
 
+	parser.add_argument("--real_is_double", help="Do all reconstruction using double type as 'real' variable", action="store_true")
         args = parser.parse_args()
         
         inputs = {}
@@ -154,6 +155,10 @@ def main():
 	recon = {}
 	files = {}
 	recon['node_num'] = inputs['num_nodes']
+	if (args.real_is_double):
+		recon['real_var_type'] = 'double'
+	else:
+		recon['real_var_type'] = 'float'
 
         if (args.Purdue):
 		recon['num_threads'] = inputs['num_threads']
