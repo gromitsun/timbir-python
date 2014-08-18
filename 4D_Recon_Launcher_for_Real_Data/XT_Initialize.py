@@ -36,7 +36,8 @@ def proj_init (proj, args):
 	#Path2Dataset - File path to the HDF file containing the dataset
 	#Path2WhiteDark - File path to the HDF file containing the white and dark images
 	proj['Path2Dataset'] = args.Path2Data
-	proj['Path2WhiteDark'] = args.Path2WhitesDarks
+	proj['Path2Whites'] = args.Path2Whites
+	proj['Path2Darks'] = args.Path2Darks
 	proj['Path2Phantom'] = args.Path2Phantom
 	proj['Path2Mask'] = args.Path2Mask
 	
@@ -45,7 +46,9 @@ def proj_init (proj, args):
 	proj['phantom_N_xy'] = args.phantom_xy_width
 	# phantom_N_z is the resolution of phantom along z
 	proj['phantom_N_z'] = args.phantom_z_width
-	proj['rotation_center_r'] = args.rot_center # Same units as recon_N_r	
+	extras_r = (int(args.x_width) % int(args.recon_x_width))
+	ratio_r = (args.x_width / args.recon_x_width)
+	proj['rotation_center_r'] = float(args.rot_center - extras_r/2)/float(ratio_r) # Same units as recon_N_r	
 	#voxel_size is the side length of each voxel (in micrometer(um))
 	proj['voxel_size'] = args.vox_size
 	proj['proj_num'] = args.proj_num # Total number of views used for reconstruction

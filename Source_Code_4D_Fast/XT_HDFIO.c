@@ -13,11 +13,11 @@
 HDF files.*/
 void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
-	hid_t data_file_id, wd_file_id, white_dataset, dark_dataset, proj_dataset;
+	hid_t data_file_id, white_file_id, dark_file_id, white_dataset, dark_dataset, proj_dataset;
 	hid_t white_dataspace, dark_dataspace, proj_dataspace, white_memspace, dark_memspace, proj_memspace;
-	hsize_t dims_wd[3], dims_proj[3], wd_offset[3], proj_offset[3], wd_count[3], proj_count[3], mem_offset[3]; 
+	hsize_t dims_white[3], dims_dark[3], dims_proj[3], white_offset[3], dark_offset[3], proj_offset[3], white_count[3], dark_count[3], proj_count[3], mem_offset[3]; 
    	herr_t status;
-	int32_t i, j, k, m, n, wd_rank, proj_rank, extras_r, true_length_r, ratio_r, ratio_t, total_t_slices, dim[4];	
+	int32_t i, j, k, m, n, white_rank, dark_rank, proj_rank, extras_r, true_length_r, ratio_r, ratio_t, total_t_slices, dim[4];	
 	uint16_t ***white_img, ***dark_img, ***proj_img;
 	Real_t temp, ***Projection, ***Weight, **white_2D_img, **dark_2D_img, **wd_dwnsmpl_img;
 	char wd_filename[100] = "bright";
@@ -25,7 +25,8 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 	char proj_filename[100] = "projection";
 
 	char data_hdf_filename[] = DATA_HDF_FILENAME;
-	char wd_hdf_filename[] = WHITEDARK_HDF_FILENAME;
+	char white_hdf_filename[] = WHITE_HDF_FILENAME;
+	char dark_hdf_filename[] = DARK_HDF_FILENAME;
 
 	sprintf(wd_filename, "%s_n%d", wd_filename, TomoInputsPtr->node_rank);
 	sprintf(weight_filename, "%s_n%d", weight_filename, TomoInputsPtr->node_rank);
@@ -33,59 +34,83 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 
 	/*HDF file pointers*/
 	data_file_id = H5Fopen(data_hdf_filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-	wd_file_id = H5Fopen(wd_hdf_filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+	white_file_id = H5Fopen(white_hdf_filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+	dark_file_id = H5Fopen(dark_hdf_filename, H5F_ACC_RDONLY, H5P_DEFAULT);
 	/*dataset pointers*/
-	white_dataset = H5Dopen(wd_file_id, "/exchange/data_white", H5P_DEFAULT);
-	dark_dataset = H5Dopen(wd_file_id, "/exchange/data_dark", H5P_DEFAULT);
+	white_dataset = H5Dopen(white_file_id, "/exchange/data_white", H5P_DEFAULT);
+	dark_dataset = H5Dopen(dark_file_id, "/exchange/data_dark", H5P_DEFAULT);
 	proj_dataset = H5Dopen(data_file_id, "/exchange/data", H5P_DEFAULT);
 
 	white_dataspace = H5Dget_space (white_dataset);    /* dataspace handle */
 	dark_dataspace = H5Dget_space (dark_dataset);    /* dataspace handle */
 	proj_dataspace = H5Dget_space (proj_dataset);    /* dataspace handle */
 	/*Gives the number of dimensions in a dataset*/
-    	wd_rank = H5Sget_simple_extent_ndims (white_dataspace);
+    	white_rank = H5Sget_simple_extent_ndims (white_dataspace);
+    	dark_rank = H5Sget_simple_extent_ndims (dark_dataspace);
     	proj_rank = H5Sget_simple_extent_ndims (proj_dataspace);
 	
-	if (wd_rank != 3 || proj_rank != 3)
+	if (white_rank != 3 || dark_rank != 3 || proj_rank != 3)
 	{
-		printf("ERROR: gen_projection_4m_HDF: The rank of one of the datasets in the HDF file is not 3\n");
+		printf("ERROR: gen_projection_4m_HDF: The rank of one of the datasets in one of the HDF files is not 3\n");
 		exit(1);
 	}
 
 	/*finds the dimension of the dataset and stores them in dims_wd and dims_proj*/	
-	status = H5Sget_simple_extent_dims (white_dataspace, dims_wd, NULL);
+	status = H5Sget_simple_extent_dims (white_dataspace, dims_white, NULL);
+	status = H5Sget_simple_extent_dims (dark_dataspace, dims_dark, NULL);
 	status = H5Sget_simple_extent_dims (proj_dataspace, dims_proj, NULL);
-	fprintf(TomoInputsPtr->debug_file_ptr, "gen_projection_4m_HDF: size of white (/exchange/data_white) dataset is %zux%zux%zu\n", dims_wd[0], dims_wd[1], dims_wd[2]);
+	fprintf(TomoInputsPtr->debug_file_ptr, "gen_projection_4m_HDF: size of white (/exchange/data_white) dataset is %zux%zux%zu\n", dims_white[0], dims_white[1], dims_white[2]);
+	fprintf(TomoInputsPtr->debug_file_ptr, "gen_projection_4m_HDF: size of dark (/exchange/data_dark) dataset is %zux%zux%zu\n", dims_dark[0], dims_dark[1], dims_dark[2]);
 	fprintf(TomoInputsPtr->debug_file_ptr, "gen_projection_4m_HDF: size of count (/exchange/data) dataset is %zux%zux%zu\n", dims_proj[0], dims_proj[1], dims_proj[2]);
 
-	if (dims_wd[2] != dims_proj[2] || dims_wd[2] < SinogramPtr->N_r)
+	if (dims_white[2] != dims_proj[2] || dims_white[2] < SinogramPtr->N_r)
 	{
-		printf("ERROR: gen_projection_4m_HDF: dims_wd[2] = %zu, dims_proj[2] = %zu, N_r = %d\n", dims_wd[2], dims_proj[2], SinogramPtr->N_r);
+		printf("ERROR: gen_projection_4m_HDF: dims_white[2] = %zu, dims_proj[2] = %zu, N_r = %d\n", dims_white[2], dims_proj[2], SinogramPtr->N_r);
 		exit(1);
 	}
 	
-	if (dims_wd[1] != dims_proj[1] || SinogramPtr->slice_num % SinogramPtr->total_t_slices != 0)
+	if (dims_white[1] != dims_proj[1] || SinogramPtr->slice_num % SinogramPtr->total_t_slices != 0)
 	{
-		printf("ERROR: gen_projection_4m_HDF: dims_wd[1] = %zu, dims_proj[1] = %zu, SinogramPtr->slice_num = %d, N_t = %d\n", dims_wd[1], dims_proj[1], SinogramPtr->slice_num, SinogramPtr->total_t_slices);
+		printf("ERROR: gen_projection_4m_HDF: dims_white[1] = %zu, dims_proj[1] = %zu, SinogramPtr->slice_num = %d, N_t = %d\n", dims_white[1], dims_proj[1], SinogramPtr->slice_num, SinogramPtr->total_t_slices);
+		exit(1);
+	}
+	
+	if (dims_dark[2] != dims_proj[2] || dims_dark[2] < SinogramPtr->N_r)
+	{
+		printf("ERROR: gen_projection_4m_HDF: dims_dark[2] = %zu, dims_proj[2] = %zu, N_r = %d\n", dims_dark[2], dims_proj[2], SinogramPtr->N_r);
+		exit(1);
+	}
+	
+	if (dims_dark[1] != dims_proj[1] || SinogramPtr->slice_num % SinogramPtr->total_t_slices != 0)
+	{
+		printf("ERROR: gen_projection_4m_HDF: dims_dark[1] = %zu, dims_proj[1] = %zu, SinogramPtr->slice_num = %d, N_t = %d\n", dims_dark[1], dims_proj[1], SinogramPtr->slice_num, SinogramPtr->total_t_slices);
 		exit(1);
 	}
 
-        extras_r = dims_wd[2] % SinogramPtr->N_r;
-        true_length_r = dims_wd[2] - extras_r;
-	SinogramPtr->Length_R = SinogramPtr->Length_R*true_length_r/dims_wd[2];	
-	TomoInputsPtr->radius_obj = TomoInputsPtr->radius_obj*true_length_r/dims_wd[2];	
+        extras_r = dims_proj[2] % SinogramPtr->N_r;
+        true_length_r = dims_proj[2] - extras_r;
+	SinogramPtr->Length_R = SinogramPtr->Length_R*true_length_r/dims_proj[2];	
+/*	TomoInputsPtr->radius_obj = TomoInputsPtr->radius_obj*true_length_r/dims_proj[2];*/	
  
-	wd_offset[0] = 1;
-	wd_offset[1] = SinogramPtr->slice_begin + TomoInputsPtr->node_rank*SinogramPtr->slice_num/TomoInputsPtr->node_num;
-    	wd_offset[2] = extras_r/2;
+	white_offset[0] = 1;
+	white_offset[1] = SinogramPtr->slice_begin + TomoInputsPtr->node_rank*SinogramPtr->slice_num/TomoInputsPtr->node_num;
+    	white_offset[2] = extras_r/2;
+	
+	white_offset[0] = 1;
+	white_offset[1] = SinogramPtr->slice_begin + TomoInputsPtr->node_rank*SinogramPtr->slice_num/TomoInputsPtr->node_num;
+    	white_offset[2] = extras_r/2;
 	
 	proj_offset[0] = PROJECTION_HDF_START;
 	proj_offset[1] = SinogramPtr->slice_begin + TomoInputsPtr->node_rank*SinogramPtr->slice_num/TomoInputsPtr->node_num;
     	proj_offset[2] = extras_r/2;
 
-	wd_count[0] = dims_wd[0] - 2;
-	wd_count[1] = SinogramPtr->slice_num/TomoInputsPtr->node_num;
-	wd_count[2] = true_length_r;
+	white_count[0] = dims_white[0] - 2;
+	white_count[1] = SinogramPtr->slice_num/TomoInputsPtr->node_num;
+	white_count[2] = true_length_r;
+	
+	dark_count[0] = dims_dark[0] - 2;
+	dark_count[1] = SinogramPtr->slice_num/TomoInputsPtr->node_num;
+	dark_count[2] = true_length_r;
 
 	proj_count[0] = SinogramPtr->N_p;
 	proj_count[1] = SinogramPtr->slice_num/TomoInputsPtr->node_num;
@@ -96,25 +121,25 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 	total_t_slices = SinogramPtr->total_t_slices/TomoInputsPtr->node_num;
 
 	fprintf(TomoInputsPtr->debug_file_ptr, "gen_projection_4m_HDF: true_length_r = %d, total_t_slices = %d, extras_r = %d, node_rank = %d\n", true_length_r, total_t_slices, extras_r, TomoInputsPtr->node_rank);
-	white_img = (uint16_t***)multialloc(sizeof(uint16_t), 3, wd_count[0], wd_count[1], wd_count[2]);
-	dark_img = (uint16_t***)multialloc(sizeof(uint16_t), 3, wd_count[0], wd_count[1], wd_count[2]);
+	white_img = (uint16_t***)multialloc(sizeof(uint16_t), 3, white_count[0], white_count[1], white_count[2]);
+	dark_img = (uint16_t***)multialloc(sizeof(uint16_t), 3, dark_count[0], dark_count[1], dark_count[2]);
 	proj_img = (uint16_t***)multialloc(sizeof(uint16_t), 3, proj_count[0], proj_count[1], proj_count[2]);
-	white_2D_img = (Real_t**)multialloc(sizeof(Real_t), 2, wd_count[2], wd_count[1]);
-	dark_2D_img = (Real_t**)multialloc(sizeof(Real_t), 2, wd_count[2], wd_count[1]);
+	white_2D_img = (Real_t**)multialloc(sizeof(Real_t), 2, white_count[2], white_count[1]);
+	dark_2D_img = (Real_t**)multialloc(sizeof(Real_t), 2, dark_count[2], dark_count[1]);
 	wd_dwnsmpl_img = (Real_t**)multialloc(sizeof(Real_t), 2, SinogramPtr->N_r, total_t_slices);
 	Projection = (Real_t***)multialloc(sizeof(Real_t), 3, SinogramPtr->N_p, SinogramPtr->N_r, total_t_slices);
 	Weight = (Real_t***)multialloc(sizeof(Real_t), 3, SinogramPtr->N_p, SinogramPtr->N_r, total_t_slices);
 
 	/*Selects ROI in the dataset which should be read into arrays*/
-    	status = H5Sselect_hyperslab (white_dataspace, H5S_SELECT_SET, wd_offset, NULL, wd_count, NULL);
-    	status = H5Sselect_hyperslab (dark_dataspace, H5S_SELECT_SET, wd_offset, NULL, wd_count, NULL);
+    	status = H5Sselect_hyperslab (white_dataspace, H5S_SELECT_SET, white_offset, NULL, white_count, NULL);
+    	status = H5Sselect_hyperslab (dark_dataspace, H5S_SELECT_SET, dark_offset, NULL, dark_count, NULL);
     	status = H5Sselect_hyperslab (proj_dataspace, H5S_SELECT_SET, proj_offset, NULL, proj_count, NULL);
-    	white_memspace = H5Screate_simple (3, wd_count, NULL);  
-    	dark_memspace = H5Screate_simple (3, wd_count, NULL);  
+    	white_memspace = H5Screate_simple (3, white_count, NULL);  
+    	dark_memspace = H5Screate_simple (3, dark_count, NULL);  
     	proj_memspace = H5Screate_simple (3, proj_count, NULL);   
 	mem_offset[0] = 0; mem_offset[1] = 0; mem_offset[2] = 0;
-    	status = H5Sselect_hyperslab (white_memspace, H5S_SELECT_SET, mem_offset, NULL, wd_count, NULL);
-    	status = H5Sselect_hyperslab (dark_memspace, H5S_SELECT_SET, mem_offset, NULL, wd_count, NULL);
+    	status = H5Sselect_hyperslab (white_memspace, H5S_SELECT_SET, mem_offset, NULL, white_count, NULL);
+    	status = H5Sselect_hyperslab (dark_memspace, H5S_SELECT_SET, mem_offset, NULL, dark_count, NULL);
     	status = H5Sselect_hyperslab (proj_memspace, H5S_SELECT_SET, mem_offset, NULL, proj_count, NULL);
 
 	fprintf(TomoInputsPtr->debug_file_ptr,"gen_projection_4m_HDF: Reading HDF5 dataset ...\n");
@@ -124,19 +149,27 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 
 	fprintf(TomoInputsPtr->debug_file_ptr,"gen_projection_4m_HDF: Read the white, dark and projection datasets\n");
 	fprintf(TomoInputsPtr->debug_file_ptr, "gen_projection_4m_HDF: ratio_r = %d, ratio_t = %d\n", ratio_r, ratio_t);
-	for (j = 0; j < wd_count[2]; j++)
-	for (k = 0; k < wd_count[1]; k++)
+	for (j = 0; j < white_count[2]; j++)
+	for (k = 0; k < white_count[1]; k++)
 	{
 		white_2D_img[j][k] = 0;
-		dark_2D_img[j][k] = 0;
-		for (i = 0; i < wd_count[0]; i++)
+		for (i = 0; i < white_count[0]; i++)
 		{
 			white_2D_img[j][k] += white_img[i][k][j];
-			dark_2D_img[j][k] += dark_img[i][k][j];
 		}
-		white_2D_img[j][k] /= wd_count[0];
-		dark_2D_img[j][k] /= wd_count[0];
+		white_2D_img[j][k] /= white_count[0];
 	}
+
+	for (j = 0; j < dark_count[2]; j++)
+        for (k = 0; k < dark_count[1]; k++)
+        {
+                dark_2D_img[j][k] = 0;
+                for (i = 0; i < dark_count[0]; i++)
+                {
+                        dark_2D_img[j][k] += dark_img[i][k][j];
+                }
+                dark_2D_img[j][k] /= dark_count[0];
+        }
 
 	fprintf(TomoInputsPtr->debug_file_ptr,"gen_projection_4m_HDF: Generated the downsampled versions of white and dark images\n");
 		
@@ -191,7 +224,8 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 	H5Dclose(white_dataset);
 	H5Dclose(dark_dataset);
 	H5Dclose(proj_dataset);
-	H5Fclose(wd_file_id);
+	H5Fclose(white_file_id);
+	H5Fclose(dark_file_id);
 	H5Fclose(data_file_id);
 } 
 

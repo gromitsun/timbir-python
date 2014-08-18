@@ -63,7 +63,8 @@ def do_MBIR_reconstruction(proj, recon, files):
 			#macros = ' -DBH_QUAD_COEF="' + str(recon['BH_Quad_Coef']) + '" -DHOUNSFIELD_MAX="' + str(recon['maxHU']) + '" -DHOUNSFIELD_MIN="' + str(recon['minHU']) + '"' 
 	
 			macros = macros + ' -DDATA_HDF_FILENAME="\\"' + proj['Path2Dataset'] + '\\""'
-			macros = macros + ' -DWHITEDARK_HDF_FILENAME="\\"' + proj['Path2WhiteDark'] + '\\""'
+			macros = macros + ' -DWHITE_HDF_FILENAME="\\"' + proj['Path2Whites'] + '\\""'
+			macros = macros + ' -DDARK_HDF_FILENAME="\\"' + proj['Path2Darks'] + '\\""'
 			macros = macros + ' -DPROJECTION_HDF_START="' + str(proj['proj_start']) + '"'
 			macros = macros + ' -DPATH_TO_PHANTOM="\\"' + proj['Path2Phantom'] + '\\""'
 			macros = macros + ' -DEXPECTED_COUNTS_FOR_PHANTOM_DATA="' + str(proj['Expected_Counts']) + '"'
