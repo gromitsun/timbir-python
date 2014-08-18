@@ -1,6 +1,6 @@
 
 from PIL import Image
-from os import system
+import os
 import numpy as np
 import h5py
 import subprocess as sp
@@ -14,14 +14,14 @@ def error_by_flag (flag, message):
 
 def create_folder (path2folder):
 	print 'create_folder: Will create ' + path2folder 
-	flag = system('mkdir ' + path2folder)
+	flag = os.system('mkdir ' + path2folder)
 	if (flag != 0):
 		print 'create_folder: Deleting ' + path2folder
-		rm_flag = system('rm -r ' + path2folder)
+		rm_flag = os.system('rm -r ' + path2folder)
 		error_by_flag(rm_flag, 'ERROR: cannot remove ' + path2folder)
 
 		print 'do_reconstruction: Creating ' + path2folder 
-		flag = system('mkdir ' + path2folder)
+		flag = os.system('mkdir ' + path2folder)
 		error_by_flag(flag, 'ERROR: cannot create ' + path2folder + '. Delete folder manually.')
 
 
@@ -67,7 +67,7 @@ def write_tiff_from_object_bin_file (proj, recon, files):
 	Object = np.zeros((recon['N_z'], recon['N_xy'], recon['N_xy']), dtype = np.float64, order = 'C')
 	for i in range(len(recon['r'])):
                 path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
-                path2results = files['Result_Folder'] + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
+                path2results = files['Result_Folder'] + recon['recon_type'] + '_sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
 		for j in range(int(recon['Rtime_num'][i])):
 			for k in range(recon['node_num']):
 				zpernode = recon['N_z']/recon['node_num']	
@@ -82,7 +82,7 @@ def write_tiff_from_object_bin_file (proj, recon, files):
 def write_object2HDF (proj, recon, files):
 	Object = np.zeros((recon['N_z'], recon['N_xy'], recon['N_xy']), dtype = np.float64, order = 'C')
         for i in range(len(recon['r'])):
-                path2results = files['Result_Folder'] + 'MBIR_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
+                path2results = files['Result_Folder'] + recon['recon_type']  + '_sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
                 path2launch = files['Launch_Folder'] + 'run_' + 'sigs_' + str(recon['sigma_s'][i]) + '_sigt_' + str(recon['sigma_t'][i]) + '_r_' + str(recon['r'][i]) + '_K_' + str(proj['K']) + '_N_theta_' + str(proj['N_theta']) + '_N_p_' + str(proj['recon_N_p']) + recon['msg_string'] + '/'
                 file = h5py.File(path2results + 'object.hdf5', 'w');
 #               dset = file.create_dataset('object', (recon['Rtime_num'][i], recon['N_z'], recon['N_xy'], recon['N_xy']), dtype=np.float32, chunks=True, compression='lzf');
