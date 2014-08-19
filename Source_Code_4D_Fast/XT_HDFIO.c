@@ -96,9 +96,9 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 	white_offset[1] = SinogramPtr->slice_begin + TomoInputsPtr->node_rank*SinogramPtr->slice_num/TomoInputsPtr->node_num;
     	white_offset[2] = extras_r/2;
 	
-	white_offset[0] = 1;
-	white_offset[1] = SinogramPtr->slice_begin + TomoInputsPtr->node_rank*SinogramPtr->slice_num/TomoInputsPtr->node_num;
-    	white_offset[2] = extras_r/2;
+	dark_offset[0] = 1;
+	dark_offset[1] = SinogramPtr->slice_begin + TomoInputsPtr->node_rank*SinogramPtr->slice_num/TomoInputsPtr->node_num;
+    	dark_offset[2] = extras_r/2;
 	
 	proj_offset[0] = PROJECTION_HDF_START;
 	proj_offset[1] = SinogramPtr->slice_begin + TomoInputsPtr->node_rank*SinogramPtr->slice_num/TomoInputsPtr->node_num;

@@ -293,11 +293,11 @@ void initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tom
 	SinogramPtr->Length_T = SinogramPtr->Length_T/TomoInputsPtr->node_num;
 	SinogramPtr->N_t = SinogramPtr->total_t_slices/TomoInputsPtr->node_num;
 
-	if (SinogramPtr->N_t < 3)
+/*	if (SinogramPtr->N_t < 3)
 	{
 		printf ("ERROR: initStructures: Number of spatial slices per node cannot be less than 3\n");
 		exit(1);
-	}
+	}*/
 	
 	if (SinogramPtr->N_t % (int32_t)ScannedObjectPtr->delta_z != 0){
 		printf("ERROR: initStructures: Cannot do reconstruction since delta_z = %d does not divide %d\n", (int32_t)ScannedObjectPtr->delta_z, SinogramPtr->N_t);

@@ -2,7 +2,7 @@
 # FILENAME:  Conte_RealData_Submit.sh
 
 #PBS -V
-#PBS -q standby
+#PBS -q bouman
 #PBS -l nodes=1:ppn=16
 #PBS -l walltime=4:00:00
 
@@ -20,16 +20,16 @@ export PARALLEL=1
 export OMP_NUM_THREADS=32
 uniq < $PBS_NODEFILE > nodefile
 
-#declare -a sigma_s=(1500000)
-#declare -a sigma_t=(4000)
-declare -a sigma_s=(1000000 1500000 2000000 2500000)
-declare -a sigma_t=(1000 2000 4000 8000)
-s_idx=`expr $PARAM_INDEX / 4`
-t_idx=`expr $PARAM_INDEX % 4`
+declare -a sigma_s=(1500000)
+declare -a sigma_t=(4000)
+#declare -a sigma_s=(1000000 1500000 2000000 2500000)
+#declare -a sigma_t=(1000 2000 4000 8000)
+s_idx=`expr $PARAM_INDEX / 1`
+t_idx=`expr $PARAM_INDEX % 1`
 
 ################## APS August 2014 ############
 
-python XT_Main.py --run_setup --run_recon --gen_outfiles --MBIR --ATT --REAL_DATA --num_nodes 1 --Purdue --Path2Data $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_60_AlSi.hdf --Path2Whites $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_60_AlSi.hdf --Path2Darks $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/APS14_60_AlSi.hdf --Path2Phantom $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard.bin --Path2Mask $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin --run_folder $RCAC_SCRATCH/Recon_Runs/PhCon_Real/ --rot_center 1059.9 --vox_size 0.65 --proj_start 150000 --proj_num 768 --x_width 2080 --recon_x_width 1040 --z_start 0 --z_width 4 --recon_z_width 2 --vox_stop_thresh 2 --cost_stop_thresh 1 --sigma_s ${sigma_s[$s_idx]} --sigma_t ${sigma_t[$t_idx]} --K 16 --N_theta 3072 --r 16 --multres_xy 4 --multres_z 1 --do_VarEstimate 1 --MaxIter 1000 --msg_string _zeromeand_quarterframe --min_time_btw_views 0.00868 --rotation_speed 108 --ZingerT 4 --maxHU 20000 --minHU 0 --BH_Quad_Coef 0.0 --num_cycles 55
+python XT_Main.py --run_setup --run_recon --gen_outfiles --MBIR --ATT --REAL_DATA --num_nodes 1 --Purdue --Path2Data $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/AlSi_data_3.hdf --Path2Whites $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/AlSi_data_3.hdf --Path2Darks $RCAC_SCRATCH/Argonne_Datasets/APS_Beamtime_042014/AlSi_data_2.hdf --Path2Phantom $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard.bin --Path2Mask $RCAC_SCRATCH/Sim_Datasets/phantom_Cahn_Hilliard_mask.bin --run_folder $RCAC_SCRATCH/Recon_Runs/PhCon_Real/ --rot_center 1059.9 --vox_size 0.65 --proj_start 150000 --proj_num 768 --x_width 2080 --recon_x_width 1040 --z_start 300 --z_width 8 --recon_z_width 4 --vox_stop_thresh 2 --cost_stop_thresh 1 --sigma_s ${sigma_s[$s_idx]} --sigma_t ${sigma_t[$t_idx]} --K 16 --N_theta 3072 --r 16 --multres_xy 4 --multres_z 1 --do_VarEstimate 1 --MaxIter 1000 --msg_string _zeromeand_quarterframe_newdark --min_time_btw_views 0.00868 --rotation_speed 108 --ZingerT 4 --maxHU 20000 --minHU 0 --BH_Quad_Coef 0.0 --num_cycles 55
 
 ###### Low resolution #####
 #proj_num = 6971
