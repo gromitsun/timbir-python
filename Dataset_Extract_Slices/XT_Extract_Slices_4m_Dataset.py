@@ -32,29 +32,29 @@ else:
 
 	FILE_WR = h5py.File(Path2Dest, 'w')
 	if (args.contain_whites):
-		shape = FILE_RD['/exchange/data_white'].shape
-		white_wr = FILE_WR.create_dataset('/exchange/data_white', (shape[0],z_num,shape[2]), dtype=np.uint16)
+		white_rd = FILE_RD['/exchange/data_white']
+		white_wr = FILE_WR.create_dataset('/exchange/data_white', (white_rd.shape[0],z_num,white_rd.shape[2]), dtype=np.uint16)
 
 	if (args.contain_darks):
-		shape = FILE_RD['/exchange/data_dark'].shape
-		dark_wr = FILE_WR.create_dataset('/exchange/data_dark', (shape[0],z_num,shape[2]), dtype=np.uint16)
+		dark_rd = FILE_RD['/exchange/data_dark']
+		dark_wr = FILE_WR.create_dataset('/exchange/data_dark', (dark_rd.shape[0],z_num,dark_rd.shape[2]), dtype=np.uint16)
 	
-	shape = FILE_RD['/exchange/data'].shape
-	data_wr = FILE_WR.create_dataset('/exchange/data', (shape[0],z_num,shape[2]), dtype=np.uint16)
+	data_rd = FILE_RD['/exchange/data']
+	data_wr = FILE_WR.create_dataset('/exchange/data', (data_rd.shape[0],z_num,data_rd.shape[2]), dtype=np.uint16)
 
 	if (args.contain_whites):
-		white_wr = FILE_RD['/exchange/data_white'][:,z_start:z_start + z_num,:]
-	#	white_wr[:,:,:] = temp
+		temp = white_rd[:,z_start:z_start + z_num,:]
+		white_wr[:,:,:] = temp
 		print 'Average of whites is ', np.mean(white_wr)
 		print 'Copied whites!'
 	if (args.contain_darks):
-		dark_wr = FILE_RD['/exchange/data_dark'][:,z_start:z_start + z_num,:]
-	#	dark_wr[:,:,:] = temp
+		temp = dark_rd[:,z_start:z_start + z_num,:]
+		dark_wr[:,:,:] = temp
 		print 'Average of darks is ', np.mean(dark_wr)
 		print 'Copied darks!'
 
-	data_wr = FILE_RD['/exchange/data'][:,z_start:z_start + z_num,:]
-	#data_wr[:,:,:] = temp
+	temp = data_rd[:,z_start:z_start + z_num,:]
+	data_wr[:,:,:] = temp
 	print 'Average of the data is ', np.mean(data_wr)
 	print 'Copied data. Done!'
 
@@ -63,7 +63,7 @@ else:
 	#print np.sum(neg<0)
 	#print np.var(np.mean(dark_wr,axis=0))
 	
-	#FILE_WR.close
-	#FILE_RD.close
+	FILE_WR.close
+	FILE_RD.close
 
 
