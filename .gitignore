@@ -1,1 +1,9 @@
 Build
+
+# Compiled Python files
+*.pyc
+*.pyd
+
+# Text editor swap files
+*.*~
+*.swp

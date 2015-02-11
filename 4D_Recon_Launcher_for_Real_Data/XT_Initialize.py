@@ -48,7 +48,10 @@ def proj_init (proj, args):
 	proj['phantom_N_z'] = args.phantom_z_width
 	extras_r = (int(args.x_width) % int(args.recon_x_width))
 	ratio_r = (args.x_width / args.recon_x_width)
-	proj['rotation_center_r'] = float(args.rot_center - extras_r/2)/float(ratio_r) # Same units as recon_N_r	
+	# proj['rotation_center_r'] = float(args.rot_center - extras_r/2)/float(ratio_r) # Same units as recon_N_r	
+	proj['rotation_center_r'] = float(args.rot_center - extras_r/2 - args.x_start)/float(ratio_r) # Same units as recon_N_r	# Added by Yue
+	proj['x_start'] = args.x_start # Added by Yue
+	proj['x_width'] = args.x_width # Added by Yue
 	#voxel_size is the side length of each voxel (in micrometer(um))
 	proj['voxel_size'] = args.vox_size
 	proj['proj_num'] = args.proj_num # Total number of views used for reconstruction

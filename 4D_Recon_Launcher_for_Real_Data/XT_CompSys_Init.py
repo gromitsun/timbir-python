@@ -21,8 +21,10 @@ def CompSys_Init(args, recon, files):
 			recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) + ' -machinefile nodefile '
 		else:
 			recon['run_command'] = 'mpiexec -n ' + str(recon['node_num'])
-		recon['compile_command'] = 'mpicc -ansi -Wall -fopenmp -O3 -I/software/hdf5/1.8.12/include -L/software/hdf5/1.8.12/lib -lhdf5 '
-		recon['HPC'] = 'Purdue' 
+		recon['compile_command'] = 'mpicc -ansi -Wall -fopenmp -O3 -I/software/hdf5/1.8.12/include -L/software/hdf5/1.8.12/lib -lhdf5 ' # gcc
+		#recon['compile_command'] = 'mpiicc -ansi -Wall -openmp -O3 -I/software/hdf5/1.8.10/include -L/software/hdf5/1.8.10/lib -lhdf5 '  # intel
+		#recon['compile_command'] = 'mpiicc -ansi -Wall -openmp -O3 -I/software/hdf5/1.8.12/include -L/software/hdf5/1.8.12/lib -lhdf5 -L/software/mpi/openmpi-1.6.3-gcc-4.6.3-trq4/lib64 -lmpi'  # intel
+		recon['HPC'] = 'Quest' 
 		#recon['rank'] = MPI.COMM_WORLD.rank
 		recon['rank'] = 0
 	elif (args.Purdue):
@@ -51,6 +53,15 @@ def CompSys_Init(args, recon, files):
 			#recon['compile_command'] = 'cc -g -O0 -openmp '
 			recon['compile_command'] = 'cc -fopenmp '
 		recon['HPC'] = 'NERSC'
+		recon['rank'] = 0
+	elif (args.linuxPC):
+		recon['num_threads'] = 4
+		files['scratch'] = '../..'
+		files['data_scratch'] = '/home/y/temp/'
+		recon['run_command'] = 'mpiexec -n ' + str(recon['node_num'])
+		recon['compile_command'] = 'mpicc -ansi -Wall -fopenmp '
+		#recon['compile_command'] = 'mpicc -fopenmp '
+		recon['HPC'] = 'linuxPC' 
 		recon['rank'] = 0		
 	else:
 		error_by_flag(1, 'HPC system not recognized')

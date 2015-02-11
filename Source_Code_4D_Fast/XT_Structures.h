@@ -63,6 +63,8 @@
    Real_t ***Projection; /*Stores the projection values (sinogram)*/
    Real_t **ProjOffset; /*stores the additive projection error offsets (called 'd' in paper)*/
    bool ***ProjSelect; /*Mask which determines whether a measurement is classified as anamolous or not. (called 'b' in paper)*/
+    int32_t x_start;/*Start of detector elements in r direction (parallel to x-axis)*/ /* Added by Yue */
+    int32_t x_width;/*Total number of data pixels covered by detector elements in r direction (parallel to x-axis)*/ /* Added by Yue */
     int32_t N_r;/*Number of detector elements in r direction (parallel to x-axis)*/
     int32_t N_t;/*Number of detector elements in t direction to be reconstructed (parallel to z axis)*/
     int32_t N_p;/*Total number of projections used in reconstruction*/

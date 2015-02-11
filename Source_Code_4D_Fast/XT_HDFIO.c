@@ -17,7 +17,8 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 	hid_t white_dataspace, dark_dataspace, proj_dataspace, white_memspace, dark_memspace, proj_memspace;
 	hsize_t dims_white[3], dims_dark[3], dims_proj[3], white_offset[3], dark_offset[3], proj_offset[3], white_count[3], dark_count[3], proj_count[3], mem_offset[3]; 
    	herr_t status;
-	int32_t i, j, k, m, n, white_rank, dark_rank, proj_rank, extras_r, true_length_r, ratio_r, ratio_t, total_t_slices, dim[4];	
+	/* int32_t i, j, k, m, n, white_rank, dark_rank, proj_rank, extras_r, true_length_r, ratio_r, ratio_t, total_t_slices, dim[4];	*/
+	int32_t i, j, k, m, n, white_rank, dark_rank, proj_rank, x_start, x_width, extras_r, true_length_r, ratio_r, ratio_t, total_t_slices, dim[4];	/* Added by Yue */
 	uint16_t ***white_img, ***dark_img, ***proj_img;
 	Real_t temp, ***Projection, ***Weight, **white_2D_img, **dark_2D_img, **wd_dwnsmpl_img;
 	char wd_filename[100] = "bright";
@@ -87,22 +88,29 @@ void gen_projection_4m_HDF (Sinogram* SinogramPtr, ScannedObject* ScannedObjectP
 		exit(1);
 	}
 
-        extras_r = dims_proj[2] % SinogramPtr->N_r;
-        true_length_r = dims_proj[2] - extras_r;
+        x_start = SinogramPtr->x_start; /* Added by Yue */
+        x_width = SinogramPtr->x_width; /* Added by Yue */
+        /* extras_r = dims_proj[2] % SinogramPtr->N_r; */
+        extras_r = x_width % SinogramPtr->N_r;
+        /* true_length_r = dims_proj[2] - extras_r; */
+        true_length_r = x_width - extras_r; /* Added by Yue */
 	SinogramPtr->Length_R = SinogramPtr->Length_R*true_length_r/dims_proj[2];	
 /*	TomoInputsPtr->radius_obj = TomoInputsPtr->radius_obj*true_length_r/dims_proj[2];*/	
  
 	white_offset[0] = 1;
 	white_offset[1] = SinogramPtr->slice_begin + TomoInputsPtr->node_rank*SinogramPtr->slice_num/TomoInputsPtr->node_num;
-    	white_offset[2] = extras_r/2;
+    	/* white_offset[2] = extras_r/2; */
+    	white_offset[2] = extras_r/2 + x_start; /* Added by Yue */
 	
 	dark_offset[0] = 1;
 	dark_offset[1] = SinogramPtr->slice_begin + TomoInputsPtr->node_rank*SinogramPtr->slice_num/TomoInputsPtr->node_num;
-    	dark_offset[2] = extras_r/2;
+    	/* dark_offset[2] = extras_r/2; */
+    	dark_offset[2] = extras_r/2 + x_start; /* Added by Yue */
 	
 	proj_offset[0] = PROJECTION_HDF_START;
 	proj_offset[1] = SinogramPtr->slice_begin + TomoInputsPtr->node_rank*SinogramPtr->slice_num/TomoInputsPtr->node_num;
-    	proj_offset[2] = extras_r/2;
+    	/* proj_offset[2] = extras_r/2; */
+    	proj_offset[2] = extras_r/2 + x_start; /* Added by Yue */
 
 	white_count[0] = dims_white[0] - 2;
 	white_count[1] = SinogramPtr->slice_num/TomoInputsPtr->node_num;

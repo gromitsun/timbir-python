@@ -22,6 +22,7 @@ def ArgParser ():
 	parser.add_argument("--Purdue", help="Cluster used is Conte or Carter at Purdue", action="store_true")
 	parser.add_argument("--Quest", help="Cluster used is Quest at Northwestern Univ", action="store_true")
 	parser.add_argument("--PC", help="Use 'PC' when running on a mac", action="store_true")
+	parser.add_argument("--linuxPC", help="Use 'linuxPC' when running on a linux PC", action="store_true")
 	parser.add_argument("-n", "--num_nodes", type=int, help="Specifies number of nodes/processors ( = number of MPI processes)")
 
         parser.add_argument("--Path2Data", help="Full path of the input hdf5 file containing the data", default="/dummy_path/")
@@ -35,6 +36,7 @@ def ArgParser ():
         parser.add_argument("--vox_size", help="Size of the detector pixels in micro meter",type=float)
 	parser.add_argument("--proj_num", help="Number of projections used for reconstruction",type=int)
 	parser.add_argument("--proj_start", help="first projection used for reconstruction",type=int)
+        parser.add_argument("--x_start", help="Start of detector pixels along x-direction", type=int, default=0) # Added by Yue
         parser.add_argument("--x_width", help="Actual number of detector pixels along x-direction",type=int)
         parser.add_argument("--recon_x_width", help="Downsampled number of detector pixels along x-direction",type=int)
 	#downsampling is from length 'x_width' to 'recon_x_width'

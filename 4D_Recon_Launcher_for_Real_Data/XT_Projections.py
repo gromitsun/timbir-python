@@ -44,10 +44,18 @@ def generate_projections (proj, recon, files, path2launch):
 	
 	print proj['Path2Dataset']
 	FILE = h5py.File(proj['Path2Dataset'], 'r')
-	print proj['Path2WhiteDark']
-	FILE_wd = h5py.File(proj['Path2WhiteDark'], 'r')
-	dark_ptr = FILE_wd['/exchange/data_dark']
-	white_ptr = FILE_wd['/exchange/data_white']
+	
+#	print proj['Path2WhiteDark']
+#	FILE_wd = h5py.File(proj['Path2WhiteDark'], 'r')
+#	dark_ptr = FILE_wd['/exchange/data_dark']
+#	white_ptr = FILE_wd['/exchange/data_white']
+	
+	print proj['Path2Whites'] # Added by Yue
+	print proj['Path2Darks'] # Added by Yue
+	FILE_w = h5py.File(proj['Path2Whites'], 'r') # Added by Yue
+	FILE_d = h5py.File(proj['Path2Darks'], 'r') # Added by Yue
+	dark_ptr = FILE_d['/exchange/data_dark'] # Added by Yue
+	white_ptr = FILE_w['/exchange/data_white'] # Added by Yue
 	data_ptr = FILE['/exchange/data']
 
 	if (dark_ptr.shape[-1] != proj['N_r'] or white_ptr.shape[-1] != proj['N_r'] or data_ptr.shape[-1] != proj['N_r']):
@@ -58,11 +66,13 @@ def generate_projections (proj, recon, files, path2launch):
 	
 	extras_r = proj['N_r'] % proj['recon_N_r']
 	true_length_r = proj['N_r'] - extras_r
+	x_start = proj['x_start'] # Added by Yue
 
 	proj['length_r'] = proj['length_r']*true_length_r/proj['N_r']
 	recon['radius_obj'] = recon['radius_obj']*true_length_r/proj['N_r']
 	
-	index_r = range(extras_r/2, extras_r/2 + true_length_r)
+#	index_r = range(extras_r/2, extras_r/2 + true_length_r)
+	index_r = range(extras_r/2 + x_start, extras_r/2 + true_length_r + x_start) # Added by Yue
 	index_t_start = proj['slice_t_start'] + rank*proj['N_t']/recon['node_num']
 	index_t_end = proj['slice_t_start'] + (rank+1)*proj['N_t']/recon['node_num']
 	max0idx = white_ptr.shape[0]
@@ -107,7 +117,9 @@ def generate_projections (proj, recon, files, path2launch):
 #	print 'generate_projections: The average value of weight is ', np.mean(proj['weight'])
 
 	FILE.close()
-	FILE_wd.close()
+#	FILE_wd.close()
+	FILE_w.close() # Added by Yue
+	FILE_d.close() # Added by Yue
 	return proj
 
 

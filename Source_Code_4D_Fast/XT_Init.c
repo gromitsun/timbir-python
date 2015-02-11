@@ -501,6 +501,8 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
                {"do_VarEst",  no_argument, 0, '%'},/*if set, estimates the variance parameter*/ 
                {"Est_of_Var",  required_argument, 0, '('}, /*contains an initial estimate of variance parameter*/
                {"RMSE_converged",  no_argument, 0, ';'},/*if set, computes the RMSE with the converged result after every iteration*/ 
+               {"x_start",  required_argument, 0, '['}, /*x_start is the start of detector bins along r-axis. parallel to x-axis*/ /* Added by Yue */
+               {"x_width",  required_argument, 0, ']'}, /*x_width is the number of data pixels covered by detector along r-axis. parallel to x-axis*/ /* Added by Yue */
                {0, 0, 0, 0}
          };
 
@@ -529,7 +531,8 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
 	TomoInputsPtr->RMSE_converged = 0;
 	while(1)
 	{		
-	   c = getopt_long (argc, argv, "a:b:c:d:e:f:z:g:h:3:j:k:l:m:no:p:q:rs:t:u:v:w:xy:i:1:2:4:5:6:7:#8+-*:^:&>%(:;", long_options, &option_index);
+	   /* c = getopt_long (argc, argv, "a:b:c:d:e:f:z:g:h:3:j:k:l:m:no:p:q:rs:t:u:v:w:xy:i:1:2:4:5:6:7:#8+-*:^:&>%(:;", long_options, &option_index); */
+	   c = getopt_long (argc, argv, "a:b:c:d:e:f:z:g:h:3:j:k:l:m:no:p:q:rs:t:u:v:w:xy:i:1:2:4:5:6:7:#8+-*:^:&>%(:;[:]:", long_options, &option_index); /* Added by Yue*/
      
            /* Detect the end of the options. */
            if (c == -1) break;
@@ -582,6 +585,8 @@ void argsParser (int argc, char **argv, Sinogram* SinogramPtr, ScannedObject *Sc
 		case '%': TomoInputsPtr->updateVar = 1; break;
 		case '(': TomoInputsPtr->var_est = (Real_t)atof(optarg); break;
 		case ';': TomoInputsPtr->RMSE_converged = 1; break;
+		case '[': SinogramPtr->x_start = (int32_t)atoi(optarg); 		break;	/* Added by Yue */
+		case ']': SinogramPtr->x_width = (int32_t)atoi(optarg); 		break;	/* Added by Yue */
 		case '?': printf("ERROR: argsParser: Cannot recognize argument %s\n",optarg); break;
 		}
 	}
