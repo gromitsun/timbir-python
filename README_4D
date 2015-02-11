@@ -1,0 +1,61 @@
+************** Purpose of Software ****************
+This software package is used to 3D tomographic reconstructions,
+with ring artifact and zinger correction
+**************************************************
+
+************** Software Requirements ***************
+1. MPI compiler (either intel MPI or openmpi)
+2. Python with the following libraries
+   a. numpy
+   b. h5py
+   c. mpi4py (optional)
+   d. PIL
+*****************************************************
+
+************** Folder Descriptions **************************
+Source_Code_4D                  - Contains C source code which does the reconstruction.
+4D_Recon_Launcher_for_Real_Data - Python script which reads data from HDF files, runs
+				  the reconstruction code (in Source_Code_4D) and generates results.
+
+************* Running the software ****************
+All reconstructions must be launched using the python script XT_Main.py with the following input arguments.
+--run_setup : (No Arg) Sets up the run directory folder 
+--run_recon : (No Arg) Runs the reconstruction
+--gen_outfiles : (No Arg) generates HDF and tiff files of the reconstruction
+--MBIR : (No Arg) Does MBIR reconstruction
+--ATT : (No Arg) Does attenuation (absorption) contrast tomography
+--REAL_DATA : (No Arg) Reconstruction on real data
+--num_nodes : Number of nodes
+--Purdue : Using Purdue clusters
+--Path2Data : Path to dataset containing photon count images
+--Path2WhitesDarks : Path to dataset containing white and dark images (bright and dark field images)
+--Path2Phantom : Path to phantom used for reconstruction using simulated data
+--Path2Mask : Path to mask used to computer RMSE along edges (used with simulated data reconstrucitions)
+--run_folder : Path to folder which should contain two more folders 'XT_run' and 'XT_Results' inside it. 'XT_run' will contain runtime files. 'XT_Results' will contain certain important output files after reconstruction completes (like object HDF and tiff files)
+--rot_center : Center of rotation of the object (in units of value in 'recon_z_width')
+--vox_size : Side length of voxel
+--proj_start : Projection where reconstruction starts
+--proj_num : Number of projections used for reconstruction (use atleast one 'N_theta' number of projections')
+--x_width : Number of detector bins perpendicular to rotation axis
+--recon_x_width : Number of detector bins to be used for reconstruction after sub-sampling
+--z_start : Reconstruction begins at this slice (detector slice parallel to rotation axis)
+--z_width : Number of detector slices used
+--recon_z_width : Number of detector slices used after subsampling 
+--vox_stop_thresh : Stopping threshold (as a percentage of change in voxel magnitudes)
+--cost_stop_thresh : Stopping threshold on cost (change in cost as a percentage of initial change)
+--sigma_s : Spatial regularization parameter (higher means sharper and noisier)
+--sigma_t : Temporal regularization parameter (lower is smoother)
+--K : Number of sub-frames
+--N_theta : Number of views in a frame
+--r : Number of reconstruction time steps in a frame
+--multres_xy : Number of multi-resolution stages in the x-y plane
+--multres_z : Number of multi-resolution stages along the z axis
+--do_VarEstimate : Do variance parameter estimation
+--MaxIter : Maximum number of iterations in each multi-resolution step
+--msg_string : message string appended to the folder names inside the folders inside 'run_folder'
+--min_time_btw_views : (Minimum acquire time) the minimum time between views
+--rotation_speed : Rotation speed in deg/sec
+--ZingerT : Threshold on data mismatch error, beyond which a measurement is classified as a zinger
+--maxHU : Max value in HU used for scaling the object
+--minHU : Min value in HU used for scaling the object
+ 
