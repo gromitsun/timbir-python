@@ -34,13 +34,16 @@ else:
 	if (args.contain_whites):
 		white_rd = FILE_RD['/exchange/data_white']
 		white_wr = FILE_WR.create_dataset('/exchange/data_white', (white_rd.shape[0],z_num,white_rd.shape[2]), dtype=np.uint16)
+		print white_rd.shape
 
 	if (args.contain_darks):
 		dark_rd = FILE_RD['/exchange/data_dark']
 		dark_wr = FILE_WR.create_dataset('/exchange/data_dark', (dark_rd.shape[0],z_num,dark_rd.shape[2]), dtype=np.uint16)
+		print dark_rd.shape
 	
 	data_rd = FILE_RD['/exchange/data']
 	data_wr = FILE_WR.create_dataset('/exchange/data', (data_rd.shape[0],z_num,data_rd.shape[2]), dtype=np.uint16)
+	print data_rd.shape
 
 	if (args.contain_whites):
 		temp = white_rd[:,z_start:z_start + z_num,:]

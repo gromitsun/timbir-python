@@ -13,6 +13,18 @@ def CompSys_Init(args, recon, files):
 		#recon['compile_command'] = 'mpicc -fopenmp '
 		recon['HPC'] = 'PC' 
 		recon['rank'] = 0
+	elif (args.Quest):
+		recon['num_threads'] = 20
+		files['scratch'] = '/tmp'
+		files['data_scratch'] = '/tmp'
+		if (recon['node_num'] > 1):
+			recon['run_command'] = 'mpiexec -n ' + str(recon['node_num']) + ' -machinefile nodefile '
+		else:
+			recon['run_command'] = 'mpiexec -n ' + str(recon['node_num'])
+		recon['compile_command'] = 'mpicc -ansi -Wall -fopenmp -O3 -I/software/hdf5/1.8.12/include -L/software/hdf5/1.8.12/lib -lhdf5 '
+		recon['HPC'] = 'Purdue' 
+		#recon['rank'] = MPI.COMM_WORLD.rank
+		recon['rank'] = 0
 	elif (args.Purdue):
 		recon['num_threads'] = 32
 		files['scratch'] = os.environ['RCAC_SCRATCH']

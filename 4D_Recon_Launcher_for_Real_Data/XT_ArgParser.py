@@ -20,6 +20,7 @@ def ArgParser ():
 	parser.add_argument("--Edison", help="Cluster used is Edison at NERSC", action="store_true")
 	parser.add_argument("--Hopper", help="Cluster used is Hopper at NERSC", action="store_true")
 	parser.add_argument("--Purdue", help="Cluster used is Conte or Carter at Purdue", action="store_true")
+	parser.add_argument("--Quest", help="Cluster used is Quest at Northwestern Univ", action="store_true")
 	parser.add_argument("--PC", help="Use 'PC' when running on a mac", action="store_true")
 	parser.add_argument("-n", "--num_nodes", type=int, help="Specifies number of nodes/processors ( = number of MPI processes)")
 
